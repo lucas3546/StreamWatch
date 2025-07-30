@@ -1,0 +1,28 @@
+﻿services:
+  streamwatch.api:
+    image: streamwatch.api
+    build:
+      context: .
+      dockerfile: src/backend/StreamWatch.Api/Dockerfile
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pgdb;Username=postgres;Password=postgres;Trust Server Certificate=true
+      - ConnectionStrings__RedisConnection=redis:6379,abortConnect=false
+      
+  postgres:
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=pgdb
+
+volumes:
+  postgres-db-volume:
+    driver: local

@@ -1,0 +1,21 @@
+# This is a generated file. Not intended for manual editing.
+services:
+  streamwatch.api:
+    build:
+      context: "/home/pcla/RiderProjects/StreamWatch"
+      dockerfile: "src/backend/StreamWatch.Api/Dockerfile"
+      target: "base"
+    command: []
+    entrypoint:
+    - "dotnet"
+    - "/app/bin/Debug/net9.0/StreamWatch.Api.dll"
+    environment:
+      ASPNETCORE_ENVIRONMENT: "Development"
+      DOTNET_USE_POLLING_FILE_WATCHER: "true"
+    image: "streamwatch.api:dev"
+    ports: []
+    volumes:
+    - "/home/pcla/RiderProjects/StreamWatch/src/backend/StreamWatch.Api:/app:rw"
+    - "/home/pcla/RiderProjects/StreamWatch:/src:rw"
+    - "/home/pcla/.nuget/packages:/home/app/.nuget/packages"
+    working_dir: "/app"
