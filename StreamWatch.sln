@@ -1,0 +1,53 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{FBB5D474-16FC-4243-9E68-C02EC51B7676}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{BF609F87-7963-498E-AB28-444B69996B9E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "frontend", "frontend", "{7B56DDF2-D738-466B-84C9-4EF331D68FCC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8F744C24-5E70-46C3-8538-002DA7F8E5B1}"
+	ProjectSection(SolutionItems) = preProject
+		compose.yaml = compose.yaml
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamWatch.Api", "src\backend\StreamWatch.Api\StreamWatch.Api.csproj", "{B49AA310-DBDC-4C03-BFBA-A852BFE73033}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamWatch.Application", "src\backend\StreamWatch.Application\StreamWatch.Application.csproj", "{45602C67-DADD-4B35-A4B7-C339228A57E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamWatch.Core", "src\backend\StreamWatch.Core\StreamWatch.Core.csproj", "{0F93F72E-5B6E-41A8-B670-F98784694EB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamWatch.Infraestructure", "src\backend\StreamWatch.Infraestructure\StreamWatch.Infraestructure.csproj", "{C4EB2C30-E54E-46BA-BFA5-0D5A6196059E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{BF609F87-7963-498E-AB28-444B69996B9E} = {FBB5D474-16FC-4243-9E68-C02EC51B7676}
+		{7B56DDF2-D738-466B-84C9-4EF331D68FCC} = {FBB5D474-16FC-4243-9E68-C02EC51B7676}
+		{B49AA310-DBDC-4C03-BFBA-A852BFE73033} = {BF609F87-7963-498E-AB28-444B69996B9E}
+		{45602C67-DADD-4B35-A4B7-C339228A57E0} = {BF609F87-7963-498E-AB28-444B69996B9E}
+		{0F93F72E-5B6E-41A8-B670-F98784694EB4} = {BF609F87-7963-498E-AB28-444B69996B9E}
+		{C4EB2C30-E54E-46BA-BFA5-0D5A6196059E} = {BF609F87-7963-498E-AB28-444B69996B9E}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B49AA310-DBDC-4C03-BFBA-A852BFE73033}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B49AA310-DBDC-4C03-BFBA-A852BFE73033}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B49AA310-DBDC-4C03-BFBA-A852BFE73033}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B49AA310-DBDC-4C03-BFBA-A852BFE73033}.Release|Any CPU.Build.0 = Release|Any CPU
+		{45602C67-DADD-4B35-A4B7-C339228A57E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{45602C67-DADD-4B35-A4B7-C339228A57E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{45602C67-DADD-4B35-A4B7-C339228A57E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{45602C67-DADD-4B35-A4B7-C339228A57E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0F93F72E-5B6E-41A8-B670-F98784694EB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0F93F72E-5B6E-41A8-B670-F98784694EB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0F93F72E-5B6E-41A8-B670-F98784694EB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0F93F72E-5B6E-41A8-B670-F98784694EB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4EB2C30-E54E-46BA-BFA5-0D5A6196059E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4EB2C30-E54E-46BA-BFA5-0D5A6196059E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4EB2C30-E54E-46BA-BFA5-0D5A6196059E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4EB2C30-E54E-46BA-BFA5-0D5A6196059E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

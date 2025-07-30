@@ -1,0 +1,69 @@
+using System.Reflection;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
+namespace StreamWatch.Api;
+
+public static class ConfigureServices
+{
+    public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
+     {
+         services.AddAuthentication(options =>
+             {
+                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+             })
+             .AddJwtBearer(options =>
+             {
+                 string? jwtKey = configuration["JWT:Key"];
+                 if(string.IsNullOrEmpty(jwtKey)) throw new ArgumentNullException("JWT KEY is null or empty");
+
+                 options.SaveToken = true;
+                 options.RequireHttpsMetadata = false;
+                 options.TokenValidationParameters = new TokenValidationParameters()
+                 { //Change this  in production
+                     ValidateIssuer = false,
+                     ValidateAudience = false,
+                     ValidAudience = configuration["JWT:Audience"],
+                     ValidIssuer = configuration["JWT:Issuer"],
+                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                 };
+
+                 options.Events = new JwtBearerEvents
+                 {
+                     OnMessageReceived = context =>
+                     {
+                         var accessToken = context.Request.Query["access_token"];
+
+                         // If the request is for our hub...
+                         var path = context.HttpContext.Request.Path;
+                         if (!string.IsNullOrEmpty(accessToken) &&
+                             (path.StartsWithSegments("/hub/waku")))
+                         {
+                             // Read the token out of the query string
+                             context.Token = accessToken;
+
+                         }
+                         return Task.CompletedTask;
+                     }
+                 };
+             });
+         
+         services.AddRouting(options =>
+         {
+             options.LowercaseUrls = true;
+             options.LowercaseQueryStrings = true;
+         });
+         services.AddHttpContextAccessor();
+         services.AddControllers();
+         services.AddProblemDetails();
+         services.AddOpenApi();
+         services.AddSwaggerGen(c =>
+         {
+             c.EnableAnnotations();
+         });
+         return services;
+     }
+}
