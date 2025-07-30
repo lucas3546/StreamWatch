@@ -15,22 +15,28 @@ public class AccountController : ControllerBase
     {
         _accountService = accountService;
     }
-    
-    [HttpGet]
-    [SwaggerOperation(Summary = "Make a ping", Description = "Get a pong!")]
-    public IActionResult Ping()
-    {
-        return Ok("Pong");
-    }
 
     [HttpPost]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [SwaggerOperation(Summary = "Register a new user account and get jwt")]
+    [SwaggerOperation(Summary = "Register a new user account and return a JWT")]
     public async Task<ActionResult<string>> Register(RegisterAccountRequest request)
     {
         var response = await _accountService.RegisterAsync(request);
 
         return response.ToActionResult(HttpContext);
     }
+
+    [HttpPost]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [SwaggerOperation(Summary = "Authenticate user and return a JWT")]
+    public async Task<ActionResult<string>> Login(LoginAccountRequest request)
+    {
+        var response = await _accountService.AuthenticateAsync(request);
+        
+        return response.ToActionResult(HttpContext);
+    }
+    
 }

@@ -14,8 +14,9 @@ public static class ResultExtensions
         var error = result.Error!;
         var (statusCode, title) = error switch
         {
-            AccountRegistrationError => (StatusCodes.Status400BadRequest, "Account registration failed"),
-            _ => (StatusCodes.Status400BadRequest, "Bad Request")
+            AccountRegistrationError => (StatusCodes.Status400BadRequest, "AccountRegistrationFailed"),
+            NotFoundError => (StatusCodes.Status404NotFound, "NotFound"),
+            _ => (StatusCodes.Status400BadRequest, "BadRequest")
         };
 
         var problem = new ProblemDetails
@@ -24,6 +25,7 @@ public static class ResultExtensions
             Title = title,
             Detail = error.Message,
             Type = $"{error.GetType().Name}",
+            Instance = httpContext.Request.Path
         };
 
         problem.Extensions["traceId"] = httpContext.TraceIdentifier;

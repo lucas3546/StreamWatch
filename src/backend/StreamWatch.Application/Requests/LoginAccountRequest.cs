@@ -3,10 +3,8 @@ using StreamWatch.Application.Common.Attributes;
 
 namespace StreamWatch.Application.Requests;
 
-public record RegisterAccountRequest
+public record LoginAccountRequest
 {
-    public required string Username { get; init; }
-    
     [EmailAddress]
     public required string Email { get; init; }
     [Password]

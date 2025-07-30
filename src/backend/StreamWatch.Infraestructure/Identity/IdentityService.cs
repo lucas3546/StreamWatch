@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Core.Constants;
 using StreamWatch.Core.Identity;
@@ -31,6 +32,25 @@ public class IdentityService : IIdentityService
         await _userManager.AddToRoleAsync(account, Roles.User);
 
         return (result.Errors.Select(x => x.Code), account);
+    }
+
+    public async Task<Account?> FindUserByEmailAsync(string email)
+    {
+        var user = _userManager.Users.Include(x => x.ProfilePic).FirstOrDefault(x => x.Email == email);
+        
+        return user;
+    }
+
+    public async Task<string?> GetRoleFromUserAsync(Account account)
+    {
+        var roles = await _userManager.GetRolesAsync(account);
+        
+        return roles.FirstOrDefault();
+    }
+    
+    public async Task<bool> VerifyPasswordAsync(Account account, string password)
+    {
+        return await _userManager.CheckPasswordAsync(account, password);
     }
     
 

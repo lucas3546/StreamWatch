@@ -18,4 +18,10 @@
       <ProjectReference Include="..\StreamWatch.Core\StreamWatch.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Reference Include="Microsoft.Extensions.Hosting.Abstractions">
+        <HintPath>..\..\..\..\..\..\..\usr\lib\dotnet\shared\Microsoft.AspNetCore.App\9.0.7\Microsoft.Extensions.Hosting.Abstractions.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
 </Project>
