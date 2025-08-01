@@ -2,6 +2,9 @@ using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using StreamWatch.Api.Services;
+using StreamWatch.Application.Common.Interfaces;
 
 namespace StreamWatch.Api;
 
@@ -60,9 +63,30 @@ public static class ConfigureServices
          services.AddControllers();
          services.AddProblemDetails();
          services.AddOpenApi();
+         services.AddScoped<ICurrentUserService, CurrentUserService>();
          services.AddSwaggerGen(c =>
          {
              c.EnableAnnotations();
+             c.AddSecurityDefinition("StreamWatch", new OpenApiSecurityScheme() 
+             {
+                 Type = SecuritySchemeType.Http,
+                 Scheme = "Bearer",
+                 Name = "Authorization",
+                 In = ParameterLocation.Header,
+                 Description = "Enter the JWT:"
+             });
+
+             c.AddSecurityRequirement(new OpenApiSecurityRequirement
+             {
+                 {
+                     new OpenApiSecurityScheme
+                     {
+                         Reference = new OpenApiReference
+                         {
+                             Type = ReferenceType.SecurityScheme,
+                             Id = "StreamWatch" }
+                     }, new List<string>() }
+             });
          });
          return services;
      }

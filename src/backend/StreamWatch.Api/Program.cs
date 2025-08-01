@@ -19,6 +19,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseStatusCodePages();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
