@@ -14,7 +14,7 @@ public static class ConfigureServices
     {
 
         services.AddScoped<IAccountService, AccountService>();
-
+        services.AddScoped<IFriendshipService, FriendshipService>();
         #region EventsRegion
         //Reference:
         //https://medium.com/@metoz.florian/breaking-free-nets-hidden-gem-vs-mediatr-a-step-by-step-guide-583c5d09baf2

@@ -40,6 +40,13 @@ public class IdentityService : IIdentityService
         
         return user;
     }
+    
+    public async Task<Account?> FindUserByUserNameAsync(string userName)
+    {
+        var user = _userManager.Users.Include(x => x.ProfilePic).FirstOrDefault(x => x.UserName == userName);
+        
+        return user;
+    }
 
     public async Task<string?> GetRoleFromUserAsync(Account account)
     {

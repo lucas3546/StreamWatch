@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using StreamWatch.Core.Entities;
 using StreamWatch.Core.Identity;
 using StreamWatch.Infraestructure.Persistence.Configurations;
 
@@ -16,7 +17,10 @@ public class ApplicationDbContext : IdentityDbContext<Account>
         base.OnModelCreating(modelBuilder);                
         
         modelBuilder.ApplyConfiguration(new NotificationConfiguration());
-        modelBuilder.ApplyConfiguration(new FriendInvitationConfiguration());           
     } 
+    
+    public DbSet<Friendship> Friendships { get; set; }
+    public DbSet<Media> Media { get; set; }
+    public DbSet<Notification> Notifications { get; set; }
     
 }

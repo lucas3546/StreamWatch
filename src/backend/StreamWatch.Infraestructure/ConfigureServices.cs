@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Core.Identity;
 using StreamWatch.Infraestructure.Identity;
 using StreamWatch.Infraestructure.Persistence;
+using StreamWatch.Infraestructure.Persistence.Interceptors;
 using StreamWatch.Infraestructure.Persistence.Repositories;
 using StreamWatch.Infraestructure.Services;
 
@@ -17,9 +19,12 @@ public static class ConfigureServices
     {
         var databaseConnectionString = configuration.GetConnectionString("DefaultConnection");
         if(databaseConnectionString is null) throw new ArgumentNullException(nameof(databaseConnectionString));
-                 
-        services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(databaseConnectionString));
-        
+        services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+        services.AddDbContext<ApplicationDbContext>((sp, options) =>
+        {
+            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+            options.UseNpgsql(databaseConnectionString);
+        });
         
         //Configure identity
         services.AddIdentity<Account, IdentityRole>(options => { }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
@@ -35,6 +40,7 @@ public static class ConfigureServices
         
         //Other DI
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
         services.AddTransient<IIdentityService, IdentityService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton(TimeProvider.System);

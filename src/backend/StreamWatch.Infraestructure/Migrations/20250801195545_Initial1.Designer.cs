@@ -12,7 +12,7 @@ using StreamWatch.Infraestructure.Persistence;
 namespace StreamWatch.Infraestructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250729194956_Initial1")]
+    [Migration("20250801195545_Initial1")]
     partial class Initial1
     {
         /// <inheritdoc />
@@ -157,6 +157,40 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("StreamWatch.Core.Entities.Friendship", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AddresseeId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("RequestDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("RequesterId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ResponseDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AddresseeId");
+
+                    b.HasIndex("RequesterId");
+
+                    b.ToTable("Friendships");
+                });
+
             modelBuilder.Entity("StreamWatch.Core.Entities.Media", b =>
                 {
                     b.Property<int>("Id")
@@ -195,6 +229,43 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Media");
+                });
+
+            modelBuilder.Entity("StreamWatch.Core.Entities.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ToAccountId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ToAccountId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>
@@ -317,6 +388,36 @@ namespace StreamWatch.Infraestructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("StreamWatch.Core.Entities.Friendship", b =>
+                {
+                    b.HasOne("StreamWatch.Core.Identity.Account", "Addressee")
+                        .WithMany()
+                        .HasForeignKey("AddresseeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("StreamWatch.Core.Identity.Account", "Requester")
+                        .WithMany()
+                        .HasForeignKey("RequesterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Addressee");
+
+                    b.Navigation("Requester");
+                });
+
+            modelBuilder.Entity("StreamWatch.Core.Entities.Notification", b =>
+                {
+                    b.HasOne("StreamWatch.Core.Identity.Account", "ToAccount")
+                        .WithMany("Notifications")
+                        .HasForeignKey("ToAccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ToAccount");
+                });
+
             modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>
                 {
                     b.HasOne("StreamWatch.Core.Entities.Media", "ProfilePic")
@@ -324,6 +425,11 @@ namespace StreamWatch.Infraestructure.Migrations
                         .HasForeignKey("ProfilePicId");
 
                     b.Navigation("ProfilePic");
+                });
+
+            modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>
+                {
+                    b.Navigation("Notifications");
                 });
 #pragma warning restore 612, 618
         }

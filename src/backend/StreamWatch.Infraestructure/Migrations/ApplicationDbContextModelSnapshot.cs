@@ -154,7 +154,7 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("StreamWatch.Core.Entities.FriendInvitation", b =>
+            modelBuilder.Entity("StreamWatch.Core.Entities.Friendship", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -162,37 +162,30 @@ namespace StreamWatch.Infraestructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AccountId")
+                    b.Property<string>("AddresseeId")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("RequestDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("CreatedBy")
+                    b.Property<string>("RequesterId")
+                        .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset>("LastModifiedAt")
+                    b.Property<DateTime?>("ResponseDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("LastModifiedBy")
-                        .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<string>("ToAccountId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("AccountId");
+                    b.HasIndex("AddresseeId");
 
-                    b.HasIndex("CreatedBy");
+                    b.HasIndex("RequesterId");
 
-                    b.HasIndex("ToAccountId");
-
-                    b.ToTable("FriendInvitation");
+                    b.ToTable("Friendships");
                 });
 
             modelBuilder.Entity("StreamWatch.Core.Entities.Media", b =>
@@ -269,7 +262,7 @@ namespace StreamWatch.Infraestructure.Migrations
 
                     b.HasIndex("ToAccountId");
 
-                    b.ToTable("Notification");
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>
@@ -392,26 +385,23 @@ namespace StreamWatch.Infraestructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StreamWatch.Core.Entities.FriendInvitation", b =>
+            modelBuilder.Entity("StreamWatch.Core.Entities.Friendship", b =>
                 {
-                    b.HasOne("StreamWatch.Core.Identity.Account", null)
-                        .WithMany("SentInvitations")
-                        .HasForeignKey("AccountId");
-
-                    b.HasOne("StreamWatch.Core.Identity.Account", "CreatedByAccount")
+                    b.HasOne("StreamWatch.Core.Identity.Account", "Addressee")
                         .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("StreamWatch.Core.Identity.Account", "ToAccount")
-                        .WithMany("ReceivedInvitations")
-                        .HasForeignKey("ToAccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasForeignKey("AddresseeId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("CreatedByAccount");
+                    b.HasOne("StreamWatch.Core.Identity.Account", "Requester")
+                        .WithMany()
+                        .HasForeignKey("RequesterId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("ToAccount");
+                    b.Navigation("Addressee");
+
+                    b.Navigation("Requester");
                 });
 
             modelBuilder.Entity("StreamWatch.Core.Entities.Notification", b =>
@@ -437,10 +427,6 @@ namespace StreamWatch.Infraestructure.Migrations
             modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>
                 {
                     b.Navigation("Notifications");
-
-                    b.Navigation("ReceivedInvitations");
-
-                    b.Navigation("SentInvitations");
                 });
 #pragma warning restore 612, 618
         }

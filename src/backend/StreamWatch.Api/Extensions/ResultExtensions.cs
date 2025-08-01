@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Core.Errors;
@@ -19,6 +20,36 @@ public static class ResultExtensions
             _ => (StatusCodes.Status400BadRequest, "BadRequest")
         };
 
+        var problem = new ProblemDetails
+        {
+            Status = statusCode,
+            Title = title,
+            Detail = error.Message,
+            Type = $"{error.GetType().Name}",
+            Instance = httpContext.Request.Path
+        };
+
+        problem.Extensions["traceId"] = httpContext.TraceIdentifier;
+
+        return new ObjectResult(problem)
+        {
+            StatusCode = statusCode,
+        };
+    }
+
+    public static ActionResult ToActionResult(this Result result, HttpContext httpContext)
+    {
+        if (result.IsSuccess)
+            return new OkResult();
+        
+        var error = result.Error!;
+        var (statusCode, title) = error switch
+        {
+            AccountRegistrationError => (StatusCodes.Status400BadRequest, "AccountRegistrationFailed"),
+            NotFoundError => (StatusCodes.Status404NotFound, "NotFound"),
+            _ => (StatusCodes.Status400BadRequest, "BadRequest")
+        };
+        
         var problem = new ProblemDetails
         {
             Status = statusCode,
