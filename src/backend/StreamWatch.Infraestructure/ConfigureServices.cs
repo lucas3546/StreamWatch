@@ -41,6 +41,7 @@ public static class ConfigureServices
         //Other DI
         services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
         services.AddScoped<IFriendshipRepository, FriendshipRepository>();
+        services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddTransient<IIdentityService, IdentityService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton(TimeProvider.System);

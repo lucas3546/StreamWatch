@@ -1,12 +1,6 @@
 namespace StreamWatch.Application.Common.Interfaces.Events;
 
-public interface IEventHandler
-{  
-    void Register(IEventBus eventBus);
-}
-
-public interface IEventHandler<in TEvent> : IEventHandler
-    where TEvent : IEvent
+public interface IEventHandler<TEvent> where TEvent : IEvent
 {
-    Task HandleAsync(TEvent integrationEvent, CancellationToken cancellationToken = default);
+    Task HandleAsync(TEvent @event, CancellationToken cancellationToken = default);
 }

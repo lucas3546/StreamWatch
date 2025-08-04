@@ -15,19 +15,11 @@ public static class ConfigureServices
 
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IFriendshipService, FriendshipService>();
+        services.AddScoped<INotificationService, NotificationService>();
         #region EventsRegion
-        //Reference:
-        //https://medium.com/@metoz.florian/breaking-free-nets-hidden-gem-vs-mediatr-a-step-by-step-guide-583c5d09baf2
-        //https://freedium.cfd/https://medium.com/@metoz.florian/breaking-free-nets-hidden-gem-vs-mediatr-a-step-by-step-guide-583c5d09baf2
-        // Register dependencies in DI container
-        services.AddSingleton<InMemoryMessageQueue>();
-        services.AddSingleton<IEventBus, EventBus>();
 
-        // Register all handlers
-        services.AddScoped<IEventHandler<ExampleCreatedEvent>, ExampleCreatedEventHandler>(); 
-
-        // Register a hosted service to consume events in the background
-        services.AddHostedService<EventBusBackgroundService>();
+        services.AddSingleton<IEventBus, InMemoryEventBus>();
+        services.AddScoped<IEventHandler<FriendshipCreatedEvent>, FriendshipCreatedEventHandler>();
 
         #endregion
         
