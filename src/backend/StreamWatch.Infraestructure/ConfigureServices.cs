@@ -8,7 +8,6 @@ using StreamWatch.Core.Identity;
 using StreamWatch.Infraestructure.Identity;
 using StreamWatch.Infraestructure.Persistence;
 using StreamWatch.Infraestructure.Persistence.Interceptors;
-using StreamWatch.Infraestructure.Persistence.Repositories;
 using StreamWatch.Infraestructure.Services;
 
 namespace StreamWatch.Infraestructure;
@@ -25,6 +24,7 @@ public static class ConfigureServices
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
             options.UseNpgsql(databaseConnectionString);
         });
+        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
         
         //Configure identity
         services.AddIdentity<Account, IdentityRole>(options => { }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
@@ -39,9 +39,6 @@ public static class ConfigureServices
         });
         
         //Other DI
-        services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-        services.AddScoped<IFriendshipRepository, FriendshipRepository>();
-        services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddTransient<IIdentityService, IdentityService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton(TimeProvider.System);

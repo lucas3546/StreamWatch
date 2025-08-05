@@ -9,4 +9,5 @@ public interface INotificationService
     Task<Result<PaginatedList<GetPaginatedNotificationItem>>> GetPagedNotificationsAsync(
         GetPagedNotificationsRequest request);
 
+    Task<Result> ClearNotificationsAsync();
 }

@@ -31,5 +31,17 @@ public class NotificationController : ControllerBase
 
         return response.ToActionResult(HttpContext);
     }
+
+    [HttpDelete]
+    [Authorize]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [SwaggerOperation(Summary = "Clear notifications", Description = "Remove all notifications from current user")]
+    public async Task<ActionResult> ClearNotifications()
+    {
+        var response = await  _notificationService.ClearNotificationsAsync();
+        
+        return response.ToActionResult(HttpContext);
+    }
+    
     
 }

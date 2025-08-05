@@ -21,4 +21,8 @@
       <ProjectReference Include="..\StreamWatch.Core\StreamWatch.Core.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Persistence\Repositories\" />
+    </ItemGroup>
+
 </Project>

@@ -3,6 +3,8 @@ using StreamWatch.Application.Common.Models;
 using StreamWatch.Core.Entities;
 using StreamWatch.Core.Errors;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using StreamWatch.Application.Common.Extensions;
 using StreamWatch.Application.Common.Interfaces.Events;
 using StreamWatch.Application.Events.DomainEvents;
 using StreamWatch.Application.Requests;
@@ -12,16 +14,16 @@ namespace StreamWatch.Application.Services;
 
 public class FriendshipService : IFriendshipService
 {
+    private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
     private readonly IIdentityService _identityService;
-    private readonly IFriendshipRepository _friendshipRepository;
     private readonly IEventBus _eventBus;
     
-    public FriendshipService(ICurrentUserService currentUserService, IIdentityService identityService, IFriendshipRepository friendshipRepository, IEventBus eventBus)
+    public FriendshipService(IApplicationDbContext context,ICurrentUserService currentUserService, IIdentityService identityService, IEventBus eventBus)
     {
+        _context = context;
         _currentUserService = currentUserService;
         _identityService = identityService;
-        _friendshipRepository = friendshipRepository;
         _eventBus = eventBus;
     }
     
@@ -35,7 +37,7 @@ public class FriendshipService : IFriendshipService
         var user = await _identityService.FindUserByUserNameAsync(request.UserName);
         if(user is null) return Result.Failure(new NotFoundError("The User does not exist!"));
 
-        var friendship = await _friendshipRepository.GetFriendshipByIdsAsync(currentUserId, user.Id);
+        var friendship = await _context.Friendships.Involving(currentUserId, user.Id).FirstOrDefaultAsync();
         if (friendship is not null) return Result.Failure(new ValidationError($"The users already has a relationship! Status: {friendship.Status.ToString()}"));
 
         var newFriendship = new Friendship
@@ -46,44 +48,64 @@ public class FriendshipService : IFriendshipService
             RequestDate = DateTime.UtcNow,
         };
         
-        await _friendshipRepository.AddAsync(newFriendship);
+        await _context.Friendships.AddAsync(newFriendship);
+
+        await _context.SaveChangesAsync(CancellationToken.None);
         
         await _eventBus.PublishAsync(new FriendshipCreatedEvent(newFriendship.RequesterId, newFriendship.AddresseeId));
         
         return Result.Success();
     }
 
-    public async Task<Result> AcceptFriendshipInvitationAsync(AcceptFriendshipInvitationRequest request)
+    /*
+    public async Task<Result> GetFriendsAsync()
     {
         var currentUserId = _currentUserService.Id;
         if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
         
-        var addressee = await _identityService.FindUserByUserNameAsync(request.UserName);
-        if(addressee is null) return Result.Failure(new NotFoundError("The addressee does not exist!"));
+        var friendships = _friendshipRepository.GetActiveFriendshipsFromUserAsync(currentUserId);
+        
+        
+        
+    }
 
-        var friendship = await _friendshipRepository.GetPendingInvitationForAddresseeAsync(currentUserId, addressee.Id);
+*/
+    public async Task<Result> AcceptFriendshipInvitationAsync(AcceptFriendshipInvitationRequest request)
+    {
+        var currentUserId = _currentUserService.Id; // Addressee
+        if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+        
+        var requester = await _identityService.FindUserByUserNameAsync(request.UserName);
+        if(requester is null) return Result.Failure(new NotFoundError("The addressee does not exist!"));
+        
+        
+        var friendship = await _context.Friendships.Between(currentUserId, requester.Id).WithStatus(FriendshipStatus.Pending).FirstOrDefaultAsync();
         if(friendship is null) return Result.Failure(new NotFoundError("Friendship pending invitation does not exist!"));
         
         friendship.Status = FriendshipStatus.Accepted;
 
-        await _friendshipRepository.UpdateAsync(friendship);
+        _context.Friendships.Update(friendship);
     
+        await _context.SaveChangesAsync(CancellationToken.None);
+        
         return Result.Success();
     }
     
     public async Task<Result> DeclineFriendshipInvitationAsync(DeclineFriendInvitationRequest request)
     {
-        var currentUserId = _currentUserService.Id;
+        var currentUserId = _currentUserService.Id; // Addressee
         if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
         
-        var addressee = await _identityService.FindUserByUserNameAsync(request.UserName);
-        if(addressee is null) return Result.Failure(new NotFoundError("The addressee does not exist!"));
+        var requester = await _identityService.FindUserByUserNameAsync(request.UserName);
+        if(requester is null) return Result.Failure(new NotFoundError("The addressee does not exist!"));
 
-        var friendship = await _friendshipRepository.GetPendingInvitationForAddresseeAsync(currentUserId, addressee.Id);
+        var friendship = await _context.Friendships.Between(currentUserId, requester.Id).WithStatus(FriendshipStatus.Pending).FirstOrDefaultAsync();
         if(friendship is null) return Result.Failure(new NotFoundError("Friendship pending invitation does not exist!"));
         
-        await _friendshipRepository.DeleteAsync(friendship);
+        _context.Friendships.Remove(friendship);
     
+        await _context.SaveChangesAsync(CancellationToken.None);
+        
         return Result.Success();
     }
     
@@ -95,13 +117,15 @@ public class FriendshipService : IFriendshipService
         var user = await _identityService.FindUserByUserNameAsync(request.UserName);
         if(user is null) return Result.Failure(new NotFoundError("The User does not exist!"));
 
-        var friendship = await _friendshipRepository.GetFriendshipByIdsAsync(currentUserId, user.Id);
+        var friendship = await _context.Friendships.Involving(currentUserId, user.Id).FirstOrDefaultAsync();
         if(friendship is null) return Result.Failure(new NotFoundError("Friendship does not exist!"));
         
         if(friendship.Status != FriendshipStatus.Accepted) return Result.Failure(new ValidationError($"The user is not your friend!"));
         
-        await _friendshipRepository.DeleteAsync(friendship);
+        _context.Friendships.Remove(friendship);
     
+        await _context.SaveChangesAsync(CancellationToken.None);
+        
         return Result.Success();
     }
 }

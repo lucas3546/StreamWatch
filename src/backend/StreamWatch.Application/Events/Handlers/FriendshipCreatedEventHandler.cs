@@ -8,11 +8,11 @@ namespace StreamWatch.Application.Events.Handlers;
 
 public class FriendshipCreatedEventHandler : IEventHandler<FriendshipCreatedEvent>
 {
-    private readonly INotificationRepository _notificationRepository;
+    private readonly IApplicationDbContext _context;
 
-    public FriendshipCreatedEventHandler(INotificationRepository notificationRepository)
+    public FriendshipCreatedEventHandler(IApplicationDbContext context)
     {
-        _notificationRepository = notificationRepository;
+        _context = context;
     }
 
     public async Task HandleAsync(FriendshipCreatedEvent @event, CancellationToken cancellationToken = default)
@@ -26,6 +26,8 @@ public class FriendshipCreatedEventHandler : IEventHandler<FriendshipCreatedEven
             Type = NotificationType.FriendInvitation
         };
         
-        await _notificationRepository.AddAsync(notification);
+        await _context.Notifications.AddAsync(notification, cancellationToken);
+        
+        await _context.SaveChangesAsync(cancellationToken);
     }
 }

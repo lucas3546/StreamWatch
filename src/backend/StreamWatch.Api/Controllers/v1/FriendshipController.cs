@@ -27,7 +27,7 @@ public class FriendshipController  : ControllerBase
         return response.ToActionResult(HttpContext);
     }
 
-    [HttpPost]
+    [HttpPut]
     [Authorize]
     [SwaggerOperation(Summary = "Accept friendship invitation", Description = "Accept friendship invitation from another user")]
     public async Task<ActionResult> AcceptFriendshipInvitation(AcceptFriendshipInvitationRequest request)
@@ -37,7 +37,7 @@ public class FriendshipController  : ControllerBase
         return response.ToActionResult(HttpContext);
     }
     
-    [HttpPost]
+    [HttpPut]
     [Authorize]
     [SwaggerOperation(Summary = "Decline friendship invitation", Description = "Decline friendship invitation from another user")]
     public async Task<ActionResult> DeclineFriendshipInvitation(DeclineFriendInvitationRequest request)
@@ -47,7 +47,7 @@ public class FriendshipController  : ControllerBase
         return response.ToActionResult(HttpContext);
     }
     
-    [HttpPost]
+    [HttpDelete]
     [Authorize]
     [SwaggerOperation(Summary = "Remove friendship", Description = "Remove friendship, enter the username of your friend")]
     public async Task<ActionResult> RemoveFriend(RemoveFriendRequest request)
