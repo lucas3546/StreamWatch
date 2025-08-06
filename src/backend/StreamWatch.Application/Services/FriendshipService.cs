@@ -57,19 +57,71 @@ public class FriendshipService : IFriendshipService
         return Result.Success();
     }
 
-    /*
-    public async Task<Result> GetFriendsAsync()
+    
+    public async Task<Result<IEnumerable<FriendModel>>> GetAllFriendsAsync()
     {
         var currentUserId = _currentUserService.Id;
         if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
-        
-        var friendships = _friendshipRepository.GetActiveFriendshipsFromUserAsync(currentUserId);
-        
-        
-        
+
+        var friends = await _context.Friendships
+            .AsNoTracking()
+            .FromUser(currentUserId)
+            .WithStatus(FriendshipStatus.Accepted)
+            .Where(f => f.AddresseeId != currentUserId || f.RequesterId != currentUserId)
+            .Select(f => f.AddresseeId == currentUserId
+                ? new FriendModel(
+                    f.Requester.UserName,
+                    f.Requester.ProfilePic!.ThumbnailUrl,
+                    f.Requester.ProfilePic.SourceUrl,
+                    f.ResponseDate
+                )
+                : new FriendModel(
+                    f.Addressee.UserName,
+                    f.Addressee.ProfilePic!.ThumbnailUrl,
+                    f.Addressee.ProfilePic.SourceUrl,
+                    f.ResponseDate
+                )
+            )
+            .ToListAsync();
+
+        return Result<IEnumerable<FriendModel>>.Success(friends);
     }
 
-*/
+    public async Task<Result<PaginatedList<FriendModel>>> GetPagedFriendsAsync(GetPagedFriendsRequest request)
+    {
+        var currentUserId = _currentUserService.Id;
+        if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+
+        var friends = await _context.Friendships
+            .AsNoTracking()
+            .FromUser(currentUserId)
+            .WithStatus(FriendshipStatus.Accepted)
+            .Where(f => f.AddresseeId != currentUserId || f.RequesterId != currentUserId)
+            .GetPaged(request.PageNumber, request.PageSize)
+            .Select(f => f.AddresseeId == currentUserId
+                ? new FriendModel(
+                    f.Requester.UserName,
+                    f.Requester.ProfilePic!.ThumbnailUrl,
+                    f.Requester.ProfilePic.SourceUrl,
+                    f.ResponseDate
+                )
+                : new FriendModel(
+                    f.Addressee.UserName,
+                    f.Addressee.ProfilePic!.ThumbnailUrl,
+                    f.Addressee.ProfilePic.SourceUrl,
+                    f.ResponseDate
+                )
+            )
+            .ToListAsync();
+
+        var totalItems = await _context.Notifications.CountAsync();
+        
+        var response = new PaginatedList<FriendModel>(friends, request.PageNumber, request.PageSize, totalItems);
+        
+        return Result<PaginatedList<FriendModel>>.Success(response);
+    }
+
+
     public async Task<Result> AcceptFriendshipInvitationAsync(AcceptFriendshipInvitationRequest request)
     {
         var currentUserId = _currentUserService.Id; // Addressee
@@ -83,7 +135,8 @@ public class FriendshipService : IFriendshipService
         if(friendship is null) return Result.Failure(new NotFoundError("Friendship pending invitation does not exist!"));
         
         friendship.Status = FriendshipStatus.Accepted;
-
+        friendship.ResponseDate = DateTime.UtcNow;
+        
         _context.Friendships.Update(friendship);
     
         await _context.SaveChangesAsync(CancellationToken.None);

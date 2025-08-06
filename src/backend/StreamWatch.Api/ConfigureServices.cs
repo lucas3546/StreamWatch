@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StreamWatch.Api.Services;
 using StreamWatch.Application.Common.Interfaces;
+using StreamWatch.Core.Options;
 
 namespace StreamWatch.Api;
 
@@ -12,6 +13,8 @@ public static class ConfigureServices
 {
     public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
      {
+         services.Configure<StorageOptions>(configuration.GetSection("Storage"));
+         
          services.AddAuthentication(options =>
              {
                  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

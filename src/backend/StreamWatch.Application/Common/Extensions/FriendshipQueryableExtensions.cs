@@ -12,6 +12,11 @@ public static class FriendshipQueryableExtensions
             (f.RequesterId == userId2 && f.AddresseeId == userId1));
     }
 
+    public static IQueryable<Friendship> FromUser(this IQueryable<Friendship> query, string userId)
+    {
+        return query.Where(x => x.RequesterId == userId || x.AddresseeId == userId);
+    }
+
     public static IQueryable<Friendship> Between(this IQueryable<Friendship> query, string addresseeId, string requesterId)
     {
         return query.Where(x => x.AddresseeId == addresseeId && x.RequesterId == requesterId);

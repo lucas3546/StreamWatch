@@ -31,4 +31,8 @@
       <ProjectReference Include="..\StreamWatch.Infraestructure\StreamWatch.Infraestructure.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\media\" />
+    </ItemGroup>
+
 </Project>

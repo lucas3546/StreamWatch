@@ -7,4 +7,5 @@ public interface IAccountService
 {
     Task<Result<string>> AuthenticateAsync(LoginAccountRequest request);
     Task<Result<string>> RegisterAsync(RegisterAccountRequest request);
+    Task<Result> SetProfilePictureAsync(UpdateProfilePicRequest request);
 }

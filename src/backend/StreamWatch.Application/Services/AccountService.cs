@@ -2,6 +2,7 @@ using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Core.Constants;
+using StreamWatch.Core.Entities;
 using StreamWatch.Core.Errors;
 
 namespace StreamWatch.Application.Services;
@@ -10,11 +11,17 @@ public class AccountService : IAccountService
 {
     private readonly IIdentityService _identityService;
     private readonly IJwtService _jwtService;
+    private readonly IStorageService _storageService;
+    private readonly IApplicationDbContext _context;
+    private readonly ICurrentUserService _currentUserService;
 
-    public AccountService(IIdentityService identityService, IJwtService jwtService)
+    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService)
     {
         _identityService = identityService;
         _jwtService = jwtService;
+        _storageService = storageService;
+        _context = context;
+        _currentUserService = currentUserService;
     }
 
     public async Task<Result<string>> AuthenticateAsync(LoginAccountRequest request)
@@ -48,5 +55,29 @@ public class AccountService : IAccountService
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
         
         return Result<string>.Success(token);
+    }
+
+    public async Task<Result> SetProfilePictureAsync(UpdateProfilePicRequest request)
+    {
+        var currentUserId = _currentUserService.Id;
+        if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+        
+        string profilePicName = Guid.NewGuid() + Path.GetExtension(request.Picture.FileName);
+        
+        var fileUrl = await _storageService.UploadAsync(request.Picture.OpenReadStream(), profilePicName, request.Picture.ContentType);
+
+        var media = new Media
+        {
+            FileName = profilePicName,
+            ThumbnailUrl = "",
+            SourceUrl = fileUrl,
+            ExpiresAt = DateTime.UtcNow.AddHours(24)
+        };
+        
+        await _context.Media.AddAsync(media);
+        
+        await _context.SaveChangesAsync(CancellationToken.None);
+        
+        return Result.Success();
     }
 }

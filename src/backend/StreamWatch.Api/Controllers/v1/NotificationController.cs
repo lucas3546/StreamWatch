@@ -9,7 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace StreamWatch.Api.Controllers.v1;
 
 [ApiController]
-[Route("api/v1/[controller]/[action]")]
+[Route("api/v1/[controller]/")]
 public class NotificationController : ControllerBase
 {
     private readonly INotificationService _notificationService;
@@ -19,11 +19,12 @@ public class NotificationController : ControllerBase
         _notificationService = notificationService;
     }
 
-    [HttpGet]
+    [HttpGet("paged")]
     [Authorize]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [SwaggerOperation(Summary = "Get paged notifications", Description = "Get paged notifications from current user")]
     public async Task<ActionResult<PaginatedList<GetPaginatedNotificationItem>>> GetPagedNotificationsAsync([FromQuery] GetPagedNotificationsRequest request)
     {
@@ -32,9 +33,11 @@ public class NotificationController : ControllerBase
         return response.ToActionResult(HttpContext);
     }
 
-    [HttpDelete]
+    [HttpDelete("clear")]
     [Authorize]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [SwaggerOperation(Summary = "Clear notifications", Description = "Remove all notifications from current user")]
     public async Task<ActionResult> ClearNotifications()
     {

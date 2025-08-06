@@ -1,8 +1,11 @@
+using Microsoft.Extensions.FileProviders;
 using StreamWatch.Api;
 using StreamWatch.Application;
+using StreamWatch.Core.Options;
 using StreamWatch.Infraestructure;
 
 var builder = WebApplication.CreateBuilder(args);
+var storageOptions = builder.Configuration.GetSection("Storage").Get<StorageOptions>();
 
 builder.Services.AddInfraestructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
@@ -23,5 +26,17 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+if (storageOptions.Provider == "Local")
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(
+            Path.Combine(Directory.GetCurrentDirectory(), storageOptions.BaseLocalPath, "media")),
+        RequestPath = "/media"
+    });
+}
+
+
 
 app.Run();
