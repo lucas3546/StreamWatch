@@ -1,5 +1,7 @@
 using Amazon.Runtime;
 using Amazon.S3;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -22,6 +24,8 @@ public static class ConfigureServices
     {
         var databaseConnectionString = configuration.GetConnectionString("DefaultConnection");
         if(databaseConnectionString is null) throw new ArgumentNullException(nameof(databaseConnectionString));
+        
+        
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
         services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
@@ -29,6 +33,15 @@ public static class ConfigureServices
             options.UseNpgsql(databaseConnectionString);
         });
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
+        
+        
+        //Hangfire
+        services.AddHangfire(config =>
+            config.UsePostgreSqlStorage(c =>
+                c.UseNpgsqlConnection(databaseConnectionString)));
+        
+        services.AddHangfireServer();
+
         
         //Configure identity
         services.AddIdentity<Account, IdentityRole>(options => { }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
@@ -73,6 +86,10 @@ public static class ConfigureServices
                 _ => throw new InvalidOperationException($"Unknown storage provider: {options.Provider}")
             };
         });
+        
+        
+
+
         
         
         //Other DI

@@ -1,3 +1,4 @@
+using Hangfire;
 using Microsoft.Extensions.FileProviders;
 using StreamWatch.Api;
 using StreamWatch.Application;
@@ -36,7 +37,7 @@ if (storageOptions.Provider == "Local")
         RequestPath = "/media"
     });
 }
-
+app.UseHangfireDashboard();
 
 
 app.Run();
