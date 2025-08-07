@@ -14,14 +14,16 @@ public class AccountService : IAccountService
     private readonly IStorageService _storageService;
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IMediaProcessingService _mediaProcessingService;
 
-    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService)
+    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService)
     {
         _identityService = identityService;
         _jwtService = jwtService;
         _storageService = storageService;
         _context = context;
         _currentUserService = currentUserService;
+        _mediaProcessingService = mediaProcessingService;
     }
 
     public async Task<Result<string>> AuthenticateAsync(LoginAccountRequest request)
@@ -62,15 +64,31 @@ public class AccountService : IAccountService
         var currentUserId = _currentUserService.Id;
         if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
         
-        string profilePicName = Guid.NewGuid() + Path.GetExtension(request.Picture.FileName);
         
-        var fileUrl = await _storageService.UploadAsync(request.Picture.OpenReadStream(), profilePicName, request.Picture.ContentType);
+        //Process and upload profile pic thumbnail
+        string thumbnailFileName =  "thumb_"+ Guid.NewGuid() + ".webp";
+        
+        Stream thumbnailStream = _mediaProcessingService.ResizeImage(request.Picture.OpenReadStream(), 800, 800);
+        
+        UploadedFile thumbnailUrl = await _storageService.UploadAsync(thumbnailStream, thumbnailFileName, "image/webp");
 
+        await thumbnailStream.DisposeAsync();
+        
+        //Process and upload original profile pic
+        string profilePicName = Guid.NewGuid() + ".webp";
+
+        Stream profilePicStream = _mediaProcessingService.ConvertImageFormat(request.Picture.OpenReadStream());
+        
+        UploadedFile profilePic = await _storageService.UploadAsync(profilePicStream, profilePicName, "image/webp");
+
+        await profilePicStream.DisposeAsync();
+        
+        //Save in database 
         var media = new Media
         {
             FileName = profilePicName,
-            ThumbnailUrl = "",
-            SourceUrl = fileUrl,
+            ThumbnailFileName = thumbnailFileName,
+            Provider = profilePic.Provider,
             ExpiresAt = DateTime.UtcNow.AddHours(24)
         };
         

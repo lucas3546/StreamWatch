@@ -1,11 +1,15 @@
 using StreamWatch.Core.Common;
+using StreamWatch.Core.Enums;
 
 namespace StreamWatch.Core.Entities;
 
 public class Media : BaseAuditableEntity
 {
     public string FileName { get; set; }
-    public string SourceUrl  { get; set; }
-    public string ThumbnailUrl { get; set; }
+    
+    public string ThumbnailFileName { get; set; }
+    
+    public string? BucketName { get; set; }
+    public MediaProvider Provider { get; set; }
     public DateTime? ExpiresAt { get; set; }
 }

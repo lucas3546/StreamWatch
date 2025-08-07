@@ -42,9 +42,9 @@ public class JwtService : IJwtService
             new Claim("role", roleName)
         };
 
-        if (!string.IsNullOrWhiteSpace(account.ProfilePic?.SourceUrl))
+        if (!string.IsNullOrWhiteSpace(account.ProfilePic?.FileName))
         {
-            claims.Add(new Claim(JwtRegisteredClaimNames.Picture, account.ProfilePic.SourceUrl));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Picture, account.ProfilePic.FileName));
         }
         return claims;
     }

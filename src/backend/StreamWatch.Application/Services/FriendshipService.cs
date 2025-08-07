@@ -71,14 +71,12 @@ public class FriendshipService : IFriendshipService
             .Select(f => f.AddresseeId == currentUserId
                 ? new FriendModel(
                     f.Requester.UserName,
-                    f.Requester.ProfilePic!.ThumbnailUrl,
-                    f.Requester.ProfilePic.SourceUrl,
+                    new MediaModel(f.Requester.ProfilePic.FileName, f.Requester.ProfilePic.FileName, f.Requester.ProfilePic.Provider.ToString()),
                     f.ResponseDate
                 )
                 : new FriendModel(
                     f.Addressee.UserName,
-                    f.Addressee.ProfilePic!.ThumbnailUrl,
-                    f.Addressee.ProfilePic.SourceUrl,
+                    new MediaModel(f.Addressee.ProfilePic.FileName, f.Addressee.ProfilePic.FileName, f.Addressee.ProfilePic.Provider.ToString()),
                     f.ResponseDate
                 )
             )
@@ -101,14 +99,12 @@ public class FriendshipService : IFriendshipService
             .Select(f => f.AddresseeId == currentUserId
                 ? new FriendModel(
                     f.Requester.UserName,
-                    f.Requester.ProfilePic!.ThumbnailUrl,
-                    f.Requester.ProfilePic.SourceUrl,
+                    new MediaModel(f.Requester.ProfilePic.FileName, f.Requester.ProfilePic.FileName, f.Requester.ProfilePic.Provider.ToString()),
                     f.ResponseDate
                 )
                 : new FriendModel(
                     f.Addressee.UserName,
-                    f.Addressee.ProfilePic!.ThumbnailUrl,
-                    f.Addressee.ProfilePic.SourceUrl,
+                    new MediaModel(f.Addressee.ProfilePic.FileName, f.Addressee.ProfilePic.FileName, f.Addressee.ProfilePic.Provider.ToString()),
                     f.ResponseDate
                 )
             )

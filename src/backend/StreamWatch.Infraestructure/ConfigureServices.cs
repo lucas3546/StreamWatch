@@ -77,6 +77,7 @@ public static class ConfigureServices
         
         //Other DI
         services.AddTransient<IIdentityService, IdentityService>();
+        services.AddScoped<IMediaProcessingService, MediaProcessingService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton(TimeProvider.System);
         
