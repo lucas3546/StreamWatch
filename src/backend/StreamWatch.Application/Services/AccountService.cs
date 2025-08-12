@@ -15,8 +15,9 @@ public class AccountService : IAccountService
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
+    private readonly IBackgroundService _backgroundService;
 
-    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService)
+    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService)
     {
         _identityService = identityService;
         _jwtService = jwtService;
@@ -24,6 +25,7 @@ public class AccountService : IAccountService
         _context = context;
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
+        _backgroundService = backgroundService;
     }
 
     public async Task<Result<string>> AuthenticateAsync(LoginAccountRequest request)
@@ -95,6 +97,8 @@ public class AccountService : IAccountService
         await _context.Media.AddAsync(media);
         
         await _context.SaveChangesAsync(CancellationToken.None);
+        
+        _backgroundService.Enqueue((() => _storageService.DeleteAsync(profilePicName)));
         
         return Result.Success();
     }

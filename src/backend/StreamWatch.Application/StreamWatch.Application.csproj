@@ -13,10 +13,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Responses\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\StreamWatch.Core\StreamWatch.Core.csproj" />
     </ItemGroup>
 

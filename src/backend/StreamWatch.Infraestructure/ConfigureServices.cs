@@ -7,11 +7,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Core.Identity;
 using StreamWatch.Core.Options;
 using StreamWatch.Infraestructure.Identity;
+using StreamWatch.Infraestructure.Jobs;
 using StreamWatch.Infraestructure.Persistence;
 using StreamWatch.Infraestructure.Persistence.Interceptors;
 using StreamWatch.Infraestructure.Services;
@@ -74,15 +76,15 @@ public static class ConfigureServices
             return new AmazonS3Client(credentials, config);
         });
         
+
         services.AddSingleton<IStorageService>(provider =>
         {
             var options = provider.GetRequiredService<IOptions<StorageOptions>>().Value;
-            var s3 = provider.GetRequiredService<IAmazonS3>();
 
             return options.Provider switch
             {
-                "S3" => new S3StorageService(options, s3),
-                "Local" => new LocalStorageService(options),
+                "S3" => ActivatorUtilities.CreateInstance<S3StorageService>(provider),
+                "Local" => ActivatorUtilities.CreateInstance<LocalStorageService>(provider),
                 _ => throw new InvalidOperationException($"Unknown storage provider: {options.Provider}")
             };
         });
@@ -94,7 +96,9 @@ public static class ConfigureServices
         
         //Other DI
         services.AddTransient<IIdentityService, IdentityService>();
+        services.AddScoped<IMediaBackgroundJobs, MediaBackgroundJobs>();
         services.AddScoped<IMediaProcessingService, MediaProcessingService>();
+        services.AddScoped<IBackgroundService, HangfireJobService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton(TimeProvider.System);
         
