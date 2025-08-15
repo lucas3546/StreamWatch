@@ -26,7 +26,7 @@ public class LocalStorageService : IStorageService
         using var file = File.Create(fullPath);
         await fileStream.CopyToAsync(file);
         
-        return new UploadedFile(fileName, MediaProvider.Local, null, contentType, null);
+        return new UploadedFile(fileName, MediaProvider.Local, null, contentType, null, null);
     }
 
     public Task DeleteAsync(string fileName)
@@ -52,6 +52,11 @@ public class LocalStorageService : IStorageService
     }
 
     public Task<UploadedFile> GetFileMetadataAsync(string fileName)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<UploadedFile?> GetPartialVideoAsync(string fileName, long startByte, long endByte)
     {
         throw new NotImplementedException();
     }

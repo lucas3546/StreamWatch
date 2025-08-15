@@ -12,10 +12,13 @@ namespace StreamWatch.Api.Controllers.v1;
 public class AccountStorageController : ControllerBase
 {
     private readonly IAccountStorageService _accountStorage;
-
-    public AccountStorageController(IAccountStorageService accountStorage)
+    private readonly IStorageService _storageService;
+    private readonly IMediaProcessingService _mediaProcessingService;
+    public AccountStorageController(IAccountStorageService accountStorage, IStorageService storageService, IMediaProcessingService mediaProcessingService)
     {
         _accountStorage = accountStorage;
+        _storageService = storageService;
+        _mediaProcessingService = mediaProcessingService;
     }
 
     [HttpPost("prepare-upload")]

@@ -8,5 +8,6 @@ public interface IStorageService
     Task DeleteAsync(string fileName);
     Task<string> GetPresignedUrl(string fileName, string contentType, DateTime expiresAt);
     Task<UploadedFile> GetFileMetadataAsync(string fileName);
+    Task<UploadedFile?> GetPartialVideoAsync(string fileName, long startByte, long endByte);
     string GetUrl(string filePath);
 }

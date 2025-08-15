@@ -30,12 +30,12 @@ public class S3StorageService : IStorageService
             Key = fileName,
             InputStream = fileStream,
             ContentType = contentType,
-            DisablePayloadSigning = true
+            DisablePayloadSigning = true,
         };
         
         var response = await _s3.PutObjectAsync(request);
         
-        return new UploadedFile(fileName, MediaProvider.S3, _bucketName, request.ContentType, null);
+        return new UploadedFile(fileName, MediaProvider.S3, _bucketName, request.ContentType, null, null);
     }
 
     public Task DeleteAsync(string fileName)
@@ -53,7 +53,7 @@ public class S3StorageService : IStorageService
             Key = fileName,
             Verb = HttpVerb.PUT,
             Expires = expiresAt,
-            ContentType = contentType
+            ContentType = contentType,
         };
         var presignedUrl = await _s3.GetPreSignedURLAsync(presign);
         
@@ -70,7 +70,25 @@ public class S3StorageService : IStorageService
         
         var response = await _s3.GetObjectAsync(request);
         
-        return new UploadedFile(response.Key, MediaProvider.S3, _bucketName, response.Headers.ContentType, response.Headers.ContentLength);
+        return new UploadedFile(response.Key, MediaProvider.S3, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, null);
+    }
+
+    public async Task<UploadedFile?> GetPartialVideoAsync(string fileName, long startByte, long endByte)
+    {
+        var request = new GetObjectRequest()
+        {
+            BucketName = _bucketName,
+            Key = fileName,
+            ByteRange = new ByteRange(startByte, endByte)
+        };
+        
+        var response = await _s3.GetObjectAsync(request);
+        
+        var memory = new MemoryStream();
+        await response.ResponseStream.CopyToAsync(memory);
+        memory.Position = 0;
+        
+        return new UploadedFile(response.Key, MediaProvider.S3, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, memory);
     }
 
     public string GetUrl(string filePath)

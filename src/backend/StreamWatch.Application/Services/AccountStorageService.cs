@@ -27,8 +27,10 @@ public class AccountStorageService : IAccountStorageService
         if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
         
         var presignedUrlExpiresAt = DateTime.Now.AddMinutes(40);
+
+        var fileNameGuid = Guid.NewGuid() + Path.GetExtension(request.FileName);
         
-        var presignedUrl = await _storageService.GetPresignedUrl(request.FileName, request.ContentType, presignedUrlExpiresAt);
+        var presignedUrl = await _storageService.GetPresignedUrl(fileNameGuid, request.ContentType, presignedUrlExpiresAt);
         
         var headers = new Dictionary<string, string>()
         {
@@ -37,7 +39,7 @@ public class AccountStorageService : IAccountStorageService
         
         var fileExpiration = DateTime.UtcNow.AddHours(1);
 
-        _backgroundService.Enqueue(() => _mediaBackgroundJobs.WaitForFileAndCreateMedia(request.FileName, currentUserId, fileExpiration));
+        _backgroundService.Enqueue(() => _mediaBackgroundJobs.WaitForFileAndCreateMedia(fileNameGuid, currentUserId, fileExpiration));
         
         var response = new GetPresignedUrlResponse("Local", presignedUrl, "PUT", headers, presignedUrlExpiresAt);
         

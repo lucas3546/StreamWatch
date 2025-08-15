@@ -17,6 +17,7 @@ public static class ConfigureServices
         services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IAccountStorageService, AccountStorageService>();
+
         
         #region EventsRegion
 
