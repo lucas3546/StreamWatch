@@ -11,5 +11,6 @@ public class Media : BaseAuditableEntity
     
     public string? BucketName { get; set; }
     public MediaProvider Provider { get; set; }
+    public MediaStatus Status { get; set; }
     public DateTime? ExpiresAt { get; set; }
 }

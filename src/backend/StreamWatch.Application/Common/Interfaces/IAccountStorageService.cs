@@ -7,4 +7,6 @@ namespace StreamWatch.Application.Common.Interfaces;
 public interface IAccountStorageService
 {
     Task<Result<GetPresignedUrlResponse>> GetPresignedUrl(GetPresignedUrlRequest request);
+    Task<Result> SetMediaFileUploaded(SetMediaFileUploadedRequest request);
+    Task<IEnumerable<MediaModel>> GetAllMediaFiles();
 }

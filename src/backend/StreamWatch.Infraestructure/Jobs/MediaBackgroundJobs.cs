@@ -1,6 +1,8 @@
 using Hangfire;
+using Microsoft.EntityFrameworkCore;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Core.Entities;
+using StreamWatch.Core.Enums;
 
 namespace StreamWatch.Infraestructure.Jobs;
 
@@ -22,13 +24,6 @@ public class MediaBackgroundJobs : IMediaBackgroundJobs
     {
         var file = await _storageService.GetPartialVideoAsync(fileName, 0, 1000000); //0 to 1MB
         
-        /*
-        if(file.ContentType != "video/mp4" || file.ContentType != "video/avi" || file.ContentType != "video/mov")
-        {
-            
-        }
-        */
-
         var tempVideoPath = Path.Combine("wwwroot", "temp", $"{fileName}");
         
         using (var outputFileStream = new FileStream(tempVideoPath, FileMode.Create, FileAccess.Write))
@@ -66,6 +61,5 @@ public class MediaBackgroundJobs : IMediaBackgroundJobs
         
         await _context.SaveChangesAsync(CancellationToken.None);
     }
-    
-    
+
 }
