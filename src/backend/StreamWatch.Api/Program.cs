@@ -1,3 +1,4 @@
+using Hangfire;
 using Microsoft.Extensions.FileProviders;
 using StreamWatch.Api;
 using StreamWatch.Application;
@@ -27,16 +28,14 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-if (storageOptions.Provider == "Local")
+app.UseStaticFiles(new StaticFileOptions
 {
-    app.UseStaticFiles(new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(
-            Path.Combine(Directory.GetCurrentDirectory(), storageOptions.BaseLocalPath, "media")),
-        RequestPath = "/media"
-    });
-}
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), storageOptions.BaseLocalPath, "media")),
+    RequestPath = "/media"
+});
 
+app.UseHangfireDashboard();
 
 
 app.Run();

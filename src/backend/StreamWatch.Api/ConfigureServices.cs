@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -91,6 +92,8 @@ public static class ConfigureServices
                      }, new List<string>() }
              });
          });
+
+         
          return services;
      }
 }

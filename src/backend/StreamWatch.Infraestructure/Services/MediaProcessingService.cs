@@ -1,3 +1,5 @@
+using FFMpegCore;
+using FFMpegCore.Pipes;
 using Microsoft.AspNetCore.Http;
 using NetVips;
 using StreamWatch.Application.Common.Interfaces;
@@ -33,6 +35,28 @@ public class MediaProcessingService : IMediaProcessingService
         outputStream.Position = 0;
 
         image.Dispose();
+        
+        return outputStream;
+    }
+    
+    public async Task<Stream> GenerateThumbnailFromFileAsync(string filePath)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("Video file not found", filePath);
+
+        var outputStream = new MemoryStream();
+
+        await FFMpegArguments
+            .FromFileInput(filePath, verifyExists: true)
+            .OutputToPipe(new StreamPipeSink(outputStream), opt => opt
+                .Seek(TimeSpan.FromSeconds(1))   
+                .Resize(600, 800)                
+                .WithFrameOutputCount(1)         
+                .WithVideoCodec("libwebp")       
+                .ForceFormat("webp"))           
+            .ProcessAsynchronously();
+
+        outputStream.Position = 0;
         
         return outputStream;
     }

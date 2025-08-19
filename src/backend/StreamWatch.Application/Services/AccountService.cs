@@ -3,6 +3,7 @@ using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Core.Constants;
 using StreamWatch.Core.Entities;
+using StreamWatch.Core.Enums;
 using StreamWatch.Core.Errors;
 
 namespace StreamWatch.Application.Services;
@@ -15,8 +16,10 @@ public class AccountService : IAccountService
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
+    private readonly IBackgroundService _backgroundService;
+    private readonly IMediaBackgroundJobs _mediaBackgroundJobs;
 
-    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService)
+    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService, IMediaBackgroundJobs mediaBackgroundJobs)
     {
         _identityService = identityService;
         _jwtService = jwtService;
@@ -24,6 +27,8 @@ public class AccountService : IAccountService
         _context = context;
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
+        _backgroundService = backgroundService;
+        _mediaBackgroundJobs = mediaBackgroundJobs;
     }
 
     public async Task<Result<string>> AuthenticateAsync(LoginAccountRequest request)
@@ -89,12 +94,15 @@ public class AccountService : IAccountService
             FileName = profilePicName,
             ThumbnailFileName = thumbnailFileName,
             Provider = profilePic.Provider,
-            ExpiresAt = DateTime.UtcNow.AddHours(24)
+            ExpiresAt = DateTime.UtcNow.AddHours(24),
+            Status = MediaStatus.Uploaded
         };
         
         await _context.Media.AddAsync(media);
         
         await _context.SaveChangesAsync(CancellationToken.None);
+        
+        _backgroundService.Enqueue((() => _storageService.DeleteAsync(profilePicName)));
         
         return Result.Success();
     }

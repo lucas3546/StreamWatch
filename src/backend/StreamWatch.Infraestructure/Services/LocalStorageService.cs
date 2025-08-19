@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Options;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Core.Enums;
@@ -9,10 +10,11 @@ public class LocalStorageService : IStorageService
 {
     private readonly string _basePath;
     private readonly string _publicUrl;
-    public LocalStorageService(StorageOptions options)
+
+    public LocalStorageService(IOptions<StorageOptions> options)
     {
-        _basePath = options.BaseLocalPath;
-        _publicUrl = options.PublicUrl;
+        _basePath = options.Value.BaseLocalPath;
+        _publicUrl = options.Value.PublicUrl;
     }
     public async Task<UploadedFile> UploadAsync(Stream fileStream, string fileName, string contentType)
     {
@@ -24,13 +26,41 @@ public class LocalStorageService : IStorageService
         using var file = File.Create(fullPath);
         await fileStream.CopyToAsync(file);
         
-        return new UploadedFile(fileName, MediaProvider.Local, null);
+        return new UploadedFile(fileName, MediaProvider.Local, null, contentType, null, null);
     }
 
-    public Task DeleteAsync(string fileUrl)
+    public Task DeleteAsync(string fileName)
+    {
+        var relativePath = Path.Combine("media", fileName);
+        var fullPath = Path.Combine(_basePath, relativePath);
+        
+        try
+        {
+            File.Delete(fullPath);
+        }
+        catch (Exception ex)
+        {
+            throw new IOException($"Error deleting file: {fullPath}", ex);
+        }
+        
+        return Task.CompletedTask;
+    }
+
+    public Task<string> GetPresignedUrl(string fileName, string contentType,DateTime expiresAt)
+    {
+        throw new Exception("Invalid endpoint, the current configuration is using LocalSotrage, not S3.");
+    }
+
+    public Task<UploadedFile> GetFileMetadataAsync(string fileName)
     {
         throw new NotImplementedException();
     }
+
+    public Task<UploadedFile?> GetPartialVideoAsync(string fileName, long startByte, long endByte)
+    {
+        throw new NotImplementedException();
+    }
+
 
     public string GetUrl(string filePath)
     {

@@ -1,0 +1,6 @@
+@StreamWatch.Api_HostAddress = http://localhost:5100
+
+GET {{StreamWatch.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
