@@ -12,13 +12,13 @@ export default function SidebarCategoriesItems() {
       ></SidebarItemLink>
       <SidebarItemLink
         icon={LuCircle}
-        label="Music"
+        label="Series"
         href="trends"
         iconSize={18}
       ></SidebarItemLink>
       <SidebarItemLink
         icon={LuCircle}
-        label="Series"
+        label="Music"
         href="trends"
         iconSize={18}
       ></SidebarItemLink>
@@ -30,7 +30,13 @@ export default function SidebarCategoriesItems() {
       ></SidebarItemLink>
       <SidebarItemLink
         icon={LuCircle}
-        label="Comedy"
+        label="Videos"
+        href="trends"
+        iconSize={18}
+      ></SidebarItemLink>
+      <SidebarItemLink
+        icon={LuCircle}
+        label="Podcasts"
         href="trends"
         iconSize={18}
       ></SidebarItemLink>

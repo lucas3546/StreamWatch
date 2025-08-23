@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Navbar from "../components/header/Navbar";
 import Sidebar from "../components/sidebar/Sidebar";
 
@@ -7,7 +7,12 @@ interface DefaultLayoutProps {
 }
 
 export default function DefaultLayout({ children }: DefaultLayoutProps) {
-  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+  const [isSidebarOpen, setSidebarOpen] = useState(!isMobile);
+
+  useEffect(() => {
+    if (window.innerWidth < 768) setSidebarOpen(false);
+  }, []);
 
   return (
     <div>
@@ -22,7 +27,9 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
         ></Sidebar>
 
         {/* Contenido principal */}
-        <main className="flex-1">{children}</main>
+        <main className="flex-1 md:h-[calc(100vh-56px)] h-screen overflow-y-auto">
+          {children}
+        </main>
       </div>
     </div>
   );
