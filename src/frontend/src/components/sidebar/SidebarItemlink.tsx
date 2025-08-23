@@ -30,7 +30,7 @@ export default function SidebarItemLink({
   return (
     <button
       onClick={onClickLink}
-      className="w-full text-left px-1 py-2 flex flex-row gap-2 items-center
+      className="w-full text-left px-2 py-2 flex flex-row gap-2 items-center
                  cursor-pointer hover:bg-gray-600 select-none"
     >
       <Icon icon={icon} size={iconSize} />
