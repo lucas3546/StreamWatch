@@ -4,12 +4,20 @@ import Icon from "../icon/Icon";
 import SearchBar from "./searchbar/SearchBar";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { MdNotifications } from "react-icons/md";
-export default function Navbar() {
+import type { Dispatch, SetStateAction } from "react";
+
+interface NavbarProps {
+  setSidebarOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+export default function Navbar({ setSidebarOpen }: NavbarProps) {
   return (
-    <div className="bg-black min-h-12 w-full flex justify-between items-center">
+    <div className="bg-black min-h-14 w-full flex justify-between items-center border-defaultbordercolor border-b-1">
       <div className="ml-4 gap-2 w-full flex flex-row items-center">
-        <Icon icon={GiHamburgerMenu} />
-        <p className="text-2xl">StreamWatch</p>
+        <button onClick={() => setSidebarOpen((prev) => !prev)}>
+          <Icon icon={GiHamburgerMenu} />
+        </button>
+        <h1 className="text-2xl">StreamWatch</h1>
       </div>
       <div className="w-2/3">
         <SearchBar></SearchBar>
