@@ -7,4 +7,9 @@ public class AccountRegistrationError : BaseError
         
     }
     
+    public AccountRegistrationError(string key, string message) : base(key, message)
+    {
+        
+    }
+    
 }

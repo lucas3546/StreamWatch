@@ -20,7 +20,7 @@ public static class ResultExtensions
             _ => (StatusCodes.Status400BadRequest, "BadRequest")
         };
 
-        var problem = new ProblemDetails
+        var problem = new ValidationProblemDetails
         {
             Status = statusCode,
             Title = title,
@@ -29,6 +29,10 @@ public static class ResultExtensions
             Instance = httpContext.Request.Path
         };
 
+        if (result.Error?.Key != null)
+        {
+            problem.Errors[result.Error.Key] =  [result.Error.Message];
+        }
         problem.Extensions["traceId"] = httpContext.TraceIdentifier;
 
         return new ObjectResult(problem)

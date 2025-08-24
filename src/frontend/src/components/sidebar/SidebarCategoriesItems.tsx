@@ -7,7 +7,7 @@ export default function SidebarCategoriesItems() {
       <SidebarItemLink
         icon={LuCircle}
         label="Movies"
-        href="trends"
+        href="categories/movies"
         iconSize={18}
       ></SidebarItemLink>
       <SidebarItemLink

@@ -34,10 +34,10 @@ public class AccountService : IAccountService
     public async Task<Result<string>> AuthenticateAsync(LoginAccountRequest request)
     {
         var user = await _identityService.FindUserByEmailAsync(request.Email);
-        if (user is null) return Result<string>.Failure(new NotFoundError("UserNotFound"));
+        if (user is null) return Result<string>.Failure(new NotFoundError(nameof(request.Email),"No registered user has been found with that email address."));
         
         bool verification = await _identityService.VerifyPasswordAsync(user, request.Password);
-        if (!verification) return Result<string>.Failure(new PasswordMismatchError("PasswordMismatch"));
+        if (!verification) return Result<string>.Failure(new PasswordMismatchError(nameof(request.Password),"The entered password is incorrect for this account."));
 
         var role = await _identityService.GetRoleFromUserAsync(user);
         if(string.IsNullOrEmpty(role)) throw new ArgumentNullException("An error occurred while trying to log in to your account. Please contact support.");
@@ -54,6 +54,11 @@ public class AccountService : IAccountService
         var (errors, account) = await _identityService.RegisterAsync(request.Email, request.Username, request.Password);
 
         if (account is null) return Result<string>.Failure(new AccountRegistrationError("Some error has ocurred when trying to register."));
+
+        if (errors.Any(x => x.Equals("DuplicateUserName")))
+        {
+            return Result<string>.Failure(new AccountRegistrationError(nameof(request.Username), "The Username is already in use!"));
+        }
         
         if (errors.Any()) return Result<string>.Failure(new AccountRegistrationError(string.Join(",", errors)));
         

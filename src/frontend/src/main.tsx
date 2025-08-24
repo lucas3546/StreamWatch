@@ -4,6 +4,8 @@ import "./index.css";
 import { BrowserRouter, Routes, Route } from "react-router";
 import HomePage from "./pages/HomePage.tsx";
 import DefaultLayout from "./layouts/DefaultLayout.tsx";
+import SettingsPage from "./pages/SettingsPage.tsx";
+import RegisterPage from "./pages/RegisterPage.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -12,6 +14,8 @@ createRoot(document.getElementById("root")!).render(
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<HomePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/register" element={<RegisterPage />} />
         </Routes>
       </DefaultLayout>
     </BrowserRouter>
