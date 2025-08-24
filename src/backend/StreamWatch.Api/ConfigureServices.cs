@@ -16,6 +16,17 @@ public static class ConfigureServices
      {
          services.Configure<StorageOptions>(configuration.GetSection("Storage"));
          
+         services.AddCors(options =>
+         {
+             options.AddDefaultPolicy(policy =>
+             {
+                 policy.WithOrigins("http://localhost:5173") // frontend
+                     .AllowAnyOrigin()
+                     .AllowAnyHeader()
+                     .AllowAnyMethod();
+             });
+         });
+         
          services.AddAuthentication(options =>
              {
                  options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

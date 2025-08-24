@@ -37,5 +37,6 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseHangfireDashboard();
 
+app.UseCors();
 
 app.Run();

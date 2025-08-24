@@ -6,6 +6,7 @@ import SidebarDropdown from "./SidebarDropdown";
 import SidebarCategoriesItems from "./SidebarCategoriesItems";
 import { AiFillSetting } from "react-icons/ai";
 import { RxAvatar } from "react-icons/rx";
+import { VscBlank } from "react-icons/vsc";
 
 interface SidebarProps {
   sidebarIsOpen: boolean;
@@ -55,16 +56,30 @@ export default function Sidebar({
         </div>
         <div className="mt-auto w-full">
           <div className="border-t-1 border-defaultbordercolor"></div>
+          {/*
           <SidebarItemLink
             icon={AiFillSetting}
             label="Settings"
             href="/settings"
           ></SidebarItemLink>
+          */}
+          <SidebarItemLink
+            icon={VscBlank}
+            label="Register"
+            href="/register"
+          ></SidebarItemLink>
+          <SidebarItemLink
+            icon={VscBlank}
+            label="Login"
+            href="/account"
+          ></SidebarItemLink>
+          {/*
           <SidebarItemLink
             icon={RxAvatar}
             label="Account"
             href="/account"
           ></SidebarItemLink>
+          */}
         </div>
       </aside>
     </>
