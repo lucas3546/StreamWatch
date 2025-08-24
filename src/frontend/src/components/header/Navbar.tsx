@@ -5,6 +5,7 @@ import SearchBar from "./searchbar/SearchBar";
 import { GiHamburgerMenu } from "react-icons/gi";
 import { MdNotifications } from "react-icons/md";
 import type { Dispatch, SetStateAction } from "react";
+import { Link } from "react-router";
 
 interface NavbarProps {
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
@@ -17,7 +18,9 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
         <button onClick={() => setSidebarOpen((prev) => !prev)}>
           <Icon icon={GiHamburgerMenu} />
         </button>
-        <h1 className="text-2xl">StreamWatch</h1>
+        <Link to="/home" className="text-2xl">
+          StreamWatch
+        </Link>
       </div>
       <div className="w-2/3">
         <SearchBar></SearchBar>

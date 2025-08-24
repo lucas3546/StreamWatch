@@ -58,12 +58,12 @@ export default function Sidebar({
           <SidebarItemLink
             icon={AiFillSetting}
             label="Settings"
-            href="/home"
+            href="/settings"
           ></SidebarItemLink>
           <SidebarItemLink
             icon={RxAvatar}
             label="Account"
-            href="/home"
+            href="/account"
           ></SidebarItemLink>
         </div>
       </aside>

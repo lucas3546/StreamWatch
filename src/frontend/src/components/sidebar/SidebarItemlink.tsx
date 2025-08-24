@@ -1,6 +1,7 @@
 import type { IconType } from "react-icons";
 import { useNavigate } from "react-router";
 import Icon from "../icon/Icon";
+import { useLocation } from "react-router";
 
 interface SidebarItemLinkProps {
   icon: IconType;
@@ -16,6 +17,8 @@ export default function SidebarItemLink({
   href,
 }: SidebarItemLinkProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isActive = href && location.pathname === href;
 
   const onClickLink = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -30,8 +33,9 @@ export default function SidebarItemLink({
   return (
     <button
       onClick={onClickLink}
-      className="w-full text-left px-2 py-2 flex flex-row gap-2 items-center
-                 cursor-pointer hover:bg-gray-600 select-none"
+      className={`w-full text-left px-2 py-2 flex flex-row gap-2 items-center cursor-pointer select-none
+              hover:bg-gray-600
+              ${isActive ? "bg-neutral-800" : ""}`}
     >
       <Icon icon={icon} size={iconSize} />
       <span className="text-xl">{label}</span>
