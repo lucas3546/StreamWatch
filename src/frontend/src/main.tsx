@@ -6,18 +6,21 @@ import HomePage from "./pages/HomePage.tsx";
 import DefaultLayout from "./layouts/DefaultLayout.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
+import { UserProvider } from "./contexts/UserContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <BrowserRouter>
-      <DefaultLayout>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-        </Routes>
-      </DefaultLayout>
+      <UserProvider>
+        <DefaultLayout>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/home" element={<HomePage />} />
+            <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+          </Routes>
+        </DefaultLayout>
+      </UserProvider>
     </BrowserRouter>
   </StrictMode>,
 );

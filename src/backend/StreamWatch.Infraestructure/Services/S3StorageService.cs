@@ -62,15 +62,15 @@ public class S3StorageService : IStorageService
     
     public async Task<UploadedFile?> GetFileMetadataAsync(string fileName)
     {
-        var request = new GetObjectRequest()
+        var request = new GetObjectMetadataRequest()
         {
             BucketName = _bucketName,
             Key = fileName,
         };
         
-        var response = await _s3.GetObjectAsync(request);
+        var response = await _s3.GetObjectMetadataAsync(request);
         
-        return new UploadedFile(response.Key, MediaProvider.S3, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, null);
+        return new UploadedFile(fileName, MediaProvider.S3, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, null);
     }
 
     public async Task<UploadedFile?> GetPartialVideoAsync(string fileName, long startByte, long endByte)
@@ -90,6 +90,7 @@ public class S3StorageService : IStorageService
         
         return new UploadedFile(response.Key, MediaProvider.S3, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, memory);
     }
+    
 
     public string GetUrl(string filePath)
     {

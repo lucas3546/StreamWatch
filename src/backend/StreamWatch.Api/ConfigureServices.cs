@@ -7,6 +7,7 @@ using Microsoft.OpenApi.Models;
 using StreamWatch.Api.Services;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Core.Options;
+using StreamWatch.Infraestructure.Services;
 
 namespace StreamWatch.Api;
 
@@ -103,6 +104,7 @@ public static class ConfigureServices
                      }, new List<string>() }
              });
          });
+         
 
          
          return services;

@@ -39,6 +39,24 @@ public class MediaProcessingService : IMediaProcessingService
         return outputStream;
     }
     
+    public async Task<Stream> GenerateThumbnailStreamAsync(string videoUrl)
+    {
+        var ms = new MemoryStream();
+        Uri uri = new Uri(videoUrl);
+        
+        await FFMpegArguments
+            .FromUrlInput(uri)
+            .OutputToPipe(new StreamPipeSink(ms), options => options
+                    .WithFrameOutputCount(1) // un solo frame
+                    .ForceFormat("webp")    // formato WEBP
+            )
+            .ProcessAsynchronously();
+
+        ms.Position = 0;
+        return ms;
+    }
+
+    
     public async Task<Stream> GenerateThumbnailFromFileAsync(string filePath)
     {
         if (!File.Exists(filePath))

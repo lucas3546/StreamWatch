@@ -20,7 +20,7 @@ public class IdentityService : IIdentityService
     public async Task<(IEnumerable<string> errors, Account? account)> RegisterAsync(string email, string username, string password)
     {
         var account = new Account { UserName = username, Email = email };
-
+        
         var result = await _userManager.CreateAsync(account, password);
         
         //Refactor this later

@@ -99,6 +99,7 @@ public class AccountService : IAccountService
             FileName = profilePicName,
             ThumbnailFileName = thumbnailFileName,
             Provider = profilePic.Provider,
+            Size = thumbnailStream.Length,
             ExpiresAt = DateTime.UtcNow.AddHours(24),
             Status = MediaStatus.Uploaded
         };

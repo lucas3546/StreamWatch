@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Hangfire;
 using Microsoft.EntityFrameworkCore;
 using StreamWatch.Application.Common.Interfaces;
@@ -17,6 +18,36 @@ public class MediaBackgroundJobs : IMediaBackgroundJobs
         _context = context;
         _storageService = storageService;
         _mediaProcessingService = mediaProcessingService;
+    }
+    [AutomaticRetry(Attempts = 5, DelaysInSeconds = new[] { 1200, 1200, 1200, 1200, 1200 })]
+    public async Task RemoveMediaAndFile(string fileName, string accountId)
+    {
+        var media = await _context.Media.FirstOrDefaultAsync(x => x.FileName == fileName && x.CreatedBy == accountId);
+        if (media is null) throw new ValidationException($"The media entity with filename: {fileName} is not found!");
+        
+        await _storageService.DeleteAsync(fileName);
+        
+        _context.Media.Remove(media);
+
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+    }
+
+
+    public async Task CleanExpiredFiles()
+    {
+        var now = DateTime.UtcNow;
+        
+        var medias = await _context.Media.Where(x => x.ExpiresAt != null && x.ExpiresAt <= now).ToListAsync();
+
+        foreach (var media in medias)
+        {
+            await _storageService.DeleteAsync(media.FileName);
+            
+            await _storageService.DeleteAsync(media.ThumbnailFileName);
+            
+            
+        }
     }
     
     [AutomaticRetry(Attempts = 5, DelaysInSeconds = new[] { 10, 30, 60, 60, 60 })]

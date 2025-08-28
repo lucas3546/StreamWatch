@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using HeyRed.Mime;
 using Microsoft.EntityFrameworkCore;
 using StreamWatch.Application.Common.Helpers;
 using StreamWatch.Application.Common.Interfaces;
@@ -18,11 +20,11 @@ public class AccountStorageService : IAccountStorageService
     private readonly IMediaBackgroundJobs _mediaBackgroundJobs;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
-
-    public AccountStorageService(IStorageService storageService,  IApplicationDbContext context, IMediaBackgroundJobs mediaBackgroundJobs, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService)
+    public AccountStorageService(IStorageService storageService,  IApplicationDbContext context, IBackgroundService backgroundService,IMediaBackgroundJobs mediaBackgroundJobs, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService)
     {
         _storageService = storageService;
         _context = context;
+        _backgroundService = backgroundService;
         _mediaBackgroundJobs = mediaBackgroundJobs;
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
@@ -50,6 +52,8 @@ public class AccountStorageService : IAccountStorageService
             FileName = fileName,
             ThumbnailFileName = "",
             Status = MediaStatus.Pending,
+            Size = request.Size,
+            ContentType = contentType,
             ExpiresAt = expiration,
         };
 
@@ -57,34 +61,53 @@ public class AccountStorageService : IAccountStorageService
         
         await _context.SaveChangesAsync(CancellationToken.None);
         
-        var response = new GetPresignedUrlResponse(MediaProvider.S3.ToString(), presignedUrl, "PUT", headers, media.Id, expiration);
+        var response = new GetPresignedUrlResponse(nameof(MediaProvider.S3), presignedUrl, "PUT", headers, media.Id, expiration);
         
         return Result<GetPresignedUrlResponse>.Success(response);
     }
-
+    
     public async Task<Result> SetMediaFileUploaded(SetMediaFileUploadedRequest request)
     {
         var currentUserId = _currentUserService.Id;
-        if (string.IsNullOrEmpty(currentUserId)) 
-            throw new ArgumentNullException(nameof(currentUserId), "CurrentUserId cannot be null or empty!");
-
+        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserId cannot be null or empty!");
+        
         var media = await _context.Media.FirstOrDefaultAsync(x => x.Id == request.MediaId);
         
         if (media is null) return Result.Failure(new NotFoundError("Media not found"));
+
+        var objectMetadata = await _storageService.GetFileMetadataAsync(media.FileName);
         
-        var uploadedVideo = await _storageService.GetPartialVideoAsync(media.FileName, 0, 1_000_000);
+        if (media.Size != objectMetadata.Size)
+        {
+            return Result.Failure(new ValidationError("File size does not match"));
+        }
 
+        if (media.ContentType != objectMetadata.ContentType)
+        {
+            return Result.Failure(new ValidationError("File content type does not match"));
+        }
+        
+        
+        var uploadedVideo = await _storageService.GetPartialVideoAsync(media.FileName, 0, 2_000_000); //2MB
+        
         var tempVideoPath = Path.Combine("wwwroot", "temp", $"{media.FileName}");
-
+        
         try
         {
             using (var outputFileStream = new FileStream(tempVideoPath, FileMode.Create, FileAccess.Write, FileShare.None))
             {
                 await uploadedVideo.Stream.CopyToAsync(outputFileStream);
             }
+            
+            //Validate video
+            var mimetype = MimeGuesser.GuessMimeType(tempVideoPath);
+            if (mimetype != media.ContentType) return Result.Failure(new ValidationError("File type does not match"));
 
-            using var thumbStream = await _mediaProcessingService.GenerateThumbnailFromFileAsync(tempVideoPath);
+            //using var thumbStream = await _mediaProcessingService.GenerateThumbnailFromFileAsync(tempVideoPath);
 
+            using var thumbStream = await _mediaProcessingService.GenerateThumbnailStreamAsync("https://pub-3d64bc11ad674a4e92d65803df99fd7e.r2.dev/" + media.FileName);
+                
+            
             var thumbName = Guid.NewGuid() + ".webp";
             var uploadedThumbnail = await _storageService.UploadAsync(thumbStream, thumbName, "image/webp");
 
@@ -93,20 +116,16 @@ public class AccountStorageService : IAccountStorageService
             media.BucketName = uploadedVideo.BucketName;
             media.ExpiresAt = DateTime.UtcNow.AddHours(24);
 
-            await _context.SaveChangesAsync(CancellationToken.None);
+            _context.Media.Update(media);
 
+            await _context.SaveChangesAsync(CancellationToken.None);
+            
             return Result.Success();
         }
         finally
         {
-            try
-            {
-                if (File.Exists(tempVideoPath))
-                    File.Delete(tempVideoPath);
-            }
-            catch
-            {
-            }
+            if (File.Exists(tempVideoPath)) File.Delete(tempVideoPath);
+                
         }
     }
     
@@ -120,7 +139,22 @@ public class AccountStorageService : IAccountStorageService
 
         return files;
     }
-    
+
+
+    public async Task<GetStorageOverviewResponse> GetStorageOverview()
+    {
+        var currentUserId = _currentUserService.Id;
+        if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+        
+        var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId)
+            .Select(x => new ExtendedMediaModel(x.FileName, x.ThumbnailFileName, x.Provider.ToString(), x.Size, x.ExpiresAt)).ToListAsync();
+
+        decimal storageUse = medias.Sum(x => x.Size);
+
+        var response = new GetStorageOverviewResponse(storageUse, medias);
+
+        return response;
+    }
     
     
     

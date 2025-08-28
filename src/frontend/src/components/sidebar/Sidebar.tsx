@@ -5,8 +5,11 @@ import { TfiReload } from "react-icons/tfi";
 import SidebarDropdown from "./SidebarDropdown";
 import SidebarCategoriesItems from "./SidebarCategoriesItems";
 import { AiFillSetting } from "react-icons/ai";
+import { FaUserFriends } from "react-icons/fa";
+import { BiSolidVideos } from "react-icons/bi";
 import { RxAvatar } from "react-icons/rx";
 import { VscBlank } from "react-icons/vsc";
+import { useUser } from "../../contexts/UserContext";
 
 interface SidebarProps {
   sidebarIsOpen: boolean;
@@ -17,6 +20,8 @@ export default function Sidebar({
   sidebarIsOpen,
   setSidebarOpen,
 }: SidebarProps) {
+  const { user } = useUser();
+
   return (
     <>
       {sidebarIsOpen && (
@@ -49,37 +54,53 @@ export default function Sidebar({
             label="Trending"
             href="trends"
           ></SidebarItemLink>
-          <div className="border-t-1 border-defaultbordercolor"></div>
+          <div className="border-t-1 border-defaultbordercolor"></div>{" "}
+          {/* Divider */}
           <SidebarDropdown icon={BiSolidCategory} label="Categories">
             <SidebarCategoriesItems></SidebarCategoriesItems>
           </SidebarDropdown>
         </div>
+        {/* Divider */}
+        <div className="border-t-1 border-defaultbordercolor w-full"></div>
+        <SidebarItemLink
+          icon={FaUserFriends}
+          label="Friends"
+          href="/friends"
+        ></SidebarItemLink>
+        <SidebarItemLink
+          icon={BiSolidVideos}
+          label="Storage"
+          href="/storage"
+        ></SidebarItemLink>
         <div className="mt-auto w-full">
-          <div className="border-t-1 border-defaultbordercolor"></div>
-          {/*
-          <SidebarItemLink
-            icon={AiFillSetting}
-            label="Settings"
-            href="/settings"
-          ></SidebarItemLink>
-          */}
-          <SidebarItemLink
-            icon={VscBlank}
-            label="Register"
-            href="/register"
-          ></SidebarItemLink>
-          <SidebarItemLink
-            icon={VscBlank}
-            label="Login"
-            href="/account"
-          ></SidebarItemLink>
-          {/*
-          <SidebarItemLink
-            icon={RxAvatar}
-            label="Account"
-            href="/account"
-          ></SidebarItemLink>
-          */}
+          <div className="border-1 border-defaultbordercolor"></div>
+          {user ? (
+            <>
+              <SidebarItemLink
+                icon={AiFillSetting}
+                label="Settings"
+                href="/settings"
+              ></SidebarItemLink>
+              <SidebarItemLink
+                icon={RxAvatar}
+                label="Account"
+                href="/account"
+              ></SidebarItemLink>
+            </>
+          ) : (
+            <>
+              <SidebarItemLink
+                icon={VscBlank}
+                label="Register"
+                href="/register"
+              ></SidebarItemLink>
+              <SidebarItemLink
+                icon={VscBlank}
+                label="Login"
+                href="/account"
+              ></SidebarItemLink>
+            </>
+          )}
         </div>
       </aside>
     </>

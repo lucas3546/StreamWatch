@@ -6,4 +6,5 @@ public interface IBackgroundService
 {
     string Enqueue(Expression<Action> methodCall);
     string Schedule(Expression<Action> methodCall, TimeSpan delay);
+    bool Delete(string jobId);
 }

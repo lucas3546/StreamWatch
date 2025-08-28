@@ -4,6 +4,7 @@ import FormContainer from "../components/forms/FormContainer";
 import { register, type RegisterRequest } from "../services/accountService";
 import type { ProblemDetails } from "../components/types/ProblemDetails";
 import { FieldError } from "../components/errors/FieldError";
+import { useUser } from "../contexts/UserContext";
 
 export default function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<
@@ -11,6 +12,7 @@ export default function RegisterPage() {
     string[]
   > | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const { setJwt } = useUser();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,6 +35,8 @@ export default function RegisterPage() {
     try {
       const token = await register(data);
       console.log(token);
+      setJwt(token);
+      window.location.href = "/";
     } catch (err) {
       const problem = err as ProblemDetails;
       if (problem.errors) {

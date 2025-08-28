@@ -91,16 +91,19 @@ public static class ConfigureServices
         
         
 
-
+      
         
         
         //Other DI
         services.AddTransient<IIdentityService, IdentityService>();
+        services.AddScoped<MediaCleanupService>();
         services.AddScoped<IMediaBackgroundJobs, MediaBackgroundJobs>();
         services.AddScoped<IMediaProcessingService, MediaProcessingService>();
         services.AddScoped<IBackgroundService, HangfireJobService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton(TimeProvider.System);
+        
+        
         
         return services;
     }

@@ -31,18 +31,7 @@ public class AccountStorageController : ControllerBase
         
         return response.ToActionResult(HttpContext);
     }
-
-    [HttpGet("all")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [SwaggerOperation(Summary = "List all uploaded media files", Description = "Retrieves a list of all media files stored in the current user's account storage.")]
-    public async Task<ActionResult> GetAll()
-    {
-        var response = await _accountStorage.GetAllMediaFiles();
-
-        return Ok(response);
-    }
+    
 
     [HttpPost("set-uploaded")]
     public async Task<ActionResult> SetFileUploaded(SetMediaFileUploadedRequest request)
@@ -50,6 +39,20 @@ public class AccountStorageController : ControllerBase
         var response = await _accountStorage.SetMediaFileUploaded(request);
         
         return response.ToActionResult(HttpContext);
+    }
+
+
+    [HttpGet("overview")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [SwaggerOperation(Summary = "List all uploaded media files", Description = "Retrieves a list of all media files stored in the current user's account storage.")]
+
+    public async Task<ActionResult<GetStorageOverviewResponse>> GetStorageOverview()
+    {
+        var response = await _accountStorage.GetStorageOverview();
+        
+        return Ok(response);
     }
     
 }
