@@ -115,6 +115,7 @@ public class AccountStorageService : IAccountStorageService
             media.ThumbnailFileName = uploadedThumbnail.FileName;
             media.BucketName = uploadedVideo.BucketName;
             media.ExpiresAt = DateTime.UtcNow.AddHours(24);
+            media.Provider = uploadedVideo.Provider;
 
             _context.Media.Update(media);
 
@@ -146,7 +147,7 @@ public class AccountStorageService : IAccountStorageService
         var currentUserId = _currentUserService.Id;
         if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
         
-        var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId)
+        var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId && x.Status == MediaStatus.Uploaded)
             .Select(x => new ExtendedMediaModel(x.FileName, x.ThumbnailFileName, x.Provider.ToString(), x.Size, x.ExpiresAt)).ToListAsync();
 
         decimal storageUse = medias.Sum(x => x.Size);

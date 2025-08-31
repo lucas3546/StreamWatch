@@ -13,7 +13,7 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
   useEffect(() => {
     if (window.innerWidth < 768) setSidebarOpen(false);
   }, []);
-
+  
   return (
     <div>
       {/* Navbar */}
