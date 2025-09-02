@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StreamWatch.Api.Extensions;
 using StreamWatch.Application.Common.Interfaces;
+using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
 
@@ -22,5 +23,13 @@ public class RoomsController : ControllerBase
         var response = await _roomService.CreateRoomAsync(request);
         
         return response.ToActionResult(HttpContext);
+    }
+
+    [HttpGet("paged")]
+    public async Task<ActionResult<PaginatedList<GetPagedRoomItemResponse>>> GetPaged([FromQuery] GetPagedRoomsRequest request)
+    {
+        var response = await _roomService.GetPagedRooms(request);
+
+        return Ok(response);
     }
 }

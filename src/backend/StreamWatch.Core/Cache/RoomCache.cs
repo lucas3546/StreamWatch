@@ -1,4 +1,5 @@
 using Redis.OM.Modeling;
+using StreamWatch.Core.Enums;
 
 namespace StreamWatch.Core.Cache;
 
@@ -11,6 +12,8 @@ public class RoomCache
     public Ulid Id { get; set; }
     [Indexed]
     public string Title { get; set; }
+    [Indexed]
+    public RoomCategory Category { get; set; }
     [Indexed]
     public string VideoUrl { get; set; }
     [Indexed]

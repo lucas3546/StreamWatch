@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -76,7 +77,10 @@ public static class ConfigureServices
              options.LowercaseQueryStrings = true;
          });
          services.AddHttpContextAccessor();
-         services.AddControllers();
+         services.AddControllers().AddJsonOptions(options =>
+         {
+             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+         });;
          services.AddProblemDetails();
          services.AddOpenApi();
          services.AddScoped<ICurrentUserService, CurrentUserService>();

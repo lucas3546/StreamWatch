@@ -78,4 +78,17 @@ public class RoomService : IRoomService
         
         return Result<CreateRoomResponse>.Success(response);
     }
+
+    public async Task<PaginatedList<GetPagedRoomItemResponse>> GetPagedRooms(GetPagedRoomsRequest request)
+    {
+        var rooms = await _roomRepository.GetPagedAsync(request.PageNumber, request.PageSize, request.Category, request.IncludeNswf, request.OrderBy);
+
+        var totalItems = await _roomRepository.CountAsync();
+        
+        var dtos =  rooms.Select(x => new GetPagedRoomItemResponse(x.Id.ToString(), x.Title, x.ThumbnailUrl, x.UsersCount, x.VideoProvider.ToString(), x.CreatedAt));
+        
+        var response = new PaginatedList<GetPagedRoomItemResponse>(dtos, request.PageNumber, request.PageSize, totalItems);
+        
+        return response;
+    }
 }

@@ -11,7 +11,7 @@ import { FieldError } from "../../components/errors/FieldError";
 
 export default function CreateRoomPage() {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("0");
+  const [category, setCategory] = useState("");
   const [provider, setProvider] = useState("youtube");
   const [media, setMedia] = useState<string | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState("");
@@ -36,7 +36,7 @@ export default function CreateRoomPage() {
 
     const request: CreateRoomRequest = {
       title: title,
-      category: Number.parseInt(category),
+      category: category,
       provider: providerPosition,
       videoUrl: provider === "youtube" ? youtubeUrl : null,
       mediaId: media,
@@ -96,12 +96,12 @@ export default function CreateRoomPage() {
           onChange={(e) => setCategory(e.target.value)}
           className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
         >
-          <option value="0">Movies</option>
-          <option value="1">Series</option>
-          <option value="2">Music</option>
-          <option value="3">Anime</option>
-          <option value="4">Videos</option>
-          <option value="5">Sports</option>
+          <option value="Movies">Movies</option>
+          <option value="Series">Series</option>
+          <option value="Music">Music</option>
+          <option value="Anime">Anime</option>
+          <option value="Videos">Videos</option>
+          <option value="Sports">Sports</option>
         </select>
         <FieldError errors={fieldErrors} name="category" />
 

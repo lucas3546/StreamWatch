@@ -2,8 +2,8 @@ import { api } from "./api";
 
 export interface CreateRoomRequest {
   title: string;
-  category: number;
-  provider: number;
+  category: string;
+  provider: string;
   videoUrl: string | null;
   mediaId: string | null;
   isPublic: boolean;
