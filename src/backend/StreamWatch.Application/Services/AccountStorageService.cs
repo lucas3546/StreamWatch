@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using HeyRed.Mime;
 using Microsoft.EntityFrameworkCore;
+using Sqids;
 using StreamWatch.Application.Common.Helpers;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
@@ -17,17 +18,18 @@ public class AccountStorageService : IAccountStorageService
     private readonly IApplicationDbContext _context;
     private readonly IStorageService _storageService;
     private readonly IBackgroundService _backgroundService;
-    private readonly IMediaBackgroundJobs _mediaBackgroundJobs;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
-    public AccountStorageService(IStorageService storageService,  IApplicationDbContext context, IBackgroundService backgroundService,IMediaBackgroundJobs mediaBackgroundJobs, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService)
+    private readonly SqidsEncoder<int> _sqids;
+
+    public AccountStorageService(IStorageService storageService,  IApplicationDbContext context, IBackgroundService backgroundService, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, SqidsEncoder<int> squids)
     {
         _storageService = storageService;
         _context = context;
         _backgroundService = backgroundService;
-        _mediaBackgroundJobs = mediaBackgroundJobs;
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
+        _sqids = squids;
     }
     public async Task<Result<GetPresignedUrlResponse>> GetPresignedUrl(GetPresignedUrlRequest request)
     {
@@ -61,7 +63,7 @@ public class AccountStorageService : IAccountStorageService
         
         await _context.SaveChangesAsync(CancellationToken.None);
         
-        var response = new GetPresignedUrlResponse(nameof(MediaProvider.S3), presignedUrl, "PUT", headers, media.Id, expiration);
+        var response = new GetPresignedUrlResponse( presignedUrl, "PUT", headers, media.Id, expiration);
         
         return Result<GetPresignedUrlResponse>.Success(response);
     }
@@ -115,7 +117,6 @@ public class AccountStorageService : IAccountStorageService
             media.ThumbnailFileName = uploadedThumbnail.FileName;
             media.BucketName = uploadedVideo.BucketName;
             media.ExpiresAt = DateTime.UtcNow.AddHours(24);
-            media.Provider = uploadedVideo.Provider;
 
             _context.Media.Update(media);
 
@@ -136,7 +137,7 @@ public class AccountStorageService : IAccountStorageService
         if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
         var files = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId)
-            .Select(o => new MediaModel(o.FileName, o.ThumbnailFileName, o.Provider.ToString())).ToListAsync();
+            .Select(o => new MediaModel(o.FileName, o.ThumbnailFileName)).ToListAsync();
 
         return files;
     }
@@ -148,7 +149,7 @@ public class AccountStorageService : IAccountStorageService
         if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
         
         var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId && x.Status == MediaStatus.Uploaded)
-            .Select(x => new ExtendedMediaModel(x.FileName, x.ThumbnailFileName, x.Provider.ToString(), x.Size, x.ExpiresAt)).ToListAsync();
+            .Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id) ,x.FileName, x.ThumbnailFileName, x.Size, x.ExpiresAt)).ToListAsync();
 
         decimal storageUse = medias.Sum(x => x.Size);
 

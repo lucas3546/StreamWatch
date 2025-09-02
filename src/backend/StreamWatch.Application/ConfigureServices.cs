@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Sqids;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Interfaces.Events;
 using StreamWatch.Application.Events;
@@ -17,8 +18,12 @@ public static class ConfigureServices
         services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IAccountStorageService, AccountStorageService>();
-        
-        
+        services.AddScoped<IRoomService, RoomService>();
+        services.AddSingleton(new SqidsEncoder<int>(new()
+        {
+            Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+            MinLength = 6,
+        }));
         #region EventsRegion
 
         services.AddSingleton<IEventBus, InMemoryEventBus>();

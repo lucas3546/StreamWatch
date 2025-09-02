@@ -17,9 +17,8 @@ public class AccountService : IAccountService
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly IBackgroundService _backgroundService;
-    private readonly IMediaBackgroundJobs _mediaBackgroundJobs;
 
-    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService, IMediaBackgroundJobs mediaBackgroundJobs)
+    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService)
     {
         _identityService = identityService;
         _jwtService = jwtService;
@@ -28,7 +27,6 @@ public class AccountService : IAccountService
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
         _backgroundService = backgroundService;
-        _mediaBackgroundJobs = mediaBackgroundJobs;
     }
 
     public async Task<Result<string>> AuthenticateAsync(LoginAccountRequest request)
@@ -98,7 +96,6 @@ public class AccountService : IAccountService
         {
             FileName = profilePicName,
             ThumbnailFileName = thumbnailFileName,
-            Provider = profilePic.Provider,
             Size = thumbnailStream.Length,
             ExpiresAt = DateTime.UtcNow.AddHours(24),
             Status = MediaStatus.Uploaded

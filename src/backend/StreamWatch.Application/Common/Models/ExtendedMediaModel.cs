@@ -1,3 +1,3 @@
 namespace StreamWatch.Application.Common.Models;
 
-public record ExtendedMediaModel(string FileName, string ThumbnailFileName, string MediaProvider, decimal Size, DateTime? expiresAt);
+public record ExtendedMediaModel(string MediaId, string FileName, string ThumbnailFileName, decimal Size, DateTime? expiresAt);

@@ -18,6 +18,7 @@
       <PackageReference Include="NetVips" Version="3.1.0" />
       <PackageReference Include="Npgsql" Version="9.0.3" />
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
+      <PackageReference Include="Redis.OM" Version="1.0.1" />
       <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
     </ItemGroup>
 

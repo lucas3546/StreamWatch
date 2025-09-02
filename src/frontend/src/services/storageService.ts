@@ -1,6 +1,7 @@
 import { api } from "./api";
 
 export interface Media {
+  mediaId: string;
   fileName: string;
   thumbnailFileName: string;
   mediaProvider: string;
@@ -42,6 +43,6 @@ export async function generatePresigned(
     .then((res) => res.data);
 }
 
-export async function setUploaded(data : SetUploadedRequest) : Promise<void>{
-  return api.post("/accountstorage/set-uploaded",data).then((res) => res.data);
+export async function setUploaded(data: SetUploadedRequest): Promise<void> {
+  return api.post("/accountstorage/set-uploaded", data).then((res) => res.data);
 }

@@ -57,39 +57,41 @@ export default function RegisterPage() {
     <FormContainer>
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col w-[34%] text-left gap-2 mx-auto"
+        className="flex flex-col w-full text-left gap-2 mx-auto"
       >
         <h2 className="text-3xl text-center">Register</h2>
 
-        <label className="">Username:</label>
+        <label className="w-full">Username:</label>
         <input
           type="text"
           name="username"
-          className="border-1 border-white rounded-sm"
+          placeholder="UserName4563"
+          className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
         ></input>
         <FieldError errors={fieldErrors} name="username" />
 
-        <label className="">Email:</label>
+        <label className="w-full">Email:</label>
         <input
           type="email"
           name="email"
-          className="border-1 border-white rounded-sm"
+          placeholder="youremail@email.com"
+          className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
         ></input>
         <FieldError errors={fieldErrors} name="email" />
 
-        <label className="">Password:</label>
+        <label className="w-full">Password:</label>
         <input
           type="password"
           name="password"
-          className="border-1 border-white rounded-sm"
+          className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
         ></input>
         <FieldError errors={fieldErrors} name="password" />
 
-        <label className="">Confirm password:</label>
+        <label className="w-full">Confirm password:</label>
         <input
           type="password"
           name="confirmpassword"
-          className="border-1 border-white rounded-sm"
+          className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
         ></input>
 
         <div className="flex items-start gap-2 mt-1">

@@ -46,10 +46,6 @@ export default function RoomCard({
       providerLabel = "YouTube";
       providerIcon = AiFillYoutube;
       break;
-    case "s3":
-      providerLabel = "StreamWatch";
-      providerIcon = BsPlayFill;
-      break;
     case "local":
       providerLabel = "StreamWatch";
       providerIcon = BsPlayFill;

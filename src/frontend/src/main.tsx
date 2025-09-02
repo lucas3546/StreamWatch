@@ -10,6 +10,8 @@ import { UserProvider } from "./contexts/UserContext.tsx";
 import StoragePage from "./pages/StoragePage.tsx";
 import AccountPage from "./pages/Account/AccountPage.tsx";
 import ChangeAvatarPage from "./pages/Account/ChangeAvatarPage.tsx";
+import CreateRoomPage from "./pages/Rooms/CraeteRoomPage.tsx";
+import RoomPage from "./pages/Rooms/RoomPage.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -19,6 +21,7 @@ createRoot(document.getElementById("root")!).render(
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/home" element={<HomePage />} />
+            <Route path="/rooms/create" element={<CreateRoomPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route
               path="/account/change-avatar"
@@ -27,6 +30,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/account" element={<AccountPage />} />
             <Route path="/storage" element={<StoragePage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/room/:roomId" element={<RoomPage />} />
           </Routes>
         </DefaultLayout>
       </UserProvider>

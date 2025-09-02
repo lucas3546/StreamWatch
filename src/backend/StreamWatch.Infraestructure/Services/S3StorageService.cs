@@ -35,7 +35,7 @@ public class S3StorageService : IStorageService
         
         var response = await _s3.PutObjectAsync(request);
         
-        return new UploadedFile(fileName, MediaProvider.S3, _bucketName, request.ContentType, null, null);
+        return new UploadedFile(fileName, _bucketName, request.ContentType, null, null);
     }
 
     public Task DeleteAsync(string fileName)
@@ -70,7 +70,7 @@ public class S3StorageService : IStorageService
         
         var response = await _s3.GetObjectMetadataAsync(request);
         
-        return new UploadedFile(fileName, MediaProvider.S3, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, null);
+        return new UploadedFile(fileName, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, null);
     }
 
     public async Task<UploadedFile?> GetPartialVideoAsync(string fileName, long startByte, long endByte)
@@ -88,7 +88,7 @@ public class S3StorageService : IStorageService
         await response.ResponseStream.CopyToAsync(memory);
         memory.Position = 0;
         
-        return new UploadedFile(response.Key, MediaProvider.S3, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, memory);
+        return new UploadedFile(response.Key, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, memory);
     }
     
 
