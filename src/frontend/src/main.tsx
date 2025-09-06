@@ -11,6 +11,7 @@ import StoragePage from "./pages/StoragePage.tsx";
 import AccountPage from "./pages/Account/AccountPage.tsx";
 import ChangeAvatarPage from "./pages/Account/ChangeAvatarPage.tsx";
 import CreateRoomPage from "./pages/Rooms/CraeteRoomPage.tsx";
+import RoomsPage from "./pages/Rooms/RoomsPage.tsx";
 import RoomPage from "./pages/Rooms/RoomPage.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -31,6 +32,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/storage" element={<StoragePage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/room/:roomId" element={<RoomPage />} />
+            <Route path="/rooms/:category/:order?" element={<RoomsPage />} />
           </Routes>
         </DefaultLayout>
       </UserProvider>

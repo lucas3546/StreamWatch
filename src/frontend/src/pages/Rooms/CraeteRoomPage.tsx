@@ -11,7 +11,7 @@ import { FieldError } from "../../components/errors/FieldError";
 
 export default function CreateRoomPage() {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState("Movies");
   const [provider, setProvider] = useState("youtube");
   const [media, setMedia] = useState<string | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState("");
@@ -26,18 +26,10 @@ export default function CreateRoomPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    let providerPosition = 0;
-
-    if (provider === "youtube") {
-      providerPosition = 0;
-    } else if (provider === "local") {
-      providerPosition = 1;
-    }
-
     const request: CreateRoomRequest = {
       title: title,
       category: category,
-      provider: providerPosition,
+      provider: provider,
       videoUrl: provider === "youtube" ? youtubeUrl : null,
       mediaId: media,
       isPublic: visibility,

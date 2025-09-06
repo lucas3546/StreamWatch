@@ -1,19 +1,15 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import Navbar from "../components/header/Navbar";
 import Sidebar from "../components/sidebar/Sidebar";
+import { useUiStore } from "../stores/uiStore";
 
 interface DefaultLayoutProps {
   children: ReactNode;
 }
 
 export default function DefaultLayout({ children }: DefaultLayoutProps) {
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-  const [isSidebarOpen, setSidebarOpen] = useState(!isMobile);
+  const { isSidebarOpen, setSidebarOpen } = useUiStore();
 
-  useEffect(() => {
-    if (window.innerWidth < 768) setSidebarOpen(false);
-  }, []);
-  
   return (
     <div>
       {/* Navbar */}

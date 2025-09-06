@@ -18,3 +18,51 @@ export async function createRoom(
 ): Promise<CreateRoomResponse> {
   return api.post("/rooms/create", data).then((res) => res.data);
 }
+
+export interface GetPagedRoomsRequest {
+  pageNumber: number;
+  pageSize: number;
+  category:
+    | "All"
+    | "Movies"
+    | "Series"
+    | "Music"
+    | "Anime"
+    | "Videos"
+    | "Sports"
+    | "Nsfw";
+  includeNswf: boolean;
+  orderBy: "Recent" | "MostUsers" | "DateAsc" | "DateDesc";
+}
+
+export interface GetPagedRoomsItem {
+  roomId: string;
+  title: string;
+  thumbnailUrl: string;
+  category: string;
+  userCount: number;
+  videoProvider: "YouTube" | "S3" | string; // si pensás soportar más, podés dejarlo como string
+  createdAt: string; // podés usar Date si lo parseás
+}
+
+export interface GetPagedRoomsResponse {
+  items: GetPagedRoomsItem[];
+  totalItems: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
+export async function getPagedRooms(req: GetPagedRoomsRequest) {
+  const response = await api.get<GetPagedRoomsResponse>("/rooms/paged", {
+    params: {
+      PageNumber: req.pageNumber,
+      PageSize: req.pageSize,
+      Category: req.category,
+      IncludeNswf: req.includeNswf,
+      OrderBy: req.orderBy,
+    },
+  });
+
+  return response.data;
+}

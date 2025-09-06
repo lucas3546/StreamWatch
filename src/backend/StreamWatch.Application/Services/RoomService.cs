@@ -34,6 +34,7 @@ public class RoomService : IRoomService
         var room = new RoomCache()
         {
             Title = request.Title,
+            Category = request.Category,
             IsPaused = true,
             IsPublic = request.IsPublic,
             LeaderAccountId = currentUserId,
@@ -85,7 +86,7 @@ public class RoomService : IRoomService
 
         var totalItems = await _roomRepository.CountAsync();
         
-        var dtos =  rooms.Select(x => new GetPagedRoomItemResponse(x.Id.ToString(), x.Title, x.ThumbnailUrl, x.UsersCount, x.VideoProvider.ToString(), x.CreatedAt));
+        var dtos =  rooms.Select(x => new GetPagedRoomItemResponse(x.Id.ToString(), x.Title, x.Category.ToString(),x.ThumbnailUrl, x.UsersCount, x.VideoProvider.ToString(), x.CreatedAt));
         
         var response = new PaginatedList<GetPagedRoomItemResponse>(dtos, request.PageNumber, request.PageSize, totalItems);
         
