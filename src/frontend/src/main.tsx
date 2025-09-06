@@ -13,6 +13,7 @@ import ChangeAvatarPage from "./pages/Account/ChangeAvatarPage.tsx";
 import CreateRoomPage from "./pages/Rooms/CraeteRoomPage.tsx";
 import RoomsPage from "./pages/Rooms/RoomsPage.tsx";
 import RoomPage from "./pages/Rooms/RoomPage.tsx";
+import LoginPage from "./pages/LoginPage.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -31,6 +32,7 @@ createRoot(document.getElementById("root")!).render(
             <Route path="/account" element={<AccountPage />} />
             <Route path="/storage" element={<StoragePage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/login" element={<LoginPage />} />
             <Route path="/room/:roomId" element={<RoomPage />} />
             <Route path="/rooms/:category/:order?" element={<RoomsPage />} />
           </Routes>

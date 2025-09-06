@@ -97,7 +97,7 @@ export default function Sidebar({
               <SidebarItemLink
                 icon={VscBlank}
                 label="Login"
-                href="/account"
+                href="/login"
               ></SidebarItemLink>
             </>
           )}

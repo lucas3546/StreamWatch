@@ -15,7 +15,7 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
       {/* Navbar */}
       <Navbar setSidebarOpen={setSidebarOpen}></Navbar>
 
-      <div className="flex flex-row">
+      <div className="flex flex-row overflow-y-auto">
         {/* Sidebar */}
         <Sidebar
           sidebarIsOpen={isSidebarOpen}
