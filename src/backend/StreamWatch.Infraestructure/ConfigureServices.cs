@@ -9,13 +9,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Redis.OM;
 using StreamWatch.Application.Common.Interfaces;
+using StreamWatch.Application.Services;
 using StreamWatch.Core.Identity;
 using StreamWatch.Core.Options;
 using StreamWatch.Infraestructure.Identity;
-using StreamWatch.Infraestructure.Jobs;
 using StreamWatch.Infraestructure.Persistence;
 using StreamWatch.Infraestructure.Persistence.Interceptors;
+using StreamWatch.Infraestructure.Repositories;
 using StreamWatch.Infraestructure.Services;
 
 namespace StreamWatch.Infraestructure;
@@ -36,6 +38,16 @@ public static class ConfigureServices
         });
         services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
         
+        
+        //Redis Stack
+        var redisConnectionString = configuration.GetConnectionString("RedisConnection");
+
+        if(string.IsNullOrEmpty(redisConnectionString)) throw new ArgumentNullException(nameof(redisConnectionString));
+
+        services.AddHostedService<IndexCreationService>();
+
+        services.AddSingleton(new RedisConnectionProvider(redisConnectionString));
+
         
         //Hangfire
         services.AddHangfire(config =>
@@ -75,32 +87,22 @@ public static class ConfigureServices
 
             return new AmazonS3Client(credentials, config);
         });
+
+        services.AddSingleton<IStorageService, S3StorageService>();
         
-
-        services.AddSingleton<IStorageService>(provider =>
-        {
-            var options = provider.GetRequiredService<IOptions<StorageOptions>>().Value;
-
-            return options.Provider switch
-            {
-                "S3" => ActivatorUtilities.CreateInstance<S3StorageService>(provider),
-                "Local" => ActivatorUtilities.CreateInstance<LocalStorageService>(provider),
-                _ => throw new InvalidOperationException($"Unknown storage provider: {options.Provider}")
-            };
-        });
-        
-        
-
-
         
         
         //Other DI
         services.AddTransient<IIdentityService, IdentityService>();
-        services.AddScoped<IMediaBackgroundJobs, MediaBackgroundJobs>();
+        services.AddScoped<MediaCleanupService>();
+        services.AddScoped<IRoomRepository, RoomRepository>();
+        services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         services.AddScoped<IMediaProcessingService, MediaProcessingService>();
         services.AddScoped<IBackgroundService, HangfireJobService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton(TimeProvider.System);
+        
+        
         
         return services;
     }

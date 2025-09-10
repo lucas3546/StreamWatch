@@ -15,4 +15,9 @@ public class HangfireJobService : IBackgroundService
     {
         return BackgroundJob.Schedule(methodCall, delay);
     }
+
+    public bool Delete(string jobId)
+    {
+        return BackgroundJob.Delete(jobId);
+    }
 }

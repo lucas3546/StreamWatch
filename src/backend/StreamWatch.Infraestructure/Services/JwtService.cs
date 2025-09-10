@@ -32,7 +32,7 @@ public class JwtService : IJwtService
         return tokenHandler.WriteToken(token);
     }
 
-    public List<Claim> GetClaimsForUser(Account account, string roleName)
+    public List<Claim> GetClaimsForUser(Account account, string? profilePicName, string roleName)
     {
         var claims = new List<Claim>
         {
@@ -42,9 +42,9 @@ public class JwtService : IJwtService
             new Claim("role", roleName)
         };
 
-        if (!string.IsNullOrWhiteSpace(account.ProfilePic?.FileName))
+        if (!string.IsNullOrWhiteSpace(profilePicName))
         {
-            claims.Add(new Claim(JwtRegisteredClaimNames.Picture, account.ProfilePic.FileName));
+            claims.Add(new Claim(JwtRegisteredClaimNames.Picture, profilePicName));
         }
         return claims;
     }

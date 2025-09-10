@@ -9,7 +9,10 @@
       - "8081:8081"
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pgdb;Username=postgres;Password=postgres;Trust Server Certificate=true
-      - ConnectionStrings__RedisConnection=redis:6379,abortConnect=false
+      - ConnectionStrings__RedisConnection=redis://redis:6379
+    depends_on:
+      - redis          
+      - postgres
       
   postgres:
     image: postgres
@@ -22,7 +25,17 @@
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_DB=pgdb
+  
+  redis:
+    image: redis/redis-stack-server:latest
+    container_name: redis-stack-server
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
 
 volumes:
+  redis_data:
   postgres-db-volume:
     driver: local

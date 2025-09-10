@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text;
+using System.Text.Json.Serialization;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -7,6 +8,7 @@ using Microsoft.OpenApi.Models;
 using StreamWatch.Api.Services;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Core.Options;
+using StreamWatch.Infraestructure.Services;
 
 namespace StreamWatch.Api;
 
@@ -16,14 +18,16 @@ public static class ConfigureServices
      {
          services.Configure<StorageOptions>(configuration.GetSection("Storage"));
          
+         services.AddSignalR();
+         
          services.AddCors(options =>
          {
              options.AddDefaultPolicy(policy =>
              {
-                 policy.WithOrigins("http://localhost:5173") // frontend
-                     .AllowAnyOrigin()
+                 policy.WithOrigins("http://localhost:5173", "http://localhost:4173") // frontend
                      .AllowAnyHeader()
-                     .AllowAnyMethod();
+                     .AllowAnyMethod()
+                     .AllowCredentials();
              });
          });
          
@@ -58,7 +62,7 @@ public static class ConfigureServices
                          // If the request is for our hub...
                          var path = context.HttpContext.Request.Path;
                          if (!string.IsNullOrEmpty(accessToken) &&
-                             (path.StartsWithSegments("/hub/waku")))
+                             (path.StartsWithSegments("/api/hubs/streamwatch")))
                          {
                              // Read the token out of the query string
                              context.Token = accessToken;
@@ -75,7 +79,10 @@ public static class ConfigureServices
              options.LowercaseQueryStrings = true;
          });
          services.AddHttpContextAccessor();
-         services.AddControllers();
+         services.AddControllers().AddJsonOptions(options =>
+         {
+             options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+         });;
          services.AddProblemDetails();
          services.AddOpenApi();
          services.AddScoped<ICurrentUserService, CurrentUserService>();
@@ -103,6 +110,7 @@ public static class ConfigureServices
                      }, new List<string>() }
              });
          });
+         
 
          
          return services;

@@ -6,12 +6,22 @@ import { GiHamburgerMenu } from "react-icons/gi";
 import { MdNotifications } from "react-icons/md";
 import type { Dispatch, SetStateAction } from "react";
 import { Link } from "react-router";
+import { useNavigate } from "react-router";
 
 interface NavbarProps {
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 export default function Navbar({ setSidebarOpen }: NavbarProps) {
+  const navigate = useNavigate();
+  const createRoomButtonClicked = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    e.preventDefault();
+
+    navigate("rooms/create");
+  };
+
   return (
     <div className="bg-black min-h-14 w-full flex justify-between items-center border-defaultbordercolor border-b-1">
       <div className="ml-4 gap-2 w-full flex flex-row items-center">
@@ -27,7 +37,10 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
       </div>
       <div className="mr-2 gap-2 w-full flex flex-row items-center justify-end">
         <Icon icon={MdNotifications} />
-        <Button className="bg-semibackground flex flex-row gap-1 text-shadow-md hover:bg-gray-700">
+        <Button
+          onClick={createRoomButtonClicked}
+          className="bg-semibackground flex flex-row gap-1 text-shadow-md hover:bg-gray-700"
+        >
           <Icon icon={IoIosRadio}></Icon>Create
         </Button>
       </div>

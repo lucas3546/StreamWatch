@@ -20,7 +20,7 @@ public class IdentityService : IIdentityService
     public async Task<(IEnumerable<string> errors, Account? account)> RegisterAsync(string email, string username, string password)
     {
         var account = new Account { UserName = username, Email = email };
-
+        
         var result = await _userManager.CreateAsync(account, password);
         
         //Refactor this later
@@ -36,14 +36,14 @@ public class IdentityService : IIdentityService
 
     public async Task<Account?> FindUserByEmailAsync(string email)
     {
-        var user = _userManager.Users.Include(x => x.ProfilePic).FirstOrDefault(x => x.Email == email);
+        var user = _userManager.Users.FirstOrDefault(x => x.Email == email);
         
         return user;
     }
     
     public async Task<Account?> FindUserByUserNameAsync(string userName)
     {
-        var user = _userManager.Users.Include(x => x.ProfilePic).FirstOrDefault(x => x.UserName == userName);
+        var user = _userManager.Users.FirstOrDefault(x => x.UserName == userName);
         
         return user;
     }

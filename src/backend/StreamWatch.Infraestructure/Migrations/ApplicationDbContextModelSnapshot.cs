@@ -199,6 +199,10 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.Property<string>("BucketName")
                         .HasColumnType("text");
 
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -218,8 +222,8 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.Property<string>("LastModifiedBy")
                         .HasColumnType("text");
 
-                    b.Property<int>("Provider")
-                        .HasColumnType("integer");
+                    b.Property<decimal>("Size")
+                        .HasColumnType("numeric");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -316,9 +320,6 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("ProfilePicId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -337,8 +338,6 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
-
-                    b.HasIndex("ProfilePicId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -422,15 +421,6 @@ namespace StreamWatch.Infraestructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ToAccount");
-                });
-
-            modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>
-                {
-                    b.HasOne("StreamWatch.Core.Entities.Media", "ProfilePic")
-                        .WithMany()
-                        .HasForeignKey("ProfilePicId");
-
-                    b.Navigation("ProfilePic");
                 });
 
             modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>

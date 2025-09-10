@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
@@ -17,9 +18,8 @@ public class AccountService : IAccountService
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly IBackgroundService _backgroundService;
-    private readonly IMediaBackgroundJobs _mediaBackgroundJobs;
 
-    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService, IMediaBackgroundJobs mediaBackgroundJobs)
+    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService)
     {
         _identityService = identityService;
         _jwtService = jwtService;
@@ -28,7 +28,6 @@ public class AccountService : IAccountService
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
         _backgroundService = backgroundService;
-        _mediaBackgroundJobs = mediaBackgroundJobs;
     }
 
     public async Task<Result<string>> AuthenticateAsync(LoginAccountRequest request)
@@ -36,13 +35,15 @@ public class AccountService : IAccountService
         var user = await _identityService.FindUserByEmailAsync(request.Email);
         if (user is null) return Result<string>.Failure(new NotFoundError(nameof(request.Email),"No registered user has been found with that email address."));
         
+        var profilePic = await _context.Media.FirstOrDefaultAsync(x => x.CreatedBy == user.Id && x.FileName.StartsWith("profile_pic"));
+        
         bool verification = await _identityService.VerifyPasswordAsync(user, request.Password);
         if (!verification) return Result<string>.Failure(new PasswordMismatchError(nameof(request.Password),"The entered password is incorrect for this account."));
 
         var role = await _identityService.GetRoleFromUserAsync(user);
         if(string.IsNullOrEmpty(role)) throw new ArgumentNullException("An error occurred while trying to log in to your account. Please contact support.");
 
-        var claims =  _jwtService.GetClaimsForUser(user, role);
+        var claims =  _jwtService.GetClaimsForUser(user, profilePic?.ThumbnailFileName, role);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
         
@@ -62,7 +63,7 @@ public class AccountService : IAccountService
         
         if (errors.Any()) return Result<string>.Failure(new AccountRegistrationError(string.Join(",", errors)));
         
-        var claims = _jwtService.GetClaimsForUser(account, Roles.User);
+        var claims = _jwtService.GetClaimsForUser(account, null,Roles.User);
         
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
         
@@ -71,8 +72,8 @@ public class AccountService : IAccountService
 
     public async Task<Result> SetProfilePictureAsync(UpdateProfilePicRequest request)
     {
-        var currentUserId = _currentUserService.Id;
-        if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+        var currentUserName = _currentUserService.Name;
+        if(string.IsNullOrEmpty(currentUserName)) throw new ArgumentNullException("currentUserName cannot be null or empty!");
         
         
         //Process and upload profile pic thumbnail
@@ -80,12 +81,12 @@ public class AccountService : IAccountService
         
         Stream thumbnailStream = _mediaProcessingService.ResizeImage(request.Picture.OpenReadStream(), 800, 800);
         
-        UploadedFile thumbnailUrl = await _storageService.UploadAsync(thumbnailStream, thumbnailFileName, "image/webp");
+        UploadedFile thumb = await _storageService.UploadAsync(thumbnailStream, thumbnailFileName, "image/webp");
 
         await thumbnailStream.DisposeAsync();
         
         //Process and upload original profile pic
-        string profilePicName = Guid.NewGuid() + ".webp";
+        string profilePicName = "profile_pic" + Guid.NewGuid() + ".webp";
 
         Stream profilePicStream = _mediaProcessingService.ConvertImageFormat(request.Picture.OpenReadStream());
         
@@ -96,18 +97,17 @@ public class AccountService : IAccountService
         //Save in database 
         var media = new Media
         {
-            FileName = profilePicName,
-            ThumbnailFileName = thumbnailFileName,
-            Provider = profilePic.Provider,
-            ExpiresAt = DateTime.UtcNow.AddHours(24),
+            FileName = profilePic.FileName,
+            ThumbnailFileName = thumb.FileName,
+            Size = Convert.ToDecimal(profilePic.Size),
+            BucketName = profilePic.BucketName,
+            ContentType = profilePic.ContentType,
             Status = MediaStatus.Uploaded
         };
         
         await _context.Media.AddAsync(media);
         
         await _context.SaveChangesAsync(CancellationToken.None);
-        
-        _backgroundService.Enqueue((() => _storageService.DeleteAsync(profilePicName)));
         
         return Result.Success();
     }

@@ -1,9 +1,11 @@
 using Hangfire;
 using Microsoft.Extensions.FileProviders;
 using StreamWatch.Api;
+using StreamWatch.Api.Hubs;
 using StreamWatch.Application;
 using StreamWatch.Core.Options;
 using StreamWatch.Infraestructure;
+using StreamWatch.Infraestructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 var storageOptions = builder.Configuration.GetSection("Storage").Get<StorageOptions>();
@@ -35,7 +37,15 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/media"
 });
 
+
 app.UseHangfireDashboard();
+
+RecurringJob.AddOrUpdate<MediaCleanupService>("cleanup",
+    svc => svc.CleanExpiredFiles(),
+    Cron.Hourly 
+);
+
+app.MapHub<StreamWatchHub>("api/hubs/streamwatch");
 
 app.UseCors();
 

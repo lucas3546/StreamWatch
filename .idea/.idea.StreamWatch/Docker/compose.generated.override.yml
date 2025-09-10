@@ -11,11 +11,12 @@ services:
     - "/app/bin/Debug/net9.0/StreamWatch.Api.dll"
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
+      ASPNETCORE_STATICWEBASSETS: "/app/bin/Debug/net9.0/StreamWatch.Api.staticwebassets.runtime.CT.json"
       DOTNET_USE_POLLING_FILE_WATCHER: "true"
     image: "streamwatch.api:dev"
     ports: []
     volumes:
     - "/home/pcla/RiderProjects/StreamWatch/src/backend/StreamWatch.Api:/app:rw"
     - "/home/pcla/RiderProjects/StreamWatch:/src:rw"
-    - "/home/pcla/.nuget/packages:/home/app/.nuget/packages"
+    - "/home/pcla/.nuget/packages:/root/.nuget/packages"
     working_dir: "/app"

@@ -2,8 +2,10 @@ import { AiFillYoutube } from "react-icons/ai";
 import Icon from "../icon/Icon";
 import { BsPlayFill } from "react-icons/bs";
 import { BiSolidUser } from "react-icons/bi";
+import { Link } from "react-router";
 
 interface RoomCardProps {
+  roomId: string;
   thumbnail: string;
   title: string;
   category: string;
@@ -11,6 +13,7 @@ interface RoomCardProps {
   provider: string;
 }
 export default function RoomCard({
+  roomId,
   thumbnail,
   title,
   category,
@@ -41,14 +44,10 @@ export default function RoomCard({
 
   let providerLabel;
   let providerIcon;
-  switch (provider) {
+  switch (provider.toLocaleLowerCase()) {
     case "youtube":
       providerLabel = "YouTube";
       providerIcon = AiFillYoutube;
-      break;
-    case "s3":
-      providerLabel = "StreamWatch";
-      providerIcon = BsPlayFill;
       break;
     case "local":
       providerLabel = "StreamWatch";
@@ -64,7 +63,10 @@ export default function RoomCard({
   }
 
   return (
-    <div className="bg-neutral-950 border border-defaultbordercolor rounded-sm shadow-md overflow-hidden p-2 hover:scale-105 active:scale-105">
+    <Link
+      to={"/room/" + roomId}
+      className="bg-neutral-950 border border-defaultbordercolor rounded-sm shadow-md overflow-hidden p-2 hover:scale-105 active:scale-105"
+    >
       {/* Imagen con aspect ratio 16:9 */}
       <div className="w-full aspect-[4/3] relative">
         <img
@@ -95,6 +97,6 @@ export default function RoomCard({
       <div className="p-2">
         <p className="font-semibold text-sm truncate">{title}</p>
       </div>
-    </div>
+    </Link>
   );
 }
