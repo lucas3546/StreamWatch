@@ -38,6 +38,8 @@ public class StreamWatchHub : Hub
     {
         var connectionId = GetConnectionId();
         
+        var user = await _userSessionService.GetUserSessionAsync(connectionId);
+        
         await _userSessionService.EndSessionAsync(connectionId);
         
         await base.OnDisconnectedAsync(exception);
