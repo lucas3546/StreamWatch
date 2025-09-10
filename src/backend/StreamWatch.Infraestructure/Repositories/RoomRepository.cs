@@ -29,7 +29,11 @@ public class RoomRepository : IRoomRepository
 
         return roomId.Replace("Room:", "");
     }
-        
+    
+    public async Task UpdateAsync(RoomCache room, CancellationToken ct = default)
+    {
+        await _rooms.UpdateAsync(room);
+    }
 
     public async Task DeleteAsync(string id, CancellationToken ct = default)
     {

@@ -3,20 +3,23 @@ using Redis.OM.Modeling;
 namespace StreamWatch.Core.Cache;
 
 
-[Document(StorageType = StorageType.Json, Prefixes = new[] { "Room" })]
+[Document(StorageType = StorageType.Json, Prefixes = new[] { "UserSession" })]
 public class UserSessionCache
 {
     [RedisIdField]
     [Indexed]
     public Ulid Id { get; set; }
+    
     [Indexed]
-    public required string UserName  { get; set; }
+    public string? UserId  { get; set; }
+    [Indexed]
+    public string? UserName  { get; set; }
     [Indexed]
     public required string ConnectionId  { get; set; }
     [Indexed]
     public string? RoomId  { get; set; }
     [Indexed]
-    public string? ProfilePicUrl { get; set; }
+    public string? ProfilePicName { get; set; }
     [Indexed]
-    public DateTime EnteredAt { get; set; }
+    public DateTime? EnteredAt { get; set; }
 }

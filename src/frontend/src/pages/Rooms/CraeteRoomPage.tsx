@@ -69,7 +69,7 @@ export default function CreateRoomPage() {
         onSubmit={handleSubmit}
         className="w-full flex flex-col items-center gap-4 text-white"
       >
-        <h2 className="text-3xl mb-1">Create Room</h2>
+        <h2 className="text-3xl mb-11">Create Room</h2>
 
         {/* Title */}
         <label className="w-full">Title</label>

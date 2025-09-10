@@ -12,7 +12,7 @@ using StreamWatch.Infraestructure.Persistence;
 namespace StreamWatch.Infraestructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250901132316_Initial1")]
+    [Migration("20250906234509_Initial1")]
     partial class Initial1
     {
         /// <inheritdoc />
@@ -323,9 +323,6 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("ProfilePicId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -344,8 +341,6 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
-
-                    b.HasIndex("ProfilePicId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -429,15 +424,6 @@ namespace StreamWatch.Infraestructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ToAccount");
-                });
-
-            modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>
-                {
-                    b.HasOne("StreamWatch.Core.Entities.Media", "ProfilePic")
-                        .WithMany()
-                        .HasForeignKey("ProfilePicId");
-
-                    b.Navigation("ProfilePic");
                 });
 
             modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>

@@ -1,6 +1,7 @@
 using Hangfire;
 using Microsoft.Extensions.FileProviders;
 using StreamWatch.Api;
+using StreamWatch.Api.Hubs;
 using StreamWatch.Application;
 using StreamWatch.Core.Options;
 using StreamWatch.Infraestructure;
@@ -44,6 +45,7 @@ RecurringJob.AddOrUpdate<MediaCleanupService>("cleanup",
     Cron.Hourly 
 );
 
+app.MapHub<StreamWatchHub>("api/hubs/streamwatch");
 
 app.UseCors();
 

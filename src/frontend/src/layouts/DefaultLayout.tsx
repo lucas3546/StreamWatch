@@ -1,17 +1,13 @@
-import { type ReactNode } from "react";
 import Navbar from "../components/header/Navbar";
 import Sidebar from "../components/sidebar/Sidebar";
 import { useUiStore } from "../stores/uiStore";
+import { Outlet } from "react-router";
 
-interface DefaultLayoutProps {
-  children: ReactNode;
-}
-
-export default function DefaultLayout({ children }: DefaultLayoutProps) {
+export default function DefaultLayout() {
   const { isSidebarOpen, setSidebarOpen } = useUiStore();
 
   return (
-    <div>
+    <div className="app-layout">
       {/* Navbar */}
       <Navbar setSidebarOpen={setSidebarOpen}></Navbar>
 
@@ -24,7 +20,7 @@ export default function DefaultLayout({ children }: DefaultLayoutProps) {
 
         {/* Contenido principal */}
         <main className="flex-1 md:h-[calc(100vh-56px)] h-screen overflow-y-auto">
-          {children}
+          <Outlet />
         </main>
       </div>
     </div>

@@ -80,6 +80,11 @@ public class RoomService : IRoomService
         return Result<CreateRoomResponse>.Success(response);
     }
 
+    public async Task<RoomCache?> GetRoomByIdAsync(string roomId)
+    {
+        return await _roomRepository.GetByIdAsync(roomId);
+    }
+
     public async Task<PaginatedList<GetPagedRoomItemResponse>> GetPagedRooms(GetPagedRoomsRequest request)
     {
         var rooms = await _roomRepository.GetPagedAsync(request.PageNumber, request.PageSize, request.Category, request.IncludeNswf, request.OrderBy);

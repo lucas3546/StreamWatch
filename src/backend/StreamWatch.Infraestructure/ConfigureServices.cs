@@ -96,6 +96,7 @@ public static class ConfigureServices
         services.AddTransient<IIdentityService, IdentityService>();
         services.AddScoped<MediaCleanupService>();
         services.AddScoped<IRoomRepository, RoomRepository>();
+        services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         services.AddScoped<IMediaProcessingService, MediaProcessingService>();
         services.AddScoped<IBackgroundService, HangfireJobService>();
         services.AddScoped<IJwtService, JwtService>();

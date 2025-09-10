@@ -36,14 +36,14 @@ public class IdentityService : IIdentityService
 
     public async Task<Account?> FindUserByEmailAsync(string email)
     {
-        var user = _userManager.Users.Include(x => x.ProfilePic).FirstOrDefault(x => x.Email == email);
+        var user = _userManager.Users.FirstOrDefault(x => x.Email == email);
         
         return user;
     }
     
     public async Task<Account?> FindUserByUserNameAsync(string userName)
     {
-        var user = _userManager.Users.Include(x => x.ProfilePic).FirstOrDefault(x => x.UserName == userName);
+        var user = _userManager.Users.FirstOrDefault(x => x.UserName == userName);
         
         return user;
     }

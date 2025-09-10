@@ -9,4 +9,5 @@ public interface IRoomService
 {
     Task<Result<CreateRoomResponse>> CreateRoomAsync(CreateRoomRequest request);
     Task<PaginatedList<GetPagedRoomItemResponse>> GetPagedRooms(GetPagedRoomsRequest request);
+    Task<RoomCache?> GetRoomByIdAsync(string roomId);
 }

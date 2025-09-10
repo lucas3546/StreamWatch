@@ -18,6 +18,7 @@ public static class ConfigureServices
         services.AddScoped<IFriendshipService, FriendshipService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IAccountStorageService, AccountStorageService>();
+        services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddScoped<IRoomService, RoomService>();
         services.AddSingleton(new SqidsEncoder<int>(new()
         {
@@ -28,6 +29,8 @@ public static class ConfigureServices
 
         services.AddSingleton<IEventBus, InMemoryEventBus>();
         services.AddScoped<IEventHandler<FriendshipCreatedEvent>, FriendshipCreatedEventHandler>();
+        services.AddScoped<IEventHandler<UserJoinedRoomEvent>, UserJoinedRoomEventHandler>();
+        services.AddScoped<IEventHandler<UserLeftRoomEvent>, UserLeftRoomEventHandler>();
 
         #endregion
         

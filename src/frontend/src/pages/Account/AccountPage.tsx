@@ -1,21 +1,21 @@
 import FormContainer from "../../components/forms/FormContainer";
-import Avatar from "boring-avatars";
 import { Link } from "react-router";
+import { useUser } from "../../contexts/UserContext";
+import ProfilePic from "../../components/avatar/ProfilePic";
 
 export default function AccountPage() {
+  const { user } = useUser();
   return (
     <FormContainer>
       <div className="flex flex-col mx-auto overflow-hidden px-2 items-center">
         <div className="flex flex-row gap-3">
-          <Avatar
-            size={80}
-            name="Outgen"
-            colors={["#696358ff", "#b3a79fff", "#ff5252", "#c91e5a", "#3d2922"]}
-            variant="bauhaus"
-          />
+          <ProfilePic
+            userName={user?.name}
+            fileName={user?.picture}
+          ></ProfilePic>
           <div className="flex flex-col gap-1 mt-1">
-            <p className="text-2xl">@UserName</p>
-            <p className="text-lg">testenadoemail@gmail.com</p>
+            <p className="text-2xl">@{user?.name}</p>
+            <p className="text-lg">{user?.email}</p>
           </div>
         </div>
 

@@ -23,6 +23,7 @@ export default function RoomsPage() {
         const data = await getPagedRooms({
           pageNumber: page,
           pageSize: 10,
+          //@ts-ignore: Test
           category: category as any,
           includeNswf: true,
           orderBy: order as any,
@@ -45,6 +46,7 @@ export default function RoomsPage() {
         rooms.map((room) => (
           <RoomCard
             key={room.roomId}
+            roomId={room.roomId}
             thumbnail={room.thumbnailUrl}
             title={room.title}
             category={room.category.toLowerCase()}
