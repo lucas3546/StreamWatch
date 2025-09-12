@@ -28,11 +28,24 @@ public class UserSessionRepository : IUserSessionRepository
         await _sessions.UpdateAsync(userSession);
     }
 
+    public async Task<IEnumerable<UserSessionCache>> GetUsersFromRoomAsync(string roomId)
+    {
+        return await _sessions.Where(x => x.RoomId == roomId).ToListAsync();
+    }
+    public async Task<UserSessionCache?> GetMostRecentUserSessionFromRoomAsync(string roomId, CancellationToken ct = default)
+    {
+        return await _sessions
+            .Where(x => x.RoomId == roomId)
+            .OrderByDescending(x => x.EnteredAt)
+            .FirstOrDefaultAsync();
+    }
+
     public async Task<UserSessionCache?> GetUserSessionAsync(string connectionId, CancellationToken ct = default)
     {
         return await _sessions.FirstOrDefaultAsync(x => x.ConnectionId == connectionId);
     }
 
+    
     public async Task Remove(UserSessionCache userSessionCache, CancellationToken ct = default)
     {
         await _sessions.DeleteAsync(userSessionCache);

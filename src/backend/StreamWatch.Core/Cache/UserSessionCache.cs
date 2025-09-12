@@ -20,6 +20,6 @@ public class UserSessionCache
     public string? RoomId  { get; set; }
     [Indexed]
     public string? ProfilePicName { get; set; }
-    [Indexed]
+    [Indexed(Sortable = true)]
     public DateTime? EnteredAt { get; set; }
 }

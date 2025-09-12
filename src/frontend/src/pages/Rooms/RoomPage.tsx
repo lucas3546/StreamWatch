@@ -2,18 +2,36 @@ import { useBlocker, useParams } from "react-router";
 import RoomSidebar from "../../components/sidebar/Room/RoomSidebar";
 import VideoPlayer from "../../components/player/VideoPlayer";
 import RoomBottomBar from "../../components/bottombar/RoomBottomBar";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { roomRealtimeService } from "../../services/roomRealtimeService";
 import type { RoomState } from "../../components/types/RoomState";
 import { useSignalR } from "../../hooks/useSignalR";
+import type { MediaPlayerInstance } from "@vidstack/react";
+import { useConfirmNavigation } from "../../hooks/useConfirmNavegation";
+import { useUser } from "../../contexts/UserContext";
+import { useVideoSync } from "../../hooks/useVideoSync";
 
 export default function RoomPage() {
-  const blocker = useBlocker(true);
-
-  const { connection, reloadConnection } = useSignalR();
   const { roomId } = useParams<{ roomId: string }>();
   const [room, setRoom] = useState<RoomState>();
-  console.log(roomId);
+  const { user } = useUser();
+  const { connection, reloadConnection } = useSignalR();
+  const player = useRef<MediaPlayerInstance>(null);
+  const [isLeader, setIsLeader] = useState<boolean>(false);
+  const { onSeeked, onPlay, onPause } = useVideoSync(
+    player,
+    isLeader,
+    room,
+    setRoom,
+  );
+
+  useConfirmNavigation(
+    true,
+    "Estas seguro que deseas salir de la sala?",
+    () => {
+      if (connection) reloadConnection();
+    },
+  );
 
   useEffect(() => {
     if (!connection || !roomId) return;
@@ -26,6 +44,11 @@ export default function RoomPage() {
 
         setRoom(roomData);
 
+        if (roomData.leaderAccountId == user?.nameid) {
+          setIsLeader(true);
+        }
+
+        console.log("IsLeader", isLeader);
         console.log(room);
 
         service.onReconnected((id) => console.log("Reconectado con id:", id));
@@ -37,28 +60,22 @@ export default function RoomPage() {
         console.error("❌ Error al conectar con el room:", err);
       }
     })();
-  }, [connection, roomId]);
-
-  useEffect(() => {
-    if (blocker.state === "blocked") {
-      const confirmLeave = window.confirm(
-        `¿Estas seguro de que quieres salir de la sala?`,
-      );
-      if (confirmLeave) {
-        if (connection) {
-          reloadConnection();
-        }
-        blocker.proceed();
-      } else blocker.reset();
-    }
-  }, [blocker.state, blocker.location]);
+  }, [connection, roomId, isLeader]);
 
   return (
     <>
       <div className="flex flex-col md:flex-row h-[calc(100vh-56px)] overflow-hidden">
         <div className="flex-1 flex flex-col ">
           <div className="flex-1 overflow-hidden">
-            <VideoPlayer />
+            {room && (
+              <VideoPlayer
+                roomState={room}
+                player={player}
+                onSeeked={onSeeked}
+                onPlay={onPlay}
+                onPause={onPause}
+              />
+            )}
           </div>
           <div className="h-auto md:h-16">
             <RoomBottomBar />

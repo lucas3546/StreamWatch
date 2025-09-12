@@ -97,4 +97,19 @@ public class RoomService : IRoomService
         
         return response;
     }
+
+    public async Task<Result> UpdateVideoStateAsync(UpdateVideoStateRequest request)
+    {
+        var room = await _roomRepository.GetByIdAsync(request.RoomId);
+        if(room is null) return Result.Failure(new NotFoundError("Room not found"));
+
+        room.CurrentVideoTime = request.CurrentTimestamp;
+        room.LastLeaderUpdateTime = request.SentAt;
+        room.IsPaused = request.IsPaused;
+        
+        await _roomRepository.UpdateAsync(room);
+        
+        return Result.Success();
+    }
+    
 }
