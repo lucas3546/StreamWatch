@@ -23,7 +23,7 @@ export default function ProfilePic({
         />
       ) : (
         <Avatar
-          size={80}
+          size={size}
           name={userName || "Outgen"}
           colors={["#696358ff", "#b3a79fff", "#ff5252", "#c91e5a", "#3d2922"]}
           variant="bauhaus"

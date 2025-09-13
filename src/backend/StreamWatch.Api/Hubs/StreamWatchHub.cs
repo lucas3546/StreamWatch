@@ -68,7 +68,7 @@ public class StreamWatchHub : Hub
 
     [Authorize]
     public async Task UpdateVideoState(UpdateVideoStateRequest request)
-    {
+    { 
         var connectionId = GetConnectionId();
 
         var room = await _roomService.GetRoomByIdAsync(request.RoomId);

@@ -31,6 +31,16 @@ public class AccountStorageService : IAccountStorageService
         _mediaProcessingService = mediaProcessingService;
         _sqids = squids;
     }
+    
+    private static readonly HashSet<string> SupportedImageFormats = new HashSet<string>
+    {
+        "image/jpg",
+        "image/avif",
+        "image/jpeg",
+        "image/png",
+        "image/webp",
+        "image/gif"
+    };
     public async Task<Result<GetPresignedUrlResponse>> GetPresignedUrl(GetPresignedUrlRequest request)
     {
         var currentUserId = _currentUserService.Id; 
@@ -66,6 +76,77 @@ public class AccountStorageService : IAccountStorageService
         var response = new GetPresignedUrlResponse( presignedUrl, "PUT", headers, media.Id, expiration);
         
         return Result<GetPresignedUrlResponse>.Success(response);
+    }
+
+    public async Task<Result<UploadImageResponse>> UploadImageAsync(UploadImageRequest request)
+    {
+        var tempVideoPath = Path.Combine("wwwroot", "temp", $"{request.fileName}");
+        
+        //TO DO: Add catch.
+        try
+        {
+            using (var outputFileStream = new FileStream(tempVideoPath, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                await request.Image.CopyToAsync(outputFileStream);
+            }
+
+            //Validate video
+            var mimetype = MimeGuesser.GuessMimeType(tempVideoPath);
+            
+            if (!SupportedImageFormats.Contains(mimetype))
+            {
+                return Result<UploadImageResponse>.Failure(new ValidationError("File format is not supported!"));
+            }
+        }
+        finally
+        {
+            if (File.Exists(tempVideoPath)) File.Delete(tempVideoPath);
+        }
+        
+        //Process and upload thumbnail
+        string thumbnailFileName =  "thumb_"+ Guid.NewGuid() + ".webp";
+        
+        Stream thumbnailStream = _mediaProcessingService.ResizeImage(request.Image, 800, 800);
+        
+        UploadedFile thumb = await _storageService.UploadAsync(thumbnailStream, thumbnailFileName, "image/webp");
+
+        await thumbnailStream.DisposeAsync();
+        
+        //Process and upload original file
+        string? originalFileName = null;
+
+        UploadedFile?  originalFile = null;
+        
+        if (!request.UploadOnlyThumbnail)
+        {
+            originalFileName = Guid.NewGuid() + ".webp";
+            
+            Stream profilePicStream = _mediaProcessingService.ConvertImageFormat(request.Image);
+        
+            UploadedFile profilePic = await _storageService.UploadAsync(profilePicStream, originalFileName, "image/webp");
+
+            await profilePicStream.DisposeAsync();
+        }
+        
+        //Save in database 
+        var media = new Media
+        {
+            FileName = originalFileName ??  thumbnailFileName,
+            ThumbnailFileName = thumb.FileName,
+            Size = Convert.ToDecimal(originalFile?.Size ?? thumb.Size),
+            BucketName = thumb.BucketName,
+            ContentType = thumb.ContentType,
+            ExpiresAt = request.ExpiresAt,
+            Status = MediaStatus.Uploaded
+        };
+        
+        await _context.Media.AddAsync(media);
+        
+        await _context.SaveChangesAsync(CancellationToken.None);
+        
+        var response = new UploadImageResponse(media.FileName, media.ThumbnailFileName, media.BucketName, media.Size, media.ExpiresAt);
+        
+        return Result<UploadImageResponse>.Success(response);
     }
     
     public async Task<Result> SetMediaFileUploaded(SetMediaFileUploadedRequest request)

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import ProfilePic from "../../avatar/ProfilePic";
 
 export interface RoomChatMessage {
   id: string;
@@ -11,31 +11,23 @@ interface RoomChatProps {
 }
 
 export default function RoomChat({ messages }: RoomChatProps) {
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  // Auto-scroll hacia el último mensaje
-  useEffect(() => {
-    scrollRef.current?.scrollTo({
-      top: scrollRef.current.scrollHeight,
-      behavior: "smooth",
-    });
-  }, [messages]);
-
   return (
-    <div
-      ref={scrollRef}
-      className="flex-1 overflow-y-auto  flex flex-col gap-2"
-    >
+    <div className="flex-1 overflow-y-auto flex flex-col gap-2">
       {messages.map((msg) => (
         <div
           key={msg.id}
-          className={`max-w-[70%] px-3 py-1 rounded-lg ${
-            msg.fromMe
-              ? "bg-neutral-600 text-white self-end"
-              : "bg-neutral-700 text-white self-start"
-          }`}
+          className={`flex gap-1 ${msg.fromMe ? "flex-row-reverse" : "flex-row"}`}
         >
-          {msg.text}
+          <ProfilePic userName="Test" fileName={undefined} size={25} />
+          <div
+            className={`max-w-[70%] px-3 py-1 rounded-lg ${
+              msg.fromMe
+                ? "bg-neutral-600 text-white"
+                : "bg-neutral-700 text-white"
+            }`}
+          >
+            {msg.text}
+          </div>
         </div>
       ))}
     </div>

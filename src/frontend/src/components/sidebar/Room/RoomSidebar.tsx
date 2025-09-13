@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import RoomChat from "./RoomChat";
 import { type RoomChatMessage } from "./RoomChat";
@@ -10,18 +10,36 @@ export default function RoomSidebar() {
   const [messages, setMessages] = useState<RoomChatMessage[]>([
     { id: "1", text: "Hola!", fromMe: false },
     { id: "2", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: true },
-    { id: "2", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "2", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "2", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "2", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "2", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "2", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "2", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
+    { id: "3", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
+    { id: "4", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
+    { id: "5", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
+    { id: "6", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
+    { id: "7", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
+    { id: "8", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
+    { id: "9", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
+    { id: "10", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: true },
+    { id: "11", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: true },
   ]);
+
+  //TO DO: Refactorize the entire responsive functionality in this component
+  useEffect(() => {
+    const handleResize = () => {
+      const isMobile = window.innerWidth < 768;
+      if (isMobile) {
+        setIsOpen(true);
+      }
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div
-      className={`h-[70%] md:h-[calc(100vh-56px)] flex flex-col bg-black border-defaultbordercolor border-l transition-all duration-300 overflow-hidden z-10
-        ${isOpen ? "w-full md:w-56" : "w-0"}`}
+      className={`flex-1 h-full md:flex-none md:h-[calc(100vh-56px)] flex flex-col bg-black border-defaultbordercolor border-l transition-all duration-300 overflow-hidden z-10
+        ${isOpen ? "w-full md:w-70" : "w-0"}`}
     >
       {/* Contenido del sidebar */}
       {isOpen && (
@@ -30,7 +48,7 @@ export default function RoomSidebar() {
             {/* Botón para cerrar al lado de los tabs */}
             <button
               onClick={() => setIsOpen(false)}
-              className="px-2 text-gray-400 hover:text-white"
+              className="hidden md:block px-2 text-gray-400 hover:text-white"
             >
               <AiOutlineClose size={18} />
             </button>
@@ -57,10 +75,19 @@ export default function RoomSidebar() {
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto  p-4 bg-neutral-900 text-white ">
-            {activeTab === "chat" && <RoomChat messages={messages}></RoomChat>}
-            {activeTab === "users" && <div>Aquí va la lista de usuarios</div>}
-          </div>
+          {activeTab === "chat" && (
+            <div className="flex-1 flex flex-col min-h-0 bg-neutral-900 text-white relative overflow-hidden">
+              <div className="overflow-y-auto p-4 pb-20 min-h-0">
+                {/* pb-20 = espacio para el input */}
+                <RoomChat messages={messages} />
+              </div>
+
+              <div className="absolute left-0 right-0 bottom-0 p-2 border-t border-gray-700 bg-neutral-900">
+                <input className="w-full rounded bg-neutral-800 text-white px-2 py-1" />
+              </div>
+            </div>
+          )}
+          {activeTab === "users" && <div>Aquí va la lista de usuarios</div>}
         </>
       )}
 
