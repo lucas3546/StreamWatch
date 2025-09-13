@@ -44,7 +44,7 @@ public class RoomsController : ControllerBase
 
     [HttpPost("send-message")]
     [Authorize]
-    public async Task<ActionResult> SendMessageAsync(SendMessageRequest request)
+    public async Task<ActionResult> SendMessageAsync([FromForm] SendMessageRequest request)
     {
         var userName = _currentUserService.Name;
         

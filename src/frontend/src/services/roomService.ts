@@ -13,12 +13,6 @@ export interface CreateRoomResponse {
   roomId: string;
 }
 
-export async function createRoom(
-  data: CreateRoomRequest,
-): Promise<CreateRoomResponse> {
-  return api.post("/rooms/create", data).then((res) => res.data);
-}
-
 export interface GetPagedRoomsRequest {
   pageNumber: number;
   pageSize: number;
@@ -53,6 +47,13 @@ export interface GetPagedRoomsResponse {
   totalPages: number;
 }
 
+export interface SendMessageRequest {
+  roomId: string;
+  message: string;
+  image?: File | null;
+  replyToMessageId?: string;
+}
+
 export async function getPagedRooms(req: GetPagedRoomsRequest) {
   const response = await api.get<GetPagedRoomsResponse>("/rooms/paged", {
     params: {
@@ -63,6 +64,28 @@ export async function getPagedRooms(req: GetPagedRoomsRequest) {
       OrderBy: req.orderBy,
     },
   });
-
   return response.data;
+}
+
+export async function sendMessage(data: SendMessageRequest): Promise<void> {
+  const formData = new FormData();
+  formData.append("roomId", data.roomId);
+  formData.append("message", data.message);
+  if (data.image) formData.append("image", data.image); // File
+  if (data.replyToMessageId)
+    formData.append("replyToMessageId", data.replyToMessageId);
+
+  return api
+    .post("/rooms/send-message", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
+}
+
+export async function createRoom(
+  data: CreateRoomRequest,
+): Promise<CreateRoomResponse> {
+  return api.post("/rooms/create", data).then((res) => res.data);
 }

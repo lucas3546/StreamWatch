@@ -52,6 +52,8 @@ public class StreamWatchHub : Hub
     {
         var connectionId = GetConnectionId();
         if(string.IsNullOrEmpty(roomId)) throw new HubException("No connection id found");
+
+        var userName = GetUsername();
         
         var room = await _roomService.GetRoomByIdAsync(roomId);
         
@@ -62,6 +64,12 @@ public class StreamWatchHub : Hub
         if(!result.IsSuccess) throw new HubException("Error while adding user session to room");
         
         await Groups.AddToGroupAsync(connectionId, roomId);
+
+        await Clients.Group(roomId).SendAsync("ReceiveMessage", new
+        {
+            Id = Guid.NewGuid().ToString(), 
+            Text = $"{userName ?? "Anon"} has joined to room",
+        });
         
         return room;
     }

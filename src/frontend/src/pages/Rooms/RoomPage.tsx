@@ -1,4 +1,4 @@
-import { useBlocker, useParams } from "react-router";
+import { useParams } from "react-router";
 import RoomSidebar from "../../components/sidebar/Room/RoomSidebar";
 import VideoPlayer from "../../components/player/VideoPlayer";
 import RoomBottomBar from "../../components/bottombar/RoomBottomBar";
@@ -51,10 +51,6 @@ export default function RoomPage() {
         console.log("IsLeader", isLeader);
         console.log(room);
 
-        service.onReceiveMessage((msg) => {
-          setMessages((prev) => [...prev, msg]);
-        });
-
         service.onReconnected((id) => console.log("Reconectado con id:", id));
 
         service.onReconnecting((err) =>
@@ -86,7 +82,7 @@ export default function RoomPage() {
           </div>
         </div>
 
-        <RoomSidebar />
+        {roomId && <RoomSidebar roomId={roomId} />}
       </div>
     </>
   );
