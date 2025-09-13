@@ -8,6 +8,7 @@ public interface IAccountStorageService
 {
     Task<Result<GetPresignedUrlResponse>> GetPresignedUrl(GetPresignedUrlRequest request);
     Task<Result> SetMediaFileUploaded(SetMediaFileUploadedRequest request);
+    Task<Result<UploadImageResponse>> UploadImageAsync(UploadImageRequest request);
     Task<IEnumerable<MediaModel>> GetAllMediaFiles();
     Task<GetStorageOverviewResponse> GetStorageOverview();
 }

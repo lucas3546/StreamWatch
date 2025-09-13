@@ -5,6 +5,7 @@ using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
 using StreamWatch.Core.Cache;
+using StreamWatch.Core.Entities;
 using StreamWatch.Core.Enums;
 using StreamWatch.Core.Errors;
 
@@ -15,14 +16,18 @@ public class RoomService : IRoomService
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
     private readonly IRoomRepository _roomRepository;
+    private readonly IMediaProcessingService _mediaProcessingService;
+    private readonly IStorageService _storageService;
     private readonly SqidsEncoder<int> _sqids;
 
-    public RoomService(IApplicationDbContext context, ICurrentUserService currentUserService, IRoomRepository roomRepository, SqidsEncoder<int> squids)
+    public RoomService(IApplicationDbContext context, ICurrentUserService currentUserService, IRoomRepository roomRepository, SqidsEncoder<int> squids, IMediaProcessingService processingService, IStorageService storageService)
     {
         _context = context;
         _currentUserService = currentUserService;
         _roomRepository = roomRepository;
         _sqids = squids;
+        _mediaProcessingService = processingService;
+        _storageService = storageService;
     }
     
     public async Task<Result<CreateRoomResponse>> CreateRoomAsync(CreateRoomRequest request)
@@ -111,5 +116,6 @@ public class RoomService : IRoomService
         
         return Result.Success();
     }
+    
     
 }

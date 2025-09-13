@@ -1,5 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Api.Extensions;
+using StreamWatch.Api.Hubs;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
@@ -12,10 +15,16 @@ namespace StreamWatch.Api.Controllers.v1;
 public class RoomsController : ControllerBase
 {
     private readonly IRoomService _roomService;
+    private readonly IAccountStorageService _accountStorageService;
+    private readonly IHubContext<StreamWatchHub> _hubContext;
+    private readonly ICurrentUserService _currentUserService;
 
-    public RoomsController(IRoomService roomService)
+    public RoomsController(IRoomService roomService, IAccountStorageService accountStorageService, IHubContext<StreamWatchHub> hubContext, ICurrentUserService currentUserService)
     {
         _roomService = roomService;
+        _accountStorageService = accountStorageService;
+        _hubContext = hubContext;
+        _currentUserService = currentUserService;
     }
     [HttpPost("Create")]
     public async Task<ActionResult<CreateRoomResponse>> Create(CreateRoomRequest request)
@@ -32,4 +41,47 @@ public class RoomsController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpPost("send-message")]
+    [Authorize]
+    public async Task<ActionResult> SendMessageAsync([FromForm] SendMessageRequest request)
+    {
+        var userName = _currentUserService.Name;
+        
+        var room = await _roomService.GetRoomByIdAsync(request.RoomId);
+
+        if (room is null) return NotFound();
+        
+        string? uploadedFileName = null;
+
+        if (request.Image != null)
+        {
+            var uploadImageRequest = new UploadImageRequest(
+                request.Image.FileName,
+                request.Image.OpenReadStream(),
+                true,
+                DateTime.UtcNow.AddMinutes(10)
+            );
+
+            var uploadedFile = await _accountStorageService.UploadImageAsync(uploadImageRequest);
+            if (!uploadedFile.IsSuccess)
+            {
+                return BadRequest(uploadedFile.Error);
+            }
+
+            uploadedFileName = uploadedFile.Data?.FileName;
+        }
+
+        await _hubContext.Clients.Group(request.RoomId).SendAsync("ReceiveMessage", new
+        {
+            Id = Guid.NewGuid().ToString(), 
+            UserName = userName,
+            Text = request.Message,
+            Image = uploadedFileName,
+            ReplyToMessageId = request.ReplyToMessageId
+        });
+        
+        return Ok();
+    }
+    
 }

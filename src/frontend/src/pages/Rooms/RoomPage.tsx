@@ -1,4 +1,4 @@
-import { useBlocker, useParams } from "react-router";
+import { useParams } from "react-router";
 import RoomSidebar from "../../components/sidebar/Room/RoomSidebar";
 import VideoPlayer from "../../components/player/VideoPlayer";
 import RoomBottomBar from "../../components/bottombar/RoomBottomBar";
@@ -64,9 +64,9 @@ export default function RoomPage() {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row h-[calc(100vh-56px)] overflow-hidden">
+      <div className="flex flex-col md:flex-row h-[calc(100vh-56px)] min-h-0  overflow-hidden">
         <div className="flex-1 flex flex-col ">
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 min-h-0  overflow-hidden">
             {room && (
               <VideoPlayer
                 roomState={room}
@@ -82,7 +82,7 @@ export default function RoomPage() {
           </div>
         </div>
 
-        <RoomSidebar />
+        {roomId && <RoomSidebar roomId={roomId} />}
       </div>
     </>
   );
