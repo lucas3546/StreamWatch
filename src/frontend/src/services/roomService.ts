@@ -41,8 +41,8 @@ export interface GetPagedRoomsItem {
   thumbnailUrl: string;
   category: string;
   userCount: number;
-  videoProvider: "YouTube" | "S3" | string; // si pensás soportar más, podés dejarlo como string
-  createdAt: string; // podés usar Date si lo parseás
+  videoProvider: "YouTube" | "S3" | string;
+  createdAt: string;
 }
 
 export interface GetPagedRoomsResponse {

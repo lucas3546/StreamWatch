@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Api.Extensions;
@@ -16,12 +17,14 @@ public class RoomsController : ControllerBase
     private readonly IRoomService _roomService;
     private readonly IAccountStorageService _accountStorageService;
     private readonly IHubContext<StreamWatchHub> _hubContext;
+    private readonly ICurrentUserService _currentUserService;
 
-    public RoomsController(IRoomService roomService, IAccountStorageService accountStorageService, IHubContext<StreamWatchHub> hubContext)
+    public RoomsController(IRoomService roomService, IAccountStorageService accountStorageService, IHubContext<StreamWatchHub> hubContext, ICurrentUserService currentUserService)
     {
         _roomService = roomService;
         _accountStorageService = accountStorageService;
         _hubContext = hubContext;
+        _currentUserService = currentUserService;
     }
     [HttpPost("Create")]
     public async Task<ActionResult<CreateRoomResponse>> Create(CreateRoomRequest request)
@@ -40,8 +43,11 @@ public class RoomsController : ControllerBase
     }
 
     [HttpPost("send-message")]
+    [Authorize]
     public async Task<ActionResult> SendMessageAsync(SendMessageRequest request)
     {
+        var userName = _currentUserService.Name;
+        
         var room = await _roomService.GetRoomByIdAsync(request.RoomId);
 
         if (room is null) return NotFound();
@@ -69,6 +75,7 @@ public class RoomsController : ControllerBase
         await _hubContext.Clients.Group(request.RoomId).SendAsync("ReceiveMessage", new
         {
             Id = Guid.NewGuid().ToString(), 
+            UserName = userName,
             Text = request.Message,
             Image = uploadedFileName,
             ReplyToMessageId = request.ReplyToMessageId

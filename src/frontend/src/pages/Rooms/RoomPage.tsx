@@ -51,6 +51,10 @@ export default function RoomPage() {
         console.log("IsLeader", isLeader);
         console.log(room);
 
+        service.onReceiveMessage((msg) => {
+          setMessages((prev) => [...prev, msg]);
+        });
+
         service.onReconnected((id) => console.log("Reconectado con id:", id));
 
         service.onReconnecting((err) =>

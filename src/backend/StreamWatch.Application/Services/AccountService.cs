@@ -18,6 +18,7 @@ public class AccountService : IAccountService
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly IBackgroundService _backgroundService;
+    
 
     public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService)
     {

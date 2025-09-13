@@ -2,23 +2,83 @@ import { useEffect, useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import RoomChat from "./RoomChat";
 import { type RoomChatMessage } from "./RoomChat";
+import { useSignalR } from "../../../hooks/useSignalR";
+import { roomRealtimeService } from "../../../services/roomRealtimeService";
+import { useUser } from "../../../contexts/UserContext";
+import { FaRegImage } from "react-icons/fa6";
+import { IoIosCloseCircle } from "react-icons/io";
+import { IoMdSend } from "react-icons/io";
+import Icon from "../../icon/Icon";
 
 export default function RoomSidebar() {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const [activeTab, setActiveTab] = useState<"chat" | "users">("chat");
   const [isOpen, setIsOpen] = useState(isMobile);
+  const { user } = useUser();
+  const { connection } = useSignalR();
+  const [file, setFile] = useState<File | null>(null);
   const [messages, setMessages] = useState<RoomChatMessage[]>([
-    { id: "1", text: "Hola!", fromMe: false },
-    { id: "2", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: true },
-    { id: "3", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "4", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "5", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "6", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "7", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "8", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "9", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: false },
-    { id: "10", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: true },
-    { id: "11", text: "¡Hola! ¿Cómo estás? yo bien", fromMe: true },
+    { id: "1", userName: "test", text: "Hola!", fromMe: false },
+    {
+      id: "2",
+      userName: "test",
+      text: "¡Hola! ¿Cómo estás? yo bien",
+      fromMe: true,
+    },
+    {
+      id: "3",
+      userName: "test",
+      text: "¡Hola! ¿Cómo estás? yo bien",
+      fromMe: false,
+    },
+    {
+      id: "4",
+      userName: "test",
+      text: "¡Hola! ¿Cómo estás? yo bien",
+      fromMe: false,
+    },
+    {
+      id: "5",
+      userName: "test",
+      text: "¡Hola! ¿Cómo estás? yo bien",
+      fromMe: false,
+    },
+    {
+      id: "6",
+      userName: "test",
+      text: "¡Hola! ¿Cómo estás? yo bien",
+      fromMe: false,
+    },
+    {
+      id: "7",
+      userName: "test",
+      text: "¡Hola! ¿Cómo estás? yo bien",
+      fromMe: false,
+    },
+    {
+      id: "8",
+      userName: "test",
+      text: "¡Hola! ¿Cómo estás? yo bien",
+      fromMe: false,
+    },
+    {
+      id: "9",
+      userName: "test",
+      text: "¡Hola! ¿Cómo estás? yo bien",
+      fromMe: false,
+    },
+    {
+      id: "10",
+      userName: "test",
+      text: "¡Hola! ¿Cómo estás? yo bien",
+      fromMe: true,
+    },
+    {
+      id: "11",
+      userName: "test",
+      text: "¡Hola! ¿Cómo estás? yo bien",
+      fromMe: true,
+    },
   ]);
 
   //TO DO: Refactorize the entire responsive functionality in this component
@@ -35,6 +95,28 @@ export default function RoomSidebar() {
 
     return () => window.removeEventListener("resize", handleResize);
   }, []);
+
+  useEffect(() => {
+    if (!connection) return;
+
+    const service = roomRealtimeService(connection);
+
+    service.onReceiveMessage((msg) => {
+      console.log(msg);
+      if (user?.name == msg.userName) {
+        msg.fromMe = true;
+      }
+      console.log(msg);
+      setMessages((prev) => [...prev, msg]);
+    });
+  }, [connection]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) setFile(f);
+  };
+
+  const clearPreview = () => setFile(null);
 
   return (
     <div
@@ -82,8 +164,41 @@ export default function RoomSidebar() {
                 <RoomChat messages={messages} />
               </div>
 
-              <div className="absolute left-0 right-0 bottom-0 p-2 border-t border-gray-700 bg-neutral-900">
-                <input className="w-full rounded bg-neutral-800 text-white px-2 py-1" />
+              {file && (
+                <div className="mb-2 flex items-center gap-2 p-2 rounded bg-neutral-800">
+                  <img
+                    src={URL.createObjectURL(file)}
+                    alt="preview"
+                    className="w-12 h-12 object-cover rounded"
+                  />
+                  <span className="text-white text-sm flex-1 truncate">
+                    {file.name}
+                  </span>
+                  <button
+                    onClick={clearPreview}
+                    className="p-1 rounded bg-red-600 hover:bg-red-700"
+                  >
+                    <Icon icon={IoIosCloseCircle}></Icon>
+                  </button>
+                </div>
+              )}
+              <div className="flex items-center gap-1 mt-2 px-1">
+                <input
+                  className="flex-1 rounded bg-neutral-800 text-white px-2 py-1"
+                  placeholder="Escribe un mensaje..."
+                />
+                <label className="w-12 h-8 flex items-center justify-center rounded bg-neutral-700 hover:bg-neutral-600 cursor-pointer">
+                  <Icon icon={FaRegImage} size={18} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </label>
+                <button className="w-12 h-8 flex items-center justify-center rounded bg-neutral-700 hover:bg-neutral-600 cursor-pointer">
+                  <Icon icon={IoMdSend} size={18} />
+                </button>
               </div>
             </div>
           )}

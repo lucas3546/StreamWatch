@@ -102,7 +102,8 @@ public class AccountStorageService : IAccountStorageService
         {
             if (File.Exists(tempVideoPath)) File.Delete(tempVideoPath);
         }
-        
+
+        request.Image.Position = 0;
         //Process and upload thumbnail
         string thumbnailFileName =  "thumb_"+ Guid.NewGuid() + ".webp";
         
