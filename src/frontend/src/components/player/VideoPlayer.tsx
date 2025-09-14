@@ -36,7 +36,7 @@ export default function VideoPlayer({
       onSeeked={onSeeked}
       onPlay={onPlay}
       onPause={onPause}
-      className="h-full w-full"
+      className="max-w-auto h-full aspect-video"
     >
       <MediaProvider />
       <DefaultAudioLayout icons={defaultLayoutIcons} />

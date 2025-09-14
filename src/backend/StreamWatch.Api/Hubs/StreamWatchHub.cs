@@ -67,7 +67,8 @@ public class StreamWatchHub : Hub
 
         await Clients.Group(roomId).SendAsync("ReceiveMessage", new
         {
-            Id = Guid.NewGuid().ToString(), 
+            Id = Guid.NewGuid().ToString(),
+            IsNotification = true,
             Text = $"{userName ?? "Anon"} has joined to room",
         });
         

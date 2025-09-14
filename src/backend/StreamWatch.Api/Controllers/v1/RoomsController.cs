@@ -1,3 +1,4 @@
+using MaxMind.GeoIP2.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -7,6 +8,7 @@ using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
+using StreamWatch.Core.Constants;
 
 namespace StreamWatch.Api.Controllers.v1;
 
@@ -19,23 +21,31 @@ public class RoomsController : ControllerBase
     private readonly IHubContext<StreamWatchHub> _hubContext;
     private readonly ICurrentUserService _currentUserService;
 
-    public RoomsController(IRoomService roomService, IAccountStorageService accountStorageService, IHubContext<StreamWatchHub> hubContext, ICurrentUserService currentUserService)
+    public RoomsController(
+        IRoomService roomService,
+        IAccountStorageService accountStorageService,
+        IHubContext<StreamWatchHub> hubContext,
+        ICurrentUserService currentUserService
+    )
     {
         _roomService = roomService;
         _accountStorageService = accountStorageService;
         _hubContext = hubContext;
         _currentUserService = currentUserService;
     }
+
     [HttpPost("Create")]
     public async Task<ActionResult<CreateRoomResponse>> Create(CreateRoomRequest request)
     {
         var response = await _roomService.CreateRoomAsync(request);
-        
+
         return response.ToActionResult(HttpContext);
     }
 
     [HttpGet("paged")]
-    public async Task<ActionResult<PaginatedList<GetPagedRoomItemResponse>>> GetPaged([FromQuery] GetPagedRoomsRequest request)
+    public async Task<ActionResult<PaginatedList<GetPagedRoomItemResponse>>> GetPaged(
+        [FromQuery] GetPagedRoomsRequest request
+    )
     {
         var response = await _roomService.GetPagedRooms(request);
 
@@ -47,11 +57,26 @@ public class RoomsController : ControllerBase
     public async Task<ActionResult> SendMessageAsync([FromForm] SendMessageRequest request)
     {
         var userName = _currentUserService.Name;
-        
+
+        var role = _currentUserService.Role;
+
+        string? countryCode = null;
+        string? countryName = null;
+        if (role != null && role == Roles.Admin)
+        {
+            countryCode = "staff";
+            countryName = "staff";
+        }
+        else
+        {
+            (countryCode, countryName) = _currentUserService.Country;
+        }
+
         var room = await _roomService.GetRoomByIdAsync(request.RoomId);
 
-        if (room is null) return NotFound();
-        
+        if (room is null)
+            return NotFound();
+
         string? uploadedFileName = null;
 
         if (request.Image != null)
@@ -72,16 +97,22 @@ public class RoomsController : ControllerBase
             uploadedFileName = uploadedFile.Data?.FileName;
         }
 
-        await _hubContext.Clients.Group(request.RoomId).SendAsync("ReceiveMessage", new
-        {
-            Id = Guid.NewGuid().ToString(), 
-            UserName = userName,
-            Text = request.Message,
-            Image = uploadedFileName,
-            ReplyToMessageId = request.ReplyToMessageId
-        });
-        
+        await _hubContext
+            .Clients.Group(request.RoomId)
+            .SendAsync(
+                "ReceiveMessage",
+                new
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    UserName = userName,
+                    CountryCode = countryCode,
+                    CountryName = countryName,
+                    Text = request.Message,
+                    Image = uploadedFileName,
+                    ReplyToMessageId = request.ReplyToMessageId,
+                }
+            );
+
         return Ok();
     }
-    
 }

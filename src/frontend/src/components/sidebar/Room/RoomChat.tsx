@@ -11,12 +11,16 @@ import {
   sendMessage,
   type SendMessageRequest,
 } from "../../../services/roomService";
+import { getUsernameColor } from "../../../utils/userColors";
 
 export interface RoomChatMessage {
   id: string;
   userName: string;
   text: string;
   fromMe: boolean;
+  countryCode: string;
+  countryName: string;
+  isNotification: boolean;
   image?: string | null;
   replyToMessageId?: string | null;
 }
@@ -31,7 +35,42 @@ export default function RoomChat({ roomId }: RoomChatProps) {
   const [file, setFile] = useState<File | null>(null);
   const [inputMessage, setInputMessage] = useState("");
   const [messages, setMessages] = useState<RoomChatMessage[]>([
-    { id: "1", userName: "OtroUsuario", text: "Hola!", fromMe: false },
+    {
+      id: "1",
+      userName: "OtroUsuario",
+      text: "Hola!",
+      countryCode: "ar",
+      countryName: "Argentina",
+      isNotification: false,
+      fromMe: false,
+    },
+    {
+      id: "2",
+      userName: "OtroUsuario2",
+      text: "Que tal!",
+      countryCode: "mx",
+      countryName: "México",
+      isNotification: false,
+      fromMe: false,
+    },
+    {
+      id: "3",
+      userName: "OtroUsuario3",
+      text: "Que tal!",
+      countryCode: "cl",
+      countryName: "Chile",
+      isNotification: false,
+      fromMe: false,
+    },
+    {
+      id: "4",
+      userName: "OtroUsuario2",
+      text: "Que tal!",
+      countryCode: "mx",
+      countryName: "México",
+      isNotification: false,
+      fromMe: false,
+    },
   ]);
   useEffect(() => {
     if (!connection) return;
@@ -81,30 +120,45 @@ export default function RoomChat({ roomId }: RoomChatProps) {
           {messages.map((msg) => (
             <div
               key={msg.id}
-              className={`flex gap-1 ${msg.fromMe ? "flex-row-reverse" : "flex-row"}`}
+              className={`flex gap-1 ${!msg.isNotification && msg.fromMe ? "flex-row-reverse" : "flex-row"}`}
             >
-              <ProfilePic
-                userName={msg.userName}
-                fileName={undefined}
-                size={25}
-              />
-              <div
-                className={`max-w-[70%] px-3 py-1 rounded-lg break-words  ${
-                  msg.fromMe
-                    ? "bg-neutral-600 text-white"
-                    : "bg-neutral-700 text-white"
-                }`}
-              >
-                <p className="text-blue-400">{msg.userName}</p>
-                {msg.image && (
-                  <img
-                    src={PUBLIC_BUCKET_URL + msg.image}
-                    className="rounded-md"
-                  ></img>
-                )}
-
-                {msg.text}
-              </div>
+              {msg.isNotification ? (
+                <div className="text-gray-300 text-center w-full">
+                  {msg.text}
+                </div>
+              ) : (
+                <>
+                  <ProfilePic
+                    userName={msg.userName}
+                    fileName={undefined}
+                    size={25}
+                  />
+                  <div
+                    className={`max-w-[70%] px-3 py-1 rounded-lg break-words ${
+                      msg.fromMe
+                        ? "bg-neutral-600 text-white"
+                        : "bg-neutral-700 text-white"
+                    }`}
+                  >
+                    <div className="flex flex-row items-center gap-2">
+                      <p className={getUsernameColor(msg.userName)}>
+                        {msg.userName}
+                      </p>
+                      <img
+                        src={`/flags/${msg.countryCode}.png`}
+                        title={msg.countryName}
+                      ></img>
+                    </div>
+                    {msg.image && (
+                      <img
+                        src={PUBLIC_BUCKET_URL + msg.image}
+                        className="rounded-md"
+                      />
+                    )}
+                    {msg.text}
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
@@ -127,7 +181,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
           </button>
         </div>
       )}
-      <div className="flex items-center gap-1 mt-2 px-1">
+      <div className="flex items-center gap-1 mt-2 py-2 px-1">
         <input
           className="flex-1 rounded bg-neutral-800 text-white px-2 py-1"
           placeholder="Escribe un mensaje..."
