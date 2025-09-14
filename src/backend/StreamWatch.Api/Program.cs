@@ -30,19 +30,22 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(
-        Path.Combine(Directory.GetCurrentDirectory(), storageOptions.BaseLocalPath, "media")),
-    RequestPath = "/media"
-});
-
+app.UseStaticFiles(
+    new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(
+            Path.Combine(Directory.GetCurrentDirectory(), storageOptions.BaseLocalPath, "media")
+        ),
+        RequestPath = "/media",
+    }
+);
 
 app.UseHangfireDashboard();
 
-RecurringJob.AddOrUpdate<MediaCleanupService>("cleanup",
+RecurringJob.AddOrUpdate<MediaCleanupService>(
+    "cleanup",
     svc => svc.CleanExpiredFiles(),
-    Cron.Hourly 
+    Cron.Hourly
 );
 
 app.MapHub<StreamWatchHub>("api/hubs/streamwatch");

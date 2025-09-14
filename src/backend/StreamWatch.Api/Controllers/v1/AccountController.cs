@@ -11,6 +11,7 @@ namespace StreamWatch.Api.Controllers.v1;
 public class AccountController : ControllerBase
 {
     private readonly IAccountService _accountService;
+
     public AccountController(IAccountService accountService)
     {
         _accountService = accountService;
@@ -35,7 +36,7 @@ public class AccountController : ControllerBase
     public async Task<ActionResult<string>> Login(LoginAccountRequest request)
     {
         var response = await _accountService.AuthenticateAsync(request);
-        
+
         return response.ToActionResult(HttpContext);
     }
 
@@ -43,8 +44,7 @@ public class AccountController : ControllerBase
     public async Task<ActionResult> SetProfilePicture(UpdateProfilePicRequest request)
     {
         var response = await _accountService.SetProfilePictureAsync(request);
-        
+
         return response.ToActionResult(HttpContext);
     }
-    
 }

@@ -2,6 +2,8 @@ using Amazon.Runtime;
 using Amazon.S3;
 using Hangfire;
 using Hangfire.PostgreSql;
+using MaxMind.GeoIP2;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -24,51 +26,58 @@ namespace StreamWatch.Infraestructure;
 
 public static class ConfigureServices
 {
-    public static IServiceCollection AddInfraestructureServices(this IServiceCollection services, IConfiguration configuration)
+    public static IServiceCollection AddInfraestructureServices(
+        this IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         var databaseConnectionString = configuration.GetConnectionString("DefaultConnection");
-        if(databaseConnectionString is null) throw new ArgumentNullException(nameof(databaseConnectionString));
-        
-        
+        if (databaseConnectionString is null)
+            throw new ArgumentNullException(nameof(databaseConnectionString));
+
         services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
-        services.AddDbContext<ApplicationDbContext>((sp, options) =>
-        {
-            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
-            options.UseNpgsql(databaseConnectionString);
-        });
-        services.AddScoped<IApplicationDbContext>(provider => provider.GetRequiredService<ApplicationDbContext>());
-        
-        
+        services.AddDbContext<ApplicationDbContext>(
+            (sp, options) =>
+            {
+                options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+                options.UseNpgsql(databaseConnectionString);
+            }
+        );
+        services.AddScoped<IApplicationDbContext>(provider =>
+            provider.GetRequiredService<ApplicationDbContext>()
+        );
+
         //Redis Stack
         var redisConnectionString = configuration.GetConnectionString("RedisConnection");
 
-        if(string.IsNullOrEmpty(redisConnectionString)) throw new ArgumentNullException(nameof(redisConnectionString));
+        if (string.IsNullOrEmpty(redisConnectionString))
+            throw new ArgumentNullException(nameof(redisConnectionString));
 
         services.AddHostedService<IndexCreationService>();
 
         services.AddSingleton(new RedisConnectionProvider(redisConnectionString));
 
-        
         //Hangfire
         services.AddHangfire(config =>
-            config.UsePostgreSqlStorage(c =>
-                c.UseNpgsqlConnection(databaseConnectionString)));
-        
+            config.UsePostgreSqlStorage(c => c.UseNpgsqlConnection(databaseConnectionString))
+        );
+
         services.AddHangfireServer();
 
-        
         //Configure identity
-        services.AddIdentity<Account, IdentityRole>(options => { }).AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
-        
+        services
+            .AddIdentity<Account, IdentityRole>(options => { })
+            .AddEntityFrameworkStores<ApplicationDbContext>()
+            .AddDefaultTokenProviders();
+
         services.Configure<IdentityOptions>(options =>
         {
             options.Lockout.AllowedForNewUsers = false;
             options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
             options.Lockout.MaxFailedAccessAttempts = 5;
             options.User.RequireUniqueEmail = true;
-            
         });
-        
+
         //Configure R2
         var accessKey = configuration["Storage:S3:AccessKey"];
         var secretKey = configuration["Storage:S3:SecretKey"];
@@ -89,9 +98,16 @@ public static class ConfigureServices
         });
 
         services.AddSingleton<IStorageService, S3StorageService>();
-        
-        
-        
+
+        services.AddSingleton<DatabaseReader>(sp =>
+        {
+            var basePath = AppContext.BaseDirectory;
+
+            var dbPath = Path.Combine(basePath, "GeoIp", "geolite2-country.mmdb");
+
+            return new DatabaseReader(dbPath);
+        });
+
         //Other DI
         services.AddTransient<IIdentityService, IdentityService>();
         services.AddScoped<MediaCleanupService>();
@@ -101,9 +117,8 @@ public static class ConfigureServices
         services.AddScoped<IBackgroundService, HangfireJobService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton(TimeProvider.System);
-        
-        
-        
+        services.AddSingleton<IGeoIpService, GeoIpService>();
+
         return services;
     }
 }

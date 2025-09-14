@@ -36,9 +36,10 @@ export default function VideoPlayer({
       onSeeked={onSeeked}
       onPlay={onPlay}
       onPause={onPause}
-      className="h-full w-full"
+      className="w-full h-full "
     >
-      <MediaProvider />
+      <MediaProvider className="items-center justify-center" />
+
       <DefaultAudioLayout icons={defaultLayoutIcons} />
       <VideoLayout></VideoLayout>
     </MediaPlayer>
