@@ -29,7 +29,7 @@ export default function RoomSidebar({ roomId }: RoomSidebarProps) {
   return (
     <div
       className={`flex-1 h-full md:flex-none md:h-[calc(100vh-56px)] flex flex-col bg-black border-defaultbordercolor border-l transition-all duration-300 overflow-hidden z-10
-        ${isOpen ? "w-full md:w-70" : "w-0"}`}
+        ${isOpen ? " md:w-70" : "w-0"}`}
     >
       {/* Contenido del sidebar */}
       {isOpen && (

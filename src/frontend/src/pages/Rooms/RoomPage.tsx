@@ -66,9 +66,9 @@ export default function RoomPage() {
     <>
       <div className="flex flex-col md:flex-row h-[calc(100vh-56px)] min-h-0  overflow-hidden">
         <div className="flex-1 flex flex-col ">
-          <div className="flex-1 min-h-0  overflow-hidden flex justify-center items-center ">
-            {room && (
-              <div className="h-full w-full aspect-video">
+          <div className="flex-1 min-h-0  overflow-hidden flex justify-center ">
+            <div className="w-full max-w-5xl max-h-full aspect-video">
+              {room && (
                 <VideoPlayer
                   roomState={room}
                   player={player}
@@ -76,8 +76,8 @@ export default function RoomPage() {
                   onPlay={onPlay}
                   onPause={onPause}
                 />
-              </div>
-            )}
+              )}
+            </div>
           </div>
           <div className="h-auto md:h-16">
             <RoomBottomBar />

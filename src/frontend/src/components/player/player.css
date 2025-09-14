@@ -21,11 +21,11 @@
     display: none;
 }
 
-/*
 .player[data-view-type="video"] {
-    aspect-ratio: 16 /9;
+    aspect-ratio: auto;
+    height: 20%;
 }
-*/
+
 .src-buttons {
     display: flex;
     align-items: center;
