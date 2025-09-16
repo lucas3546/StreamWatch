@@ -2,7 +2,8 @@
 @import "@vidstack/react/player/styles/base.css";
 
 @theme {
-    --color-semibackground: #2b2b2b;
+    --color-semibackground: rgb(26, 26, 31);
+    --color-basecolor: rgb(22, 22, 26);
     --color-defaultbordercolor: rgb(60, 60, 60);
 }
 
@@ -13,8 +14,7 @@
 
     color-scheme: light dark;
     color: rgba(255, 255, 255, 0.87);
-    background-color: #242424;
-
+    background-color: rgb(22, 22, 26);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Core.Constants;
+using StreamWatch.Core.Entities;
 using StreamWatch.Core.Identity;
 
 namespace StreamWatch.Infraestructure.Identity;
@@ -34,10 +35,18 @@ public class IdentityService : IIdentityService
         return (result.Errors.Select(x => x.Code), account);
     }
 
+    public async Task<bool> UpdateUserAsync(Account account)
+    {
+        var result = await _userManager.UpdateAsync(account);
+        
+        return result.Succeeded;
+    }
+
+
     public async Task<Account?> FindUserByEmailAsync(string email)
     {
         var user = _userManager.Users.FirstOrDefault(x => x.Email == email);
-        
+
         return user;
     }
     

@@ -15,6 +15,7 @@ import RoomPage from "./pages/Rooms/RoomPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import { SignalRProvider } from "./contexts/SignalRProvider.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
+import TrendingPage from "./pages/TrendingPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -26,7 +27,7 @@ const router = createBrowserRouter([
       </SignalRProvider>
     ),
     children: [
-      { path: "/", element: <HomePage /> },
+      { path: "/", element: <RoomsPage /> },
       { path: "/home", element: <RoomsPage /> },
       { path: "/rooms/create", element: <CreateRoomPage /> },
       { path: "/settings", element: <SettingsPage /> },
@@ -35,8 +36,8 @@ const router = createBrowserRouter([
       { path: "/storage", element: <StoragePage /> },
       { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <LoginPage /> },
+      { path: "/trending", element: <TrendingPage /> },
       { path: "/room/:roomId", element: <RoomPage /> },
-      { path: "/rooms/:category/:order?", element: <RoomsPage /> },
     ],
   },
 ]);

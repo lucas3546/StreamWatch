@@ -29,13 +29,13 @@ public class RoomService : IRoomService
         _mediaProcessingService = processingService;
         _storageService = storageService;
     }
-    
+
     public async Task<Result<CreateRoomResponse>> CreateRoomAsync(CreateRoomRequest request)
     {
         var currentUserId = _currentUserService.Id;
         if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserId cannot be null or empty!");
 
-        
+
         var room = new RoomCache()
         {
             Title = request.Title,
@@ -54,7 +54,7 @@ public class RoomService : IRoomService
             if (_sqids.Decode(request.MediaId) is [var decodedId] && request.MediaId == _sqids.Encode(decodedId))
             {
                 var media = await _context.Media.FindAsync(decodedId);
-            
+
                 room.VideoUrl = media.FileName;
                 room.ThumbnailUrl = media.ThumbnailFileName;
                 room.VideoProvider = "S3";
@@ -63,8 +63,8 @@ public class RoomService : IRoomService
             {
                 return Result<CreateRoomResponse>.Failure(new ValidationError("MediaId is invalid"));
             }
-            
-            
+
+
         }
         else if (request.Provider == RoomVideoProvider.YouTube)
         {
@@ -72,7 +72,7 @@ public class RoomService : IRoomService
             if (platform is null) throw new Exception();
 
             var thumbnailUrl = VideoUrlHelper.GetThumbnailUrl(request.VideoUrl);
-            
+
             room.VideoUrl = request.VideoUrl;
             room.ThumbnailUrl = thumbnailUrl;
             room.VideoProvider = "YouTube";
@@ -81,7 +81,7 @@ public class RoomService : IRoomService
         var roomId = await _roomRepository.SaveAsync(room);
 
         var response = new CreateRoomResponse(roomId);
-        
+
         return Result<CreateRoomResponse>.Success(response);
     }
 
@@ -95,27 +95,28 @@ public class RoomService : IRoomService
         var rooms = await _roomRepository.GetPagedAsync(request.PageNumber, request.PageSize, request.Category, request.IncludeNswf, request.OrderBy);
 
         var totalItems = await _roomRepository.CountAsync();
-        
-        var dtos =  rooms.Select(x => new GetPagedRoomItemResponse(x.Id.ToString(), x.Title, x.Category.ToString(),x.ThumbnailUrl, x.UsersCount, x.VideoProvider.ToString(), x.CreatedAt));
-        
+
+        var dtos = rooms.Select(x => new GetPagedRoomItemResponse(x.Id.ToString(), x.Title, x.Category.ToString(), x.ThumbnailUrl, x.UsersCount, x.VideoProvider.ToString(), x.CreatedAt));
+
         var response = new PaginatedList<GetPagedRoomItemResponse>(dtos, request.PageNumber, request.PageSize, totalItems);
-        
+
         return response;
     }
 
     public async Task<Result> UpdateVideoStateAsync(UpdateVideoStateRequest request)
     {
         var room = await _roomRepository.GetByIdAsync(request.RoomId);
-        if(room is null) return Result.Failure(new NotFoundError("Room not found"));
+        if (room is null) return Result.Failure(new NotFoundError("Room not found"));
 
         room.CurrentVideoTime = request.CurrentTimestamp;
         room.LastLeaderUpdateTime = request.SentAt;
         room.IsPaused = request.IsPaused;
-        
+
         await _roomRepository.UpdateAsync(room);
-        
+
         return Result.Success();
     }
+    
     
     
 }

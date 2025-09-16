@@ -41,7 +41,6 @@ export default function RoomPage() {
     (async () => {
       try {
         const roomData = await service.connectToRoom(roomId);
-
         setRoom(roomData);
 
         if (roomData.leaderAccountId == user?.nameid) {
@@ -60,7 +59,7 @@ export default function RoomPage() {
         console.error("❌ Error al conectar con el room:", err);
       }
     })();
-  }, [connection, roomId, isLeader]);
+  }, [connection, roomId]);
 
   return (
     <>

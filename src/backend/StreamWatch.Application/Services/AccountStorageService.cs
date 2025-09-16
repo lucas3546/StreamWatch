@@ -145,7 +145,7 @@ public class AccountStorageService : IAccountStorageService
         
         await _context.SaveChangesAsync(CancellationToken.None);
         
-        var response = new UploadImageResponse(media.FileName, media.ThumbnailFileName, media.BucketName, media.Size, media.ExpiresAt);
+        var response = new UploadImageResponse(media.FileName, media.ThumbnailFileName, media.BucketName, media.Size, _sqids.Encode(media.Id), media.ExpiresAt);
         
         return Result<UploadImageResponse>.Success(response);
     }

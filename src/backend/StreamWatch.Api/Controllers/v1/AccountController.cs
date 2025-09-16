@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using StreamWatch.Api.Extensions;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Requests;
+using StreamWatch.Core.Errors;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace StreamWatch.Api.Controllers.v1;
@@ -11,10 +12,12 @@ namespace StreamWatch.Api.Controllers.v1;
 public class AccountController : ControllerBase
 {
     private readonly IAccountService _accountService;
+    private readonly IAccountStorageService _accountStorageService;
 
-    public AccountController(IAccountService accountService)
+    public AccountController(IAccountService accountService, IAccountStorageService accountStorageService)
     {
         _accountService = accountService;
+        _accountStorageService = accountStorageService;
     }
 
     [HttpPost("register")]
@@ -43,7 +46,14 @@ public class AccountController : ControllerBase
     [HttpPost("set-profile-pic")]
     public async Task<ActionResult> SetProfilePicture(UpdateProfilePicRequest request)
     {
-        var response = await _accountService.SetProfilePictureAsync(request);
+        string fileName = "profile_pic" + Guid.NewGuid();
+        var uploadRequest = new UploadImageRequest(fileName, request.Picture.OpenReadStream(), true, null);
+
+        var uploadResponse = await _accountStorageService.UploadImageAsync(uploadRequest);
+
+        if (!uploadResponse.IsSuccess || uploadResponse.Data is null) return BadRequest();
+        
+        var response = await _accountService.SetProfilePictureAsync(uploadResponse.Data.MediaId);
 
         return response.ToActionResult(HttpContext);
     }

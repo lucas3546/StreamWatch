@@ -65,7 +65,7 @@ export default function RoomCard({
   return (
     <Link
       to={"/room/" + roomId}
-      className="bg-neutral-950 border border-defaultbordercolor rounded-sm shadow-md overflow-hidden p-2 hover:scale-105 active:scale-105"
+      className="bg-semibackground border border-defaultbordercolor rounded-sm shadow-md overflow-hidden p-2 hover:scale-105 active:scale-105"
     >
       {/* Imagen con aspect ratio 16:9 */}
       <div className="w-full aspect-[4/3] relative">

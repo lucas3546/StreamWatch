@@ -29,16 +29,14 @@ export default function StoragePage() {
 
       <div className="grid gap-2 p-2 grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">
         {videos?.medias.map((x) => (
-          <>
-            <VideoItemCard
-              key={x.fileName}
-              fileName={x.fileName}
-              thumbnailName={x.thumbnailFileName}
-              provider={x.mediaProvider}
-              size={x.size}
-              expirestAt={DateTime.fromISO(x.expiresAt).toUTC()}
-            ></VideoItemCard>
-          </>
+          <VideoItemCard
+            key={x.mediaId}
+            fileName={x.fileName}
+            thumbnailName={x.thumbnailFileName}
+            provider={x.mediaProvider}
+            size={x.size}
+            expirestAt={DateTime.fromISO(x.expiresAt).toUTC()}
+          ></VideoItemCard>
         ))}
       </div>
     </>

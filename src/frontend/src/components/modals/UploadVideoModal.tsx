@@ -8,7 +8,9 @@ import { useState } from "react";
 import { VideoUpload } from "../upload/VideoUpload";
 import {
   generatePresigned,
+  setUploaded,
   type GeneratePresigned,
+  type SetUploadedRequest,
 } from "../../services/storageService";
 import axios from "axios";
 
@@ -38,7 +40,15 @@ export default function UploadVideoModal() {
         },
       });
 
-      console.log("Upload de video completo:", response.status);
+      console.log("Upload de video a S3 completo:", response.status);
+
+      const request: SetUploadedRequest = {
+        mediaId: presignedResponse.mediaId,
+      };
+
+      await setUploaded(request);
+
+      window.location.href = "/storage";
     } catch (err) {
       console.error("Error subiendo video:", err);
     }

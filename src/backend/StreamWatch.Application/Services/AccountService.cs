@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Sqids;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
@@ -18,9 +19,10 @@ public class AccountService : IAccountService
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly IBackgroundService _backgroundService;
-    
+    private readonly SqidsEncoder<int> _sqids;
 
-    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService)
+
+    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService, SqidsEncoder<int> squids)
     {
         _identityService = identityService;
         _jwtService = jwtService;
@@ -29,6 +31,7 @@ public class AccountService : IAccountService
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
         _backgroundService = backgroundService;
+        _sqids = squids;
     }
 
     public async Task<Result<string>> AuthenticateAsync(LoginAccountRequest request)
@@ -71,45 +74,27 @@ public class AccountService : IAccountService
         return Result<string>.Success(token);
     }
 
-    public async Task<Result> SetProfilePictureAsync(UpdateProfilePicRequest request)
+    public async Task<Result> SetProfilePictureAsync(string mediaId)
     {
-        var currentUserName = _currentUserService.Name;
-        if(string.IsNullOrEmpty(currentUserName)) throw new ArgumentNullException("currentUserName cannot be null or empty!");
-        
-        
-        //Process and upload profile pic thumbnail
-        string thumbnailFileName =  "thumb_"+ Guid.NewGuid() + ".webp";
-        
-        Stream thumbnailStream = _mediaProcessingService.ResizeImage(request.Picture.OpenReadStream(), 800, 800);
-        
-        UploadedFile thumb = await _storageService.UploadAsync(thumbnailStream, thumbnailFileName, "image/webp");
-
-        await thumbnailStream.DisposeAsync();
-        
-        //Process and upload original profile pic
-        string profilePicName = "profile_pic" + Guid.NewGuid() + ".webp";
-
-        Stream profilePicStream = _mediaProcessingService.ConvertImageFormat(request.Picture.OpenReadStream());
-        
-        UploadedFile profilePic = await _storageService.UploadAsync(profilePicStream, profilePicName, "image/webp");
-
-        await profilePicStream.DisposeAsync();
-        
-        //Save in database 
-        var media = new Media
+        if (_sqids.Decode(mediaId) is [var decodedId] && mediaId == _sqids.Encode(decodedId))
         {
-            FileName = profilePic.FileName,
-            ThumbnailFileName = thumb.FileName,
-            Size = Convert.ToDecimal(profilePic.Size),
-            BucketName = profilePic.BucketName,
-            ContentType = profilePic.ContentType,
-            Status = MediaStatus.Uploaded
-        };
+            var currentUserName = _currentUserService.Name;
+            if (string.IsNullOrEmpty(currentUserName)) throw new ArgumentNullException("currentUserName cannot be null or empty!");
+
+            var account = await _identityService.FindUserByUserNameAsync(currentUserName);
+
+            if (account is null) return Result.Failure(new NotFoundError("User not found!"));
+
+            account.ProfilePicId = decodedId;
+
+            await _identityService.UpdateUserAsync(account);
+
+            return Result.Success();
+        }
+        else
+        {
+            return Result.Failure(new ValidationError("MediaId is invalid"));
+        }
         
-        await _context.Media.AddAsync(media);
-        
-        await _context.SaveChangesAsync(CancellationToken.None);
-        
-        return Result.Success();
     }
 }
