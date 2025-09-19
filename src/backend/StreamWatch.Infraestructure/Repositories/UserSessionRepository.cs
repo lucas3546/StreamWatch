@@ -51,6 +51,15 @@ public class UserSessionRepository : IUserSessionRepository
         return await _sessions.FirstOrDefaultAsync(x => x.ConnectionId == connectionId);
     }
 
+    public async Task<UserSessionCache?> GetUserSessionByIdAsync(string userId, CancellationToken ct = default)
+    {
+        return await _sessions.FirstOrDefaultAsync(x => x.UserId == userId);
+    }
+
+    public async Task<UserSessionCache?> GetUserSessionByUserNameAsync(string userName, CancellationToken ct = default)
+    {
+        return await _sessions.FirstOrDefaultAsync(x => x.UserName == userName);
+    }
     
     public async Task Remove(UserSessionCache userSessionCache, CancellationToken ct = default)
     {

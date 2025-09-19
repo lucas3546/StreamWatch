@@ -224,6 +224,7 @@ namespace StreamWatch.Infraestructure.Migrations
                     IsRead = table.Column<bool>(type: "boolean", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     Payload = table.Column<string>(type: "text", nullable: false),
+                    FromUserName = table.Column<string>(type: "text", nullable: false),
                     ToAccountId = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),

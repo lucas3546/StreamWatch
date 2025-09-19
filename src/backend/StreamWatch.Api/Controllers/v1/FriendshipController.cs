@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Api.Extensions;
+using StreamWatch.Api.Hubs;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
@@ -13,9 +15,11 @@ namespace StreamWatch.Api.Controllers.v1;
 public class FriendshipController  : ControllerBase
 {
     private readonly IFriendshipService _friendshipService;
-    public FriendshipController(IFriendshipService friendshipService)
+    private readonly IHubContext<StreamWatchHub> _hubContext;
+    public FriendshipController(IFriendshipService friendshipService, IHubContext<StreamWatchHub> hubContext)
     {
         _friendshipService = friendshipService;
+        _hubContext = hubContext;
     }
 
     [HttpPost("requests/send")]

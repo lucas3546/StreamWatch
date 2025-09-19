@@ -56,11 +56,18 @@ public class IdentityService : IIdentityService
         
         return user;
     }
+    
+    public async Task<Account?> FindUserByUserByIdAsync(string userId)
+    {
+        var user = _userManager.Users.FirstOrDefault(x => x.Id == userId);
+        
+        return user;
+    }
 
     public async Task<string?> GetRoleFromUserAsync(Account account)
     {
         var roles = await _userManager.GetRolesAsync(account);
-        
+
         return roles.FirstOrDefault();
     }
     

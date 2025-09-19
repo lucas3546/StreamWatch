@@ -16,6 +16,7 @@ import LoginPage from "./pages/LoginPage.tsx";
 import { SignalRProvider } from "./contexts/SignalRProvider.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import TrendingPage from "./pages/TrendingPage.tsx";
+import FriendsPage from "./pages/FriendsPage.tsx";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,7 @@ const router = createBrowserRouter([
       { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <LoginPage /> },
       { path: "/trending", element: <TrendingPage /> },
+      { path: "/friends", element: <FriendsPage /> },
       { path: "/room/:roomId", element: <RoomPage /> },
     ],
   },

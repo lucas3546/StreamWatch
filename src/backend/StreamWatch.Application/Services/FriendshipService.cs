@@ -38,7 +38,11 @@ public class FriendshipService : IFriendshipService
         if (string.IsNullOrEmpty(currentUserId))
             throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
-        if (currentUserId.Equals(request.UserName))
+        var currentUserName = _currentUserService.Name;
+        if (string.IsNullOrEmpty(currentUserName))
+            throw new ArgumentNullException("currentUserName cannot be null or empty!");    
+
+        if (currentUserName.Equals(request.UserName))
             return Result.Failure(
                 new ValidationError("You cannot send a friend request to yourself.")
             );
@@ -70,7 +74,7 @@ public class FriendshipService : IFriendshipService
         await _context.SaveChangesAsync(CancellationToken.None);
 
         await _eventBus.PublishAsync(
-            new FriendshipCreatedEvent(newFriendship.RequesterId, newFriendship.ReceiverId)
+            new FriendshipCreatedEvent(newFriendship.RequesterId, currentUserName, newFriendship.ReceiverId)
         );
 
         return Result.Success();

@@ -12,7 +12,7 @@ using StreamWatch.Infraestructure.Persistence;
 namespace StreamWatch.Infraestructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250916182152_Initial1")]
+    [Migration("20250918191350_Initial1")]
     partial class Initial1
     {
         /// <inheritdoc />
@@ -252,6 +252,10 @@ namespace StreamWatch.Infraestructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FromUserName")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<bool>("IsRead")

@@ -3,10 +3,12 @@ import Button from "../buttons/Button";
 import Icon from "../icon/Icon";
 import SearchBar from "./searchbar/SearchBar";
 import { GiHamburgerMenu } from "react-icons/gi";
-import { MdNotifications } from "react-icons/md";
-import { type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { Link } from "react-router";
 import { useNavigate } from "react-router";
+import { useSignalR } from "../../hooks/useSignalR";
+import type { NotificationModel } from "../types/NotificationModel";
+import NotificationMenu from "./notifications/NotificationMenu";
 
 interface NavbarProps {
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
@@ -37,7 +39,7 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
         <SearchBar></SearchBar>
       </div>
       <div className="mr-2 gap-2 w-full flex flex-row items-center justify-end">
-        <Icon icon={MdNotifications} />
+        <NotificationMenu></NotificationMenu>
         <Button
           onClick={createRoomButtonClicked}
           className="bg-semibackground flex flex-row gap-1 text-shadow-md hover:bg-gray-700"
