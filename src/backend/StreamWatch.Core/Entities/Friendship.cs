@@ -9,8 +9,8 @@ public class Friendship : BaseEntity
     public string RequesterId { get; set; }
     public Account? Requester { get; set; }
     
-    public string AddresseeId { get; set; }
-    public Account? Addressee { get; set; }
+    public string ReceiverId { get; set; }
+    public Account? Receiver { get; set; }
     
     public FriendshipStatus Status { get; set; } 
     public DateTime RequestDate { get; set; }

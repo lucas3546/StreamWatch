@@ -8,7 +8,10 @@ public interface IUserSessionService
 {
     Task<Result<string>> CreateSessionAsync(CreateSessionRequest request);
     Task<IEnumerable<UserSessionCache>> GetUserSessionsAsync(string roomId);
+    Task<bool> UserHasOtherSessionsInRoomAsync(string userId, string roomId);
     Task<UserSessionCache?> GetUserSessionAsync(string connectionId);
+    Task<UserSessionCache?> GetUserSessionByIdAsync(string userId);
+    Task<UserSessionCache?> GetUserSessionByUserNameAsync(string userName);
     Task<Result> AddToRoom(string connectionId, string roomId);
     Task<Result> EndSessionAsync(string connectionId);
 }

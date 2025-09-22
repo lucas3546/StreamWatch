@@ -26,7 +26,7 @@ public class NotificationController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [SwaggerOperation(Summary = "Get paged notifications", Description = "Get paged notifications from current user")]
-    public async Task<ActionResult<PaginatedList<GetPaginatedNotificationItem>>> GetPagedNotificationsAsync([FromQuery] GetPagedNotificationsRequest request)
+    public async Task<ActionResult<PaginatedList<NotificationModel>>> GetPagedNotificationsAsync([FromQuery] GetPagedNotificationsRequest request)
     {
         var response = await _notificationService.GetPagedNotificationsAsync(request);
 
@@ -41,8 +41,16 @@ public class NotificationController : ControllerBase
     [SwaggerOperation(Summary = "Clear notifications", Description = "Remove all notifications from current user")]
     public async Task<ActionResult> ClearNotifications()
     {
-        var response = await  _notificationService.ClearNotificationsAsync();
-        
+        var response = await _notificationService.ClearNotificationsAsync();
+
+        return response.ToActionResult(HttpContext);
+    }
+
+    [HttpDelete("remove/{notificationId}")]
+    public async Task<ActionResult> RemoveNotification(int notificationId)
+    {
+        var response = await _notificationService.DeleteNotification(notificationId);
+
         return response.ToActionResult(HttpContext);
     }
     

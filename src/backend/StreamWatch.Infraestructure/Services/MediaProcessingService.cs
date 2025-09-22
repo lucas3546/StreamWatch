@@ -7,13 +7,13 @@ using StreamWatch.Application.Common.Interfaces;
 namespace StreamWatch.Infraestructure.Services;
 
 public class MediaProcessingService : IMediaProcessingService
-{ 
+{
     public Stream ResizeImage(Stream inputStream, int width, int height, string format = "webp")
     {
         var image = Image.NewFromStream(inputStream, "", access: Enums.Access.Sequential);
 
         var resized = image.ThumbnailImage(width, height: height);
-        
+
         var outputStream = new MemoryStream();
         var outputBytes = resized.WriteToBuffer($".{format}");
         outputStream.Write(outputBytes);
@@ -21,10 +21,10 @@ public class MediaProcessingService : IMediaProcessingService
 
         image.Dispose();
         resized.Dispose();
-        
+
         return outputStream;
     }
-    
+
     public Stream ConvertImageFormat(Stream inputStream, string format = "webp")
     {
         var image = Image.NewFromStream(inputStream, "", access: Enums.Access.Sequential);
@@ -35,20 +35,26 @@ public class MediaProcessingService : IMediaProcessingService
         outputStream.Position = 0;
 
         image.Dispose();
-        
+
         return outputStream;
     }
-    
+
     public async Task<Stream> GenerateThumbnailStreamAsync(string videoUrl)
     {
         var ms = new MemoryStream();
         Uri uri = new Uri(videoUrl);
-        
+
         await FFMpegArguments
             .FromUrlInput(uri)
-            .OutputToPipe(new StreamPipeSink(ms), options => options
-                    .WithFrameOutputCount(1) // un solo frame
-                    .ForceFormat("webp")    // formato WEBP
+            .OutputToPipe(
+                new StreamPipeSink(ms),
+                options =>
+                    options
+                        .Seek(TimeSpan.FromSeconds(1))
+                        .Resize(600, 800)
+                        .WithFrameOutputCount(1) // un solo frame
+                        .WithVideoCodec("libwebp")
+                        .ForceFormat("webp") // formato WEBP
             )
             .ProcessAsynchronously();
 
@@ -56,7 +62,6 @@ public class MediaProcessingService : IMediaProcessingService
         return ms;
     }
 
-    
     public async Task<Stream> GenerateThumbnailFromFileAsync(string filePath)
     {
         if (!File.Exists(filePath))
@@ -66,17 +71,19 @@ public class MediaProcessingService : IMediaProcessingService
 
         await FFMpegArguments
             .FromFileInput(filePath, verifyExists: true)
-            .OutputToPipe(new StreamPipeSink(outputStream), opt => opt
-                .Seek(TimeSpan.FromSeconds(1))   
-                .Resize(600, 800)                
-                .WithFrameOutputCount(1)         
-                .WithVideoCodec("libwebp")       
-                .ForceFormat("webp"))           
+            .OutputToPipe(
+                new StreamPipeSink(outputStream),
+                opt =>
+                    opt.Seek(TimeSpan.FromSeconds(1))
+                        .Resize(600, 800)
+                        .WithFrameOutputCount(1)
+                        .WithVideoCodec("libwebp")
+                        .ForceFormat("webp")
+            )
             .ProcessAsynchronously();
 
         outputStream.Position = 0;
-        
+
         return outputStream;
     }
-
 }

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Api.Extensions;
+using StreamWatch.Api.Hubs;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
@@ -13,12 +15,14 @@ namespace StreamWatch.Api.Controllers.v1;
 public class FriendshipController  : ControllerBase
 {
     private readonly IFriendshipService _friendshipService;
-    public FriendshipController(IFriendshipService friendshipService)
+    private readonly IHubContext<StreamWatchHub> _hubContext;
+    public FriendshipController(IFriendshipService friendshipService, IHubContext<StreamWatchHub> hubContext)
     {
         _friendshipService = friendshipService;
+        _hubContext = hubContext;
     }
 
-    [HttpPost("invitations/send")]
+    [HttpPost("requests/send")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
@@ -32,13 +36,13 @@ public class FriendshipController  : ControllerBase
         return response.ToActionResult(HttpContext);
     }
 
-    [HttpPut("invitations/accept")]
+    [HttpPut("requests/accept")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [SwaggerOperation(Summary = "Accept friendship invitation", Description = "Accept friendship invitation from another user")]
+    [SwaggerOperation(Summary = "Accept friendship invitation", Description = "Accept friendship request from another user")]
     public async Task<ActionResult> AcceptFriendshipInvitation(AcceptFriendshipInvitationRequest request)
     {
         var response = await _friendshipService.AcceptFriendshipInvitationAsync(request);
@@ -46,13 +50,13 @@ public class FriendshipController  : ControllerBase
         return response.ToActionResult(HttpContext);
     }
     
-    [HttpPut("invitations/decline")]
+    [HttpPut("requests/decline")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [SwaggerOperation(Summary = "Decline friendship invitation", Description = "Decline friendship invitation from another user")]
+    [SwaggerOperation(Summary = "Decline friendship invitation", Description = "Decline friendship request from another user")]
     public async Task<ActionResult> DeclineFriendshipInvitation(DeclineFriendInvitationRequest request)
     {
         var response = await _friendshipService.DeclineFriendshipInvitationAsync(request);
@@ -99,5 +103,6 @@ public class FriendshipController  : ControllerBase
         
         return response.ToActionResult(HttpContext);
     }
+    
 
 }

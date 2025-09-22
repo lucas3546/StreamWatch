@@ -3,14 +3,16 @@ import Avatar from "boring-avatars";
 
 interface ProfilePicProps {
   userName: string | undefined;
-  fileName: string | undefined;
+  fileName?: string | undefined;
   size?: number;
+  isSquare?: boolean;
 }
 
 export default function ProfilePic({
   userName,
   fileName,
   size = 24,
+  isSquare = false,
 }: ProfilePicProps) {
   return (
     <>
@@ -27,6 +29,8 @@ export default function ProfilePic({
           name={userName || "Outgen"}
           colors={["#696358ff", "#b3a79fff", "#ff5252", "#c91e5a", "#3d2922"]}
           variant="bauhaus"
+          square={isSquare}
+          className="rounded-2xl"
         />
       )}
     </>

@@ -162,7 +162,7 @@ namespace StreamWatch.Infraestructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("AddresseeId")
+                    b.Property<string>("ReceiverId")
                         .IsRequired()
                         .HasColumnType("text");
 
@@ -181,7 +181,7 @@ namespace StreamWatch.Infraestructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AddresseeId");
+                    b.HasIndex("ReceiverId");
 
                     b.HasIndex("RequesterId");
 
@@ -251,8 +251,9 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
+                    b.Property<string>("FromUserName")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTimeOffset>("LastModifiedAt")
                         .HasColumnType("timestamp with time zone");
@@ -320,6 +321,9 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<int?>("ProfilePicId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -338,6 +342,8 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.HasIndex("NormalizedUserName")
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex");
+
+                    b.HasIndex("ProfilePicId");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -395,9 +401,9 @@ namespace StreamWatch.Infraestructure.Migrations
 
             modelBuilder.Entity("StreamWatch.Core.Entities.Friendship", b =>
                 {
-                    b.HasOne("StreamWatch.Core.Identity.Account", "Addressee")
+                    b.HasOne("StreamWatch.Core.Identity.Account", "Receiver")
                         .WithMany()
-                        .HasForeignKey("AddresseeId")
+                        .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -407,7 +413,7 @@ namespace StreamWatch.Infraestructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Addressee");
+                    b.Navigation("Receiver");
 
                     b.Navigation("Requester");
                 });
@@ -421,6 +427,15 @@ namespace StreamWatch.Infraestructure.Migrations
                         .IsRequired();
 
                     b.Navigation("ToAccount");
+                });
+
+            modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>
+                {
+                    b.HasOne("StreamWatch.Core.Entities.Media", "ProfilePic")
+                        .WithMany()
+                        .HasForeignKey("ProfilePicId");
+
+                    b.Navigation("ProfilePic");
                 });
 
             modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>

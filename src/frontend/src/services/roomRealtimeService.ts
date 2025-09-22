@@ -1,10 +1,20 @@
 import type { HubConnection } from "@microsoft/signalr";
 import type { RoomState } from "../components/types/RoomState";
 import type { RoomChatMessage } from "../components/sidebar/Room/RoomChat";
+import type { BasicUserRoomModel } from "../components/types/BasicUserRoomModel";
 
 export const roomRealtimeService = (connection: HubConnection) => {
   const connectToRoom = async (roomId: string): Promise<RoomState> => {
     return await connection.invoke<RoomState>("ConnectToRoom", roomId);
+  };
+
+  const getUsersFromRoom = async (
+    roomId: string,
+  ): Promise<BasicUserRoomModel[]> => {
+    return await connection.invoke<BasicUserRoomModel[]>(
+      "GetUsersFromRoom",
+      roomId,
+    );
   };
 
   /*
@@ -32,6 +42,7 @@ export const roomRealtimeService = (connection: HubConnection) => {
 
   return {
     connectToRoom,
+    getUsersFromRoom,
     /*
     onVideoSourceChanged,
     onVideoAddedToPlaylist,

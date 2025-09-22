@@ -16,24 +16,13 @@ interface VideoItemCardProps {
 export default function VideoItemCard({
   fileName,
   thumbnailName,
-  provider,
   size,
   expirestAt,
 }: VideoItemCardProps) {
-  let thumbnailUrl: string;
-  let videoUrl: string;
-  if (provider == "S3") {
-    videoUrl = PUBLIC_BUCKET_URL + fileName;
-    thumbnailUrl = PUBLIC_BUCKET_URL + thumbnailName;
-  } else if (provider == "Local") {
-    videoUrl = BASE_URL + "media" + fileName;
-    thumbnailUrl = BASE_URL + "media" + thumbnailName;
-  }
-
   const handleVideoClick = (event) => {
     event.preventDefault();
 
-    window.location.href = videoUrl;
+    window.location.href = PUBLIC_BUCKET_URL + fileName;
   };
 
   return (
@@ -44,8 +33,7 @@ export default function VideoItemCard({
       <div className="w-full aspect-[4/3] relative">
         <img
           className="w-full h-full object-cover rounded-md opacity-50"
-          src={thumbnailUrl}
-          alt={thumbnailName}
+          src={PUBLIC_BUCKET_URL + thumbnailName}
         />
         <span
           className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-white text-xs font-semibold px-2 py-1 rounded`}

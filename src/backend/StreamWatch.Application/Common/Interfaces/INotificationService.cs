@@ -6,8 +6,10 @@ namespace StreamWatch.Application.Common.Interfaces;
 
 public interface INotificationService
 {
-    Task<Result<PaginatedList<GetPaginatedNotificationItem>>> GetPagedNotificationsAsync(
+    Task<Result<PaginatedList<NotificationModel>>> GetPagedNotificationsAsync(
         GetPagedNotificationsRequest request);
+
+    Task<Result> DeleteNotification(int notificationId);
 
     Task<Result> ClearNotificationsAsync();
 }

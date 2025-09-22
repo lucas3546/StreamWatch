@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StreamWatch.Api.Services;
@@ -111,7 +112,9 @@ public static class ConfigureServices
              });
          });
          
+        services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
 
+        services.AddSingleton<IRealtimeMessengerService, RealtimeMessengerService>();
          
          return services;
      }

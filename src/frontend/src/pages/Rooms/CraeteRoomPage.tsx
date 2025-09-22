@@ -57,6 +57,7 @@ export default function CreateRoomPage() {
     if (provider === "local") {
       const fetchMedia = async () => {
         const medias = await getOverview();
+        console.log(medias);
         setMedias(medias);
       };
       fetchMedia();
@@ -67,9 +68,9 @@ export default function CreateRoomPage() {
     <FormContainer>
       <form
         onSubmit={handleSubmit}
-        className="w-full flex flex-col items-center gap-4 text-white"
+        className="w-full flex flex-col items-center gap-4 text-white overflow-y-auto h-screen"
       >
-        <h2 className="text-3xl mb-11">Create Room</h2>
+        <h2 className="text-3xl ">Create Room</h2>
 
         {/* Title */}
         <label className="w-full">Title</label>

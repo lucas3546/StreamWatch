@@ -1,3 +1,4 @@
+import type { PagedResponse } from "../components/types/PagedResponse";
 import { api } from "./api";
 
 export interface LoginRequest {
@@ -11,10 +12,38 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface SearchPagedUsersRequest {
+  pageNumber: number;
+  pageSize: number;
+  userName: string;
+}
+
 export async function login(data: LoginRequest): Promise<string> {
   return api.post("/account/login", data).then((res) => res.data);
 }
 
 export async function register(data: RegisterRequest): Promise<string> {
   return api.post("/account/register", data).then((res) => res.data);
+}
+
+export interface SearchPagedUsersResponseItem {
+  id: string;
+  userName: string;
+  profilePicThumb: string;
+}
+
+type SearchPagedUsersResponse = PagedResponse<SearchPagedUsersResponseItem>;
+
+export async function searchUsers(req: SearchPagedUsersRequest) {
+  const response = await api.get<SearchPagedUsersResponse>(
+    "/account/search/paged",
+    {
+      params: {
+        PageNumber: req.pageNumber,
+        PageSize: req.pageSize,
+        UserName: req.userName,
+      },
+    },
+  );
+  return response.data;
 }

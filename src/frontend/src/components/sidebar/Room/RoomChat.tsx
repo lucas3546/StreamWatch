@@ -73,7 +73,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
     },
   ]);
   useEffect(() => {
-    if (!connection) return;
+    if (!connection || !user?.name) return;
 
     const handler = (msg: RoomChatMessage) => {
       console.log("Received message:", msg);
@@ -83,10 +83,11 @@ export default function RoomChat({ roomId }: RoomChatProps) {
       setMessages((prev) => [...prev, msg]);
     };
 
+    connection.off("ReceiveMessage");
     connection.on("ReceiveMessage", handler);
 
     return () => {
-      connection.off("ReceiveMessage", handler);
+      connection.off("ReceiveMessage");
     };
   }, [connection, user?.name]);
 

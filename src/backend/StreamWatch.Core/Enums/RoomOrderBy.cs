@@ -5,5 +5,5 @@ public enum RoomOrderBy
     Recent,
     MostUsers,
     DateAsc,
-    DateDesc
+    DateDesc,
 }
