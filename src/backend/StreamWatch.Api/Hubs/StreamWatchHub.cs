@@ -3,6 +3,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Application.Common.Interfaces;
+using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Core.Cache;
 
@@ -144,6 +145,14 @@ public class StreamWatchHub : Hub
                 request.SentAt,
                 request.IsPaused
             );
+    }
+
+    [Authorize]
+    public async Task<IEnumerable<BasicUserRoomModel>> GetUsersFromRoom(string roomId)
+    {
+        var sessions = await _userSessionService.GetUserSessionsAsync(roomId);
+
+        return sessions.Select(x => new BasicUserRoomModel(x.UserId, x.UserName, x.ProfilePicName));;
     }
 
     private string GetConnectionId()

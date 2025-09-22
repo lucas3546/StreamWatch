@@ -10,14 +10,11 @@ namespace StreamWatch.Application.Events.Handlers;
 public class FriendshipCreatedEventHandler : IEventHandler<FriendshipCreatedEvent>
 {
     private readonly IApplicationDbContext _context;
-    private readonly IUserSessionService _userSessionService;
-
     private readonly IRealtimeMessengerService _realtimeMessengerService;
 
-    public FriendshipCreatedEventHandler(IApplicationDbContext context, IUserSessionService userSessionService, IRealtimeMessengerService realtimeMessengerService)
+    public FriendshipCreatedEventHandler(IApplicationDbContext context, IRealtimeMessengerService realtimeMessengerService)
     {
         _context = context;
-        _userSessionService = userSessionService;
         _realtimeMessengerService = realtimeMessengerService;
     }
 

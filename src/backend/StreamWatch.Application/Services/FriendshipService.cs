@@ -54,6 +54,7 @@ public class FriendshipService : IFriendshipService
         var friendship = await _context
             .Friendships.Involving(currentUserId, user.Id)
             .FirstOrDefaultAsync();
+
         if (friendship is not null)
             return Result.Failure(
                 new ValidationError(
@@ -86,31 +87,34 @@ public class FriendshipService : IFriendshipService
         if (string.IsNullOrEmpty(currentUserId))
             throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
-        var friends = await _context
-            .Friendships.AsNoTracking()
-            .FromUser(currentUserId)
-            .Where(f => f.ReceiverId != currentUserId || f.RequesterId != currentUserId)
-            .Select(f =>
-                f.ReceiverId == currentUserId
-                    ? new FriendModel(
-                        f.Requester.UserName,
-                        f.Requester.ProfilePic.FileName,
-                        f.Requester.ProfilePic.ThumbnailFileName,
-                        f.Status.ToString(),
-                        f.ResponseDate
-                    )
-                    : new FriendModel(
-                        f.Receiver.UserName,
-                        f.Receiver.ProfilePic.FileName,
-                        f.Receiver.ProfilePic.ThumbnailFileName,
-                        f.Status.ToString(),
-                        f.ResponseDate
-                    )
+        var friends = await _context.Friendships
+            .AsNoTracking()
+            .Where(f => f.ReceiverId == currentUserId || f.RequesterId == currentUserId && f.Status == FriendshipStatus.Accepted)
+            .Select(f => f.ReceiverId == currentUserId
+                ? new FriendModel(
+                    f.RequesterId,
+                    f.Requester.UserName,
+                    f.Requester.ProfilePic.ThumbnailFileName,
+                    f.RequesterId,
+                    f.Status.ToString(),
+                    f.RequestDate,
+                    f.ResponseDate
+                )
+                : new FriendModel(
+                    f.ReceiverId,
+                    f.Receiver.UserName,
+                    f.Receiver.ProfilePic.ThumbnailFileName,
+                    f.RequesterId,
+                    f.Status.ToString(),
+                    f.RequestDate,
+                    f.ResponseDate
+                )
             )
             .ToListAsync();
 
         return Result<IEnumerable<FriendModel>>.Success(friends);
     }
+
 
     public async Task<Result<PaginatedList<FriendModel>>> GetPagedFriendsAsync(
         GetPagedFriendsRequest request
@@ -129,17 +133,21 @@ public class FriendshipService : IFriendshipService
             .Select(f =>
                 f.ReceiverId == currentUserId
                     ? new FriendModel(
+                        f.RequesterId,
                         f.Requester.UserName,
-                        f.Requester.ProfilePic.FileName,
                         f.Requester.ProfilePic.ThumbnailFileName,
+                        f.RequesterId,
                         f.Status.ToString(),
+                        f.RequestDate,
                         f.ResponseDate
                     )
                     : new FriendModel(
+                        f.ReceiverId,
                         f.Receiver.UserName,
-                        f.Receiver.ProfilePic.FileName,
                         f.Receiver.ProfilePic.ThumbnailFileName,
+                        f.RequesterId,
                         f.Status.ToString(),
+                        f.RequestDate,
                         f.ResponseDate
                     )
             )
@@ -184,6 +192,8 @@ public class FriendshipService : IFriendshipService
         _context.Friendships.Update(friendship);
 
         await _context.SaveChangesAsync(CancellationToken.None);
+
+        await _eventBus.PublishAsync(new AcceptFriendshipInvitationEvent(friendship.RequesterId));
 
         return Result.Success();
     }

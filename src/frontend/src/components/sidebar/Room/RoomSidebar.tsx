@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import RoomChat from "./RoomChat";
+import RoomUsersTab from "./RoomUsersTab";
 
 export interface RoomSidebarProps {
   roomId: string;
@@ -70,7 +71,9 @@ export default function RoomSidebar({ roomId }: RoomSidebarProps) {
               <RoomChat roomId={roomId} />
             </div>
           )}
-          {activeTab === "users" && <div>Aquí va la lista de usuarios</div>}
+          {activeTab === "users" && (
+            <RoomUsersTab roomId={roomId}></RoomUsersTab>
+          )}
         </>
       )}
 

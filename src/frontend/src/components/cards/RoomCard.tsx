@@ -3,6 +3,7 @@ import Icon from "../icon/Icon";
 import { BsPlayFill } from "react-icons/bs";
 import { BiSolidUser } from "react-icons/bi";
 import { Link } from "react-router";
+import { useUser } from "../../contexts/UserContext";
 
 interface RoomCardProps {
   roomId: string;
@@ -20,6 +21,8 @@ export default function RoomCard({
   connectedUsers,
   provider,
 }: RoomCardProps) {
+  const { user } = useUser();
+
   let categoryColor;
   switch (category) {
     case "music":
@@ -62,9 +65,11 @@ export default function RoomCard({
       providerIcon = BsPlayFill;
   }
 
+  const linkUrl = user ? `/room/${roomId}` : "/login";
+
   return (
     <Link
-      to={"/room/" + roomId}
+      to={linkUrl}
       className="bg-semibackground border border-defaultbordercolor rounded-sm shadow-md overflow-hidden p-2 hover:scale-105 active:scale-105"
     >
       {/* Imagen con aspect ratio 16:9 */}

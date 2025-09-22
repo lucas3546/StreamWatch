@@ -1,6 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StreamWatch.Api.Extensions;
 using StreamWatch.Application.Common.Interfaces;
+using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Core.Errors;
 using Swashbuckle.AspNetCore.Annotations;
@@ -52,9 +54,19 @@ public class AccountController : ControllerBase
         var uploadResponse = await _accountStorageService.UploadImageAsync(uploadRequest);
 
         if (!uploadResponse.IsSuccess || uploadResponse.Data is null) return BadRequest();
-        
+
         var response = await _accountService.SetProfilePictureAsync(uploadResponse.Data.MediaId);
 
         return response.ToActionResult(HttpContext);
+    }
+
+
+    [HttpGet("search/paged")]
+    [Authorize]
+    public async Task<ActionResult<PaginatedList<UserSearchResultModel>>> SearchUsers([FromQuery] SearchUsersPagedRequest request)
+    {
+        var response = await _accountService.SearchUsersPagedAsync(request);
+
+        return Ok(response);
     }
 }

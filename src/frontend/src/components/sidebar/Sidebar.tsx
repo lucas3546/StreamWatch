@@ -62,18 +62,21 @@ export default function Sidebar({
         </div>
         {/* Divider */}
         <div className="border-t-1 border-defaultbordercolor w-full"></div>
-        <SidebarItemLink
-          icon={FaUserFriends}
-          label="Friends"
-          href="/friends"
-        ></SidebarItemLink>
-        <SidebarItemLink
-          icon={BiSolidVideos}
-          label="Storage"
-          href="/storage"
-        ></SidebarItemLink>
-        <div className="mt-auto w-full">
-          <div className="border-1 border-defaultbordercolor"></div>
+        {user && (
+          <>
+            <SidebarItemLink
+              icon={FaUserFriends}
+              label="Friends"
+              href="/friends"
+            ></SidebarItemLink>
+            <SidebarItemLink
+              icon={BiSolidVideos}
+              label="Storage"
+              href="/storage"
+            ></SidebarItemLink>
+          </>
+        )}
+        <div className="mt-auto w-full border-t-1 border-t-defaultbordercolor">
           {user ? (
             <>
               <SidebarItemLink

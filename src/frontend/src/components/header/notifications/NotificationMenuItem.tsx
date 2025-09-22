@@ -45,6 +45,19 @@ export default function NotificationMenuItem({
         </span>
       </>
     );
+  } else if (type == "friendrequestaccepted") {
+    icon = <MdMeetingRoom size={30} />;
+    route = "friends";
+    message = (
+      <>
+        <span className="text-white text-sm">
+          <span className="font-bold break-all">
+            @{notificationModel.fromUserName}{" "}
+          </span>
+          has accepted your friend request
+        </span>
+      </>
+    );
   } else {
     icon = <FaUserFriends size={24} className="text-white" />;
     route = "";
