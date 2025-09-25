@@ -25,6 +25,8 @@ public class RoomCache
     [Indexed]
     public string LeaderAccountId { get; set; }
     [Indexed]
+    public string CreatedByAccountId { get; set; }
+    [Indexed]
     public bool IsPaused { get; set; }
     [Indexed]
     public decimal LastLeaderUpdateTime { get; set; }

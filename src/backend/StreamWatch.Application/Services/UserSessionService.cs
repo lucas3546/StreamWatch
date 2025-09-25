@@ -77,16 +77,16 @@ public class UserSessionService : IUserSessionService
         return session;
     }
 
-    public async Task<UserSessionCache?> GetUserSessionByUserNameAsync(string userName)
-    {
-        return await _userSessionRepository.GetUserSessionByUserNameAsync(userName);
-    }
-
-    public async Task<IEnumerable<UserSessionCache>> GetUserSessionsAsync(string roomId)
+    public async Task<IEnumerable<UserSessionCache>> GetUsersFromRoomAsync(string roomId)
     {
         var sessions = await _userSessionRepository.GetUsersFromRoomAsync(roomId);
 
         return sessions;
+    }
+
+    public async Task<UserSessionCache?> GetUserSessionInRoomAsync(string roomId, string userId)
+    {
+        return await _userSessionRepository.FindUserSessionInRoomAsync(roomId, userId);
     }
 
     public async Task<bool> UserHasOtherSessionsInRoomAsync(string userId, string roomId)

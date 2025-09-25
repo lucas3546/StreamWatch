@@ -43,6 +43,7 @@ public class RoomService : IRoomService
             IsPaused = true,
             IsPublic = request.IsPublic,
             LeaderAccountId = currentUserId,
+            CreatedByAccountId = currentUserId,
             LastLeaderUpdateTime = 0,
             CurrentVideoTime = 0,
             CreatedAt = DateTime.UtcNow,
@@ -101,6 +102,19 @@ public class RoomService : IRoomService
         var response = new PaginatedList<GetPagedRoomItemResponse>(dtos, request.PageNumber, request.PageSize, totalItems);
 
         return response;
+    }
+
+    public async Task<Result> ChangeRoomLeader(string leaderId, string roomId)
+    {
+        var room = await _roomRepository.GetByIdAsync(roomId);
+        
+        if (room is null) return Result.Failure(new NotFoundError("Room not found"));
+
+        room.LeaderAccountId = leaderId;
+
+        await _roomRepository.UpdateAsync(room);
+
+        return Result.Success();
     }
 
     public async Task<Result> UpdateVideoStateAsync(UpdateVideoStateRequest request)

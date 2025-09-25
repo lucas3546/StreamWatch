@@ -38,6 +38,11 @@ public class UserSessionRepository : IUserSessionRepository
         return await _sessions.Where(x => x.RoomId == roomId && x.UserId == userId).ToListAsync();
     }
 
+    public async Task<UserSessionCache?> FindUserSessionInRoomAsync(string roomId, string userId)
+    {
+        return await _sessions.FirstOrDefaultAsync(x => x.RoomId == roomId && x.UserId == userId);
+    }
+
     public async Task<UserSessionCache?> GetMostRecentUserSessionFromRoomAsync(string roomId, CancellationToken ct = default)
     {
         return await _sessions
