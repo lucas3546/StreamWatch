@@ -35,6 +35,8 @@ public class RoomService : IRoomService
         var currentUserId = _currentUserService.Id;
         if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserId cannot be null or empty!");
 
+        var currentUserName = _currentUserService.Name;
+        if (string.IsNullOrEmpty(currentUserName)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserName cannot be null or empty!");
 
         var room = new RoomCache()
         {
@@ -43,12 +45,14 @@ public class RoomService : IRoomService
             IsPaused = true,
             IsPublic = request.IsPublic,
             LeaderAccountId = currentUserId,
+            CreatedByAccountId = currentUserId,
             LastLeaderUpdateTime = 0,
             CurrentVideoTime = 0,
             CreatedAt = DateTime.UtcNow,
             UsersCount = 0,
         };
 
+        string videoTitle = "";
         if (request.Provider == RoomVideoProvider.Local)
         {
             if (_sqids.Decode(request.MediaId) is [var decodedId] && request.MediaId == _sqids.Encode(decodedId))
@@ -58,6 +62,7 @@ public class RoomService : IRoomService
                 room.VideoUrl = media.FileName;
                 room.ThumbnailUrl = media.ThumbnailFileName;
                 room.VideoProvider = "S3";
+                videoTitle = media.FileName;
             }
             else
             {
@@ -72,11 +77,15 @@ public class RoomService : IRoomService
             if (platform is null) throw new Exception();
 
             var thumbnailUrl = VideoUrlHelper.GetThumbnailUrl(request.VideoUrl);
-
             room.VideoUrl = request.VideoUrl;
             room.ThumbnailUrl = thumbnailUrl;
             room.VideoProvider = "YouTube";
+            videoTitle = await VideoUrlHelper.GetVideoTitleAsync(request.VideoUrl) ?? "Unknown";
         }
+
+        var playlistItem = new PlaylistVideoItem(room.VideoUrl, videoTitle, room.ThumbnailUrl, room.VideoProvider.ToString(), currentUserId, currentUserName);
+
+        room.PlaylistVideoItems.Add(playlistItem);
 
         var roomId = await _roomRepository.SaveAsync(room);
 
@@ -101,6 +110,19 @@ public class RoomService : IRoomService
         var response = new PaginatedList<GetPagedRoomItemResponse>(dtos, request.PageNumber, request.PageSize, totalItems);
 
         return response;
+    }
+
+    public async Task<Result> ChangeRoomLeader(string leaderId, string roomId)
+    {
+        var room = await _roomRepository.GetByIdAsync(roomId);
+        
+        if (room is null) return Result.Failure(new NotFoundError("Room not found"));
+
+        room.LeaderAccountId = leaderId;
+
+        await _roomRepository.UpdateAsync(room);
+
+        return Result.Success();
     }
 
     public async Task<Result> UpdateVideoStateAsync(UpdateVideoStateRequest request)

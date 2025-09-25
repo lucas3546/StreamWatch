@@ -1,13 +1,9 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import FormContainer from "../../components/forms/FormContainer";
 import { createRoom, type CreateRoomRequest } from "../../services/roomService";
-import {
-  getOverview,
-  type StorageResponse,
-} from "../../services/storageService";
-import { PUBLIC_BUCKET_URL } from "../../utils/config";
 import type { ProblemDetails } from "../../components/types/ProblemDetails";
 import { FieldError } from "../../components/errors/FieldError";
+import MediaSelector from "../../components/media/MediaSelector";
 
 export default function CreateRoomPage() {
   const [title, setTitle] = useState("");
@@ -16,7 +12,6 @@ export default function CreateRoomPage() {
   const [media, setMedia] = useState<string | null>(null);
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [visibility, setVisibility] = useState(true);
-  const [medias, setMedias] = useState<StorageResponse | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<
     string,
     string[]
@@ -52,17 +47,6 @@ export default function CreateRoomPage() {
       }
     }
   };
-
-  useEffect(() => {
-    if (provider === "local") {
-      const fetchMedia = async () => {
-        const medias = await getOverview();
-        console.log(medias);
-        setMedias(medias);
-      };
-      fetchMedia();
-    }
-  }, [provider]);
 
   return (
     <FormContainer>
@@ -124,25 +108,8 @@ export default function CreateRoomPage() {
         ) : (
           <>
             <p className="text-gray-400 w-full">Choose Local Media</p>
-            <div className="max-h-48 overflow-y-auto border border-white rounded-md bg-neutral-800">
-              {medias?.medias.map((item) => (
-                <div
-                  key={item.mediaId}
-                  onClick={() => setMedia(item.mediaId)}
-                  className={`flex items-center gap-2 px-3 py-2 cursor-pointer
-                          hover:bg-neutral-700
-                          ${media === item.mediaId ? "bg-violet-700 border-2 border-white" : ""}`}
-                >
-                  {media === item.mediaId ? <p className="">•</p> : <></>}
-
-                  <img
-                    src={PUBLIC_BUCKET_URL + item.thumbnailFileName}
-                    alt={item.thumbnailFileName}
-                    className="w-8 h-8 object-cover rounded"
-                  />
-                  <span>{item.fileName}</span>
-                </div>
-              ))}
+            <div className="max-h-60 overflow-y-auto border border-white rounded-md bg-neutral-800">
+              <MediaSelector media={media} setMedia={setMedia}></MediaSelector>
             </div>
           </>
         )}

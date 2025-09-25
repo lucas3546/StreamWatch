@@ -1,3 +1,5 @@
+import type { PlaylistVideoItemModel } from "./PlaylistVideoItemModel";
+
 export interface RoomState {
   id: string;
   title: string;
@@ -10,6 +12,7 @@ export interface RoomState {
   isPaused: boolean;
   lastLeaderUpdateTime: number;
   currentVideoTime: number;
+  playlistVideoItems: PlaylistVideoItemModel[];
   createdAt: string;
   usersCount: number;
 }

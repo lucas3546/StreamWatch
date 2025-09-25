@@ -25,6 +25,8 @@ public class RoomCache
     [Indexed]
     public string LeaderAccountId { get; set; }
     [Indexed]
+    public string CreatedByAccountId { get; set; }
+    [Indexed]
     public bool IsPaused { get; set; }
     [Indexed]
     public decimal LastLeaderUpdateTime { get; set; }
@@ -34,4 +36,6 @@ public class RoomCache
     public DateTime CreatedAt { get; set; }
     [Indexed]
     public int UsersCount { get; set; }
+    [Indexed(CascadeDepth = 1)]
+    public List<PlaylistVideoItem> PlaylistVideoItems { get; set; } = new List<PlaylistVideoItem>();
 }

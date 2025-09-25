@@ -11,6 +11,7 @@ public interface IUserSessionRepository
     Task<UserSessionCache?> GetUserSessionByUserNameAsync(string userName, CancellationToken ct = default);
     Task<UserSessionCache?> GetMostRecentUserSessionFromRoomAsync(string roomId, CancellationToken ct = default);
     Task<IEnumerable<UserSessionCache>> FindUserSessionsInRoomAsync(string roomId, string userId);
+    Task<UserSessionCache?> FindUserSessionInRoomAsync(string roomId, string userId);
     Task UpdateAsync(UserSessionCache userSession, CancellationToken ct = default);
     Task Remove(UserSessionCache userSessionCache, CancellationToken ct = default);
 }

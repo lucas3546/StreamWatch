@@ -11,7 +11,8 @@ import {
 import type { NotificationModel } from "../../types/NotificationModel";
 import { useSignalR } from "../../../hooks/useSignalR";
 import { useNavigate } from "react-router";
-
+import { playSound } from "../../../utils/playSound";
+import { toast } from "react-toastify";
 export default function NotificationMenu() {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
@@ -77,6 +78,10 @@ export default function NotificationMenu() {
       console.log("Received notification", notification);
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCounter((prev) => prev + 1);
+      playSound("/sounds/notificationsound.mp3");
+      toast.dark("You have received a new notification!", {
+        position: "bottom-right",
+      });
     });
 
     return () => {

@@ -69,6 +69,25 @@ export function useVideoSync(
     );
   }, [connection, isOwner]);
 
+  useEffect(() => {
+    if (!connection || !isOwner) return;
+
+    const handler = async () => {
+      try {
+        console.log("Sending refresh video state");
+        await sendUpdateVideoState();
+      } catch (err) {
+        console.error("Error al actualizar estado de video:", err);
+      }
+    };
+
+    connection.on("RefreshVideoState", handler);
+
+    return () => {
+      connection.off("RefreshVideoState", handler);
+    };
+  }, [connection, isOwner, sendUpdateVideoState]);
+
   async function onSeeked(detail: number, event: MediaSeekedEvent) {
     console.log(event, "[useVideoSync:onSeeked] Seeked to", detail);
     if (isOwner) {

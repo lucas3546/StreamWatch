@@ -16,6 +16,10 @@ export default function StoragePage() {
     fetchData();
   }, []);
 
+  const onUploadedVideo = () => {
+    window.location.href = "/storage";
+  };
+
   return (
     <>
       <div className="flex-col">
@@ -24,7 +28,9 @@ export default function StoragePage() {
           This is your temporal storage, you can upload videos up to 2gb, and
           will be deleted in 24 hours
         </p>
-        <UploadVideoModal></UploadVideoModal>
+        <button className="bg-blue-600 m-2 p-0.5 rounded-sm cursor-pointer">
+          <UploadVideoModal onUploaded={onUploadedVideo}></UploadVideoModal>
+        </button>
       </div>
 
       <div className="grid gap-2 p-2 grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">

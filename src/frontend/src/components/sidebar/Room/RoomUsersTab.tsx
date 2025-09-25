@@ -5,7 +5,6 @@ import type { BasicUserRoomModel } from "../../types/BasicUserRoomModel";
 import ProfilePic from "../../avatar/ProfilePic";
 import { HiUserAdd } from "react-icons/hi";
 import Icon from "../../icon/Icon";
-import Button from "../../buttons/Button";
 
 interface RoomUsersTabProps {
   roomId: string;

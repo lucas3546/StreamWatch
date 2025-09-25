@@ -22,6 +22,17 @@ public class StreamWatchHub : Hub
 
     public override Task OnConnectedAsync()
     {
+        return base.OnConnectedAsync();
+    }
+
+
+    [Authorize]
+    public async Task<RoomCache> ConnectToRoom(string roomId)
+    {
+        var room = await _roomService.GetRoomByIdAsync(roomId);
+
+        if (room is null) throw new HubException("Room not found");
+
         var userId = GetUserId();
 
         var profilePic = GetProfilePic();
@@ -30,90 +41,29 @@ public class StreamWatchHub : Hub
 
         var connectionId = GetConnectionId();
 
+        //Get if user has a current session in the room
+        var session = await _userSessionService.GetUserSessionInRoomAsync(roomId, userId);
+
+        if (session is not null) throw new HubException("User has another session in the same room"); 
+
+        //Create user session
         var request = new CreateSessionRequest(userName, userId, profilePic, connectionId);
 
-        _userSessionService.CreateSessionAsync(request);
+        await _userSessionService.CreateSessionAsync(request);
 
-        return base.OnConnectedAsync();
-    }
-
-    public override async Task OnDisconnectedAsync(Exception exception)
-    {
-        var connectionId = GetConnectionId();
-
-        var userId = GetUserId();
-
-        var user = await _userSessionService.GetUserSessionAsync(connectionId);
-
-        
-
-        if (!string.IsNullOrEmpty(user.RoomId))
-        {
-            if (
-                userId != null
-                && !await _userSessionService.UserHasOtherSessionsInRoomAsync(userId, user.RoomId)
-            )
-            {
-                await Clients
-                    .Group(user.RoomId)
-                    .SendAsync(
-                        "ReceiveMessage",
-                        new
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            IsNotification = true,
-                            Text = $"{user.UserName} has left the room",
-                        }
-                    );
-            }
-        }
-
-        await _userSessionService.EndSessionAsync(connectionId);
-
-        await base.OnDisconnectedAsync(exception);
-    }
-
-    [Authorize]
-    public async Task<RoomCache> ConnectToRoom(string roomId)
-    {
-        var connectionId = GetConnectionId();
-        if (string.IsNullOrEmpty(roomId))
-            throw new HubException("No connection id found");
-
-        var userName = GetUsername();
-
-        var userId = GetUserId();
-
-        var room = await _roomService.GetRoomByIdAsync(roomId);
-
-        if (room is null)
-            throw new HubException("Room not found");
-
+        //Add user to room
+            
         var result = await _userSessionService.AddToRoom(connectionId, roomId);
 
-        if (!result.IsSuccess)
-            throw new HubException("Error while adding user session to room");
+        if (!result.IsSuccess) throw new HubException("Error while adding user session to room");
 
         await Groups.AddToGroupAsync(connectionId, roomId);
 
-        if (
-            userId != null
-            && !await _userSessionService.UserHasOtherSessionsInRoomAsync(userId, roomId)
-        )
-        {
-            await Clients
-                .Group(roomId)
-                .SendAsync(
-                    "ReceiveMessage",
-                    new
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        IsNotification = true,
-                        Text = $"{userName} has joined to room",
-                    }
-                );
-        }
 
+        //Request to leader to send the actual video state.
+        await Clients.User(room.LeaderAccountId).SendAsync("RefreshVideoState");
+
+        //Return the current room state
         return room;
     }
 
@@ -150,9 +100,22 @@ public class StreamWatchHub : Hub
     [Authorize]
     public async Task<IEnumerable<BasicUserRoomModel>> GetUsersFromRoom(string roomId)
     {
-        var sessions = await _userSessionService.GetUserSessionsAsync(roomId);
+        var sessions = await _userSessionService.GetUsersFromRoomAsync(roomId);
 
         return sessions.Select(x => new BasicUserRoomModel(x.UserId, x.UserName, x.ProfilePicName));;
+    }
+
+    public override async Task OnDisconnectedAsync(Exception exception)
+    {
+        var connectionId = GetConnectionId();
+
+        var session = await _userSessionService.GetUserSessionAsync(connectionId);
+
+        await Clients.Group(session.RoomId).SendAsync("ReceiveMessage",new{Id = Guid.NewGuid().ToString(), IsNotification = true,Text = $"{session.UserName} has left the room",});
+                    
+        await _userSessionService.EndSessionAsync(connectionId);
+
+        await base.OnDisconnectedAsync(exception);
     }
 
     private string GetConnectionId()

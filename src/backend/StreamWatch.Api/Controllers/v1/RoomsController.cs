@@ -105,8 +105,8 @@ public class RoomsController : ControllerBase
                 {
                     Id = Guid.NewGuid().ToString(),
                     UserName = userName,
-                    CountryCode = countryCode,
-                    CountryName = countryName,
+                    CountryCode = "ar",
+                    CountryName = "Argentina",
                     Text = request.Message,
                     Image = uploadedFileName,
                     ReplyToMessageId = request.ReplyToMessageId,

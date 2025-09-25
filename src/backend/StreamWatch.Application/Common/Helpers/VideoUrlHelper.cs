@@ -10,6 +10,7 @@ using System.Web;
 
 public static class VideoUrlHelper
 {
+    private static readonly HttpClient _http = new HttpClient();
     private static readonly Dictionary<string, Regex> Platforms = new()
     {
         { "YouTube", new Regex(@"(youtube\.com|youtu\.be)", RegexOptions.IgnoreCase | RegexOptions.Compiled) },
@@ -44,6 +45,20 @@ public static class VideoUrlHelper
             "YouTube" => ExtractYouTubeId(url),
             _ => null
         };
+    }
+
+    public static async Task<string?> GetVideoTitleAsync(string url)
+    {
+        var html = await _http.GetStringAsync(url);
+
+        var match = Regex.Match(html, @"<title>(.*?)</title>", RegexOptions.Singleline);
+        if (match.Success)
+        {
+            var rawTitle = match.Groups[1].Value;
+            return rawTitle.Replace(" - YouTube", "").Trim();
+        }
+
+        return null;
     }
 
     public static string? GetThumbnailUrl(string url)

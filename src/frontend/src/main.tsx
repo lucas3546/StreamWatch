@@ -17,11 +17,12 @@ import { SignalRProvider } from "./contexts/SignalRProvider.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import TrendingPage from "./pages/TrendingPage.tsx";
 import FriendsPage from "./pages/FriendsPage.tsx";
-
+import { ToastContainer } from "react-toastify";
 const router = createBrowserRouter([
   {
     element: (
       <SignalRProvider>
+        <ToastContainer></ToastContainer>
         <UserProvider>
           <DefaultLayout />
         </UserProvider>
@@ -45,7 +46,5 @@ const router = createBrowserRouter([
 ]);
 
 createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <RouterProvider router={router} />
-  </StrictMode>,
+  <RouterProvider router={router} />,
 );
