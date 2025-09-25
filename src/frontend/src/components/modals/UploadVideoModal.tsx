@@ -14,9 +14,16 @@ import {
 } from "../../services/storageService";
 import axios from "axios";
 
-export default function UploadVideoModal() {
+interface UploadVideoModalProps {
+  onUploaded?: () => void; // callback opcional
+}
+
+export default function UploadVideoModal({
+  onUploaded,
+}: UploadVideoModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleFileSelect = (file: File) => {
     setSelectedVideo(file);
@@ -26,6 +33,8 @@ export default function UploadVideoModal() {
     event?.preventDefault();
     console.log(selectedVideo);
     if (selectedVideo === null) return;
+
+    setIsLoading(true);
 
     const generatePresignedRequest: GeneratePresigned = {
       fileName: selectedVideo.name,
@@ -48,7 +57,10 @@ export default function UploadVideoModal() {
 
       await setUploaded(request);
 
-      window.location.href = "/storage";
+      setIsLoading(false);
+      if (onUploaded !== undefined) onUploaded();
+
+      setIsOpen(false);
     } catch (err) {
       console.error("Error subiendo video:", err);
     }
@@ -56,28 +68,42 @@ export default function UploadVideoModal() {
 
   return (
     <>
-      <button
-        className="bg-sky-700 text-lg rounded-sm px-2 ml-2 mt-1 hover:bg-sky-600"
+      <span
         onClick={() => setIsOpen(true)}
+        className="w-full h-full flex justify-center"
       >
         + Upload
-      </button>
+      </span>
       <Dialog
         open={isOpen}
         onClose={() => setIsOpen(false)}
         className="relative z-50"
       >
         <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-          <DialogPanel className="max-w-lg space-y-4 border-1 border-white bg-neutral-700 p-12 text-center">
+          <DialogPanel className="max-w-lg space-y-4 border-1 border-defaultbordercolor bg-neutral-900 rounded-md p-12 text-center">
             <DialogTitle className="font-bold">Upload Video</DialogTitle>
             <Description>
               Upload video to our servers for display in your rooms
             </Description>
             <VideoUpload onFileSelect={handleFileSelect} />
             <div className="flex gap-4">
-              <button onClick={() => setIsOpen(false)}>Cancel</button>
-              <button onClick={() => setIsOpen(false)}>Deactivate</button>
-              <button onClick={handleUpload}>Upload</button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="bg-neutral-600 rounded-md p-2"
+              >
+                Cancel
+              </button>
+              {isLoading ? (
+                <p>Uplading..</p>
+              ) : (
+                <button
+                  onClick={handleUpload}
+                  className="bg-blue-700
+                -600 rounded-md p-2"
+                >
+                  Upload
+                </button>
+              )}
             </div>
           </DialogPanel>
         </div>

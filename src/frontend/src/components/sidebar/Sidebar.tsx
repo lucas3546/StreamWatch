@@ -32,7 +32,7 @@ export default function Sidebar({
       )}
       <aside
         className={`h-screen md:h-[calc(100vh-56px)] flex flex-col bg-basecolor border-defaultbordercolor border-r-1
-              transition-normal duration-50 overflow-hidden z-50
+              transition-normal duration-50 overflow-y-auto z-50
               fixed top-0 left-0 md:static md:top-auto md:left-auto items-center
               ${sidebarIsOpen ? "w-56" : "w-0"}
             `}
