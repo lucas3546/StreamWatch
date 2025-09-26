@@ -2,6 +2,14 @@ import type { HubConnection } from "@microsoft/signalr";
 import type { RoomState } from "../components/types/RoomState";
 import type { RoomChatMessage } from "../components/sidebar/Room/RoomChat";
 import type { BasicUserRoomModel } from "../components/types/BasicUserRoomModel";
+import type { PlaylistVideoItemModel } from "../components/types/PlaylistVideoItemModel";
+
+export interface AddVideoToPlaylistType {
+  roomId: string;
+  videoUrl: string | null;
+  mediaId: string | null;
+  provider: "YouTube" | "S3" | string;
+}
 
 export const roomRealtimeService = (connection: HubConnection) => {
   const connectToRoom = async (roomId: string): Promise<RoomState> => {
@@ -17,6 +25,12 @@ export const roomRealtimeService = (connection: HubConnection) => {
     );
   };
 
+  const addVideoToPlaylist = async (
+    data: AddVideoToPlaylistType,
+  ): Promise<void> => {
+    return await connection.invoke("AddVideoToPlaylist", data);
+  };
+
   /*
   const onVideoSourceChanged = (handler: (src: string) => void) => {
     connection.on("VideoSourceChanged", handler);
@@ -27,6 +41,12 @@ export const roomRealtimeService = (connection: HubConnection) => {
   };
 
   */
+
+  const onReceiveNewVideoToPlaylist = (
+    handler: (src: PlaylistVideoItemModel) => void,
+  ) => {
+    connection.on("NewPlaylistVideo", handler);
+  };
 
   const onReceiveMessage = (handler: (src: RoomChatMessage) => void) => {
     connection.on("ReceiveMessage", handler);
@@ -43,6 +63,8 @@ export const roomRealtimeService = (connection: HubConnection) => {
   return {
     connectToRoom,
     getUsersFromRoom,
+    addVideoToPlaylist,
+    onReceiveNewVideoToPlaylist,
     /*
     onVideoSourceChanged,
     onVideoAddedToPlaylist,

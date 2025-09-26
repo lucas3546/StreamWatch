@@ -4,18 +4,36 @@ import {
   DialogPanel,
   DialogTitle,
 } from "@headlessui/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { PlaylistVideoItemModel } from "../../types/PlaylistVideoItemModel";
 import PlaylistVideoItem from "./PlaylistVideoItem";
 import Icon from "../../icon/Icon";
 import { MdOutlinePlaylistPlay } from "react-icons/md";
+import AddToPlaylist from "./AddToPlaylistModal";
+import { useSignalR } from "../../../hooks/useSignalR";
+import { roomRealtimeService } from "../../../services/roomRealtimeService";
 
 interface PlaylistModalProps {
   items: PlaylistVideoItemModel[];
+  roomId: string;
 }
 
-export default function PlaylistModal({ items }: PlaylistModalProps) {
+export default function PlaylistModal({ items, roomId }: PlaylistModalProps) {
+  const { connection } = useSignalR();
+  const [playlistItems, setPlaylistItems] =
+    useState<PlaylistVideoItemModel[]>(items);
   const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    if (!connection) return;
+
+    const service = roomRealtimeService(connection);
+
+    service.onReceiveNewVideoToPlaylist((item: PlaylistVideoItemModel) => {
+      console.log("New playlist item received:", item);
+      setPlaylistItems((prev) => [...prev, item]);
+    });
+  }, [connection]);
 
   return (
     <>
@@ -32,10 +50,11 @@ export default function PlaylistModal({ items }: PlaylistModalProps) {
         className="relative z-50"
       >
         <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-          <DialogPanel className="max-w-lg space-y-4 border-1 border-defaultbordercolor bg-basecolor p-5 text-center">
+          <DialogPanel className="max-w-full space-y-4 border-1 border-defaultbordercolor bg-basecolor p-5 text-center">
             <DialogTitle className="font-bold">Playlist</DialogTitle>
+            <AddToPlaylist roomId={roomId}></AddToPlaylist>
             <Description>
-              {items?.map((item) => (
+              {playlistItems?.map((item) => (
                 <PlaylistVideoItem
                   key={item.createdAt}
                   item={item}

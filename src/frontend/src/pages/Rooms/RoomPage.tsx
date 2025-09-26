@@ -80,7 +80,10 @@ export default function RoomPage() {
           </div>
           <div className="h-auto md:h-16">
             {room && (
-              <RoomBottomBar playlistVideos={room?.playlistVideoItems} />
+              <RoomBottomBar
+                roomId={room.id}
+                playlistVideos={room?.playlistVideoItems}
+              />
             )}
           </div>
         </div>

@@ -9,6 +9,7 @@ public interface IRoomService
 {
     Task<Result<CreateRoomResponse>> CreateRoomAsync(CreateRoomRequest request);
     Task<Result> UpdateVideoStateAsync(UpdateVideoStateRequest request);
+    Task<Result<PlaylistVideoItem>> AddVideoToPlaylist(AddVideoToPlaylistRequest request);
     Task<PaginatedList<GetPagedRoomItemResponse>> GetPagedRooms(GetPagedRoomsRequest request);
     Task<Result> ChangeRoomLeader(string leaderId, string roomId);
     Task<RoomCache?> GetRoomByIdAsync(string roomId);

@@ -8,6 +8,7 @@ using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
+using StreamWatch.Core.Cache;
 using StreamWatch.Core.Constants;
 
 namespace StreamWatch.Api.Controllers.v1;
@@ -114,5 +115,15 @@ public class RoomsController : ControllerBase
             );
 
         return Ok();
+    }
+
+    [HttpPost("playlist/add")]
+    public async Task<ActionResult<PlaylistVideoItem>> AddVideoToPlaylist(AddVideoToPlaylistRequest request)
+    {
+        var result = await _roomService.AddVideoToPlaylist(request);
+
+        await _hubContext.Clients.Group(request.RoomId).SendAsync("NewPlaylistVideo", result.Data);
+
+        return result.ToActionResult(HttpContext);
     }
 }

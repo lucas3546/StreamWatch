@@ -18,6 +18,7 @@ export default function PlaylistVideoItem({ item }: PlaylistVideoItemProps) {
     <div
       className={`flex items-center gap-2 px-3 py-2 cursor-pointer border-defaultbordercolor border-1 rounded-sm
               hover:bg-neutral-700`}
+      title={item.videoTitle}
     >
       <Icon icon={FaPlay} size={15}></Icon>
       <img
@@ -25,8 +26,8 @@ export default function PlaylistVideoItem({ item }: PlaylistVideoItemProps) {
         alt={item.thumbnailUrl}
         className="w-8 h-8 object-cover rounded"
       />
-      <span>{item.videoTitle}</span>
-      <span>Added by {item.userName}</span>
+      <span className="truncate">{item.videoTitle}</span>
+      <span className="ml-auto not-only-of-type:text-xs">{item.userName}</span>
     </div>
   );
 }

@@ -4,12 +4,16 @@ import type { PlaylistVideoItemModel } from "../types/PlaylistVideoItemModel";
 
 interface RoomBottomBarProps {
   playlistVideos: PlaylistVideoItemModel[];
+  roomId: string;
 }
 
-export default function RoomBottomBar({ playlistVideos }: RoomBottomBarProps) {
+export default function RoomBottomBar({
+  playlistVideos,
+  roomId,
+}: RoomBottomBarProps) {
   return (
     <div className="flex flex-row  bg-black border-defaultbordercolor h-full w-full ">
-      <PlaylistModal items={playlistVideos}></PlaylistModal>
+      <PlaylistModal roomId={roomId} items={playlistVideos}></PlaylistModal>
     </div>
   );
 }

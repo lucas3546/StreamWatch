@@ -6,6 +6,7 @@ using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Core.Cache;
+using StreamWatch.Core.Enums;
 
 namespace StreamWatch.Api.Hubs;
 
@@ -66,6 +67,7 @@ public class StreamWatchHub : Hub
         //Return the current room state
         return room;
     }
+
 
     [Authorize]
     public async Task UpdateVideoState(UpdateVideoStateRequest request)

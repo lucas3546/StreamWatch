@@ -1,4 +1,5 @@
 import { api } from "./api";
+import type { AddVideoToPlaylistType } from "./roomRealtimeService";
 
 export interface CreateRoomRequest {
   title: string;
@@ -88,4 +89,10 @@ export async function createRoom(
   data: CreateRoomRequest,
 ): Promise<CreateRoomResponse> {
   return api.post("/rooms/create", data).then((res) => res.data);
+}
+
+export async function addVideoToPlaylist(
+  data: AddVideoToPlaylistType,
+): Promise<void> {
+  return api.post("/rooms/playlist/add", data).then((res) => res.data);
 }

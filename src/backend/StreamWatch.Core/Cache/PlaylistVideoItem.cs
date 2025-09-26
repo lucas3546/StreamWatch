@@ -5,6 +5,7 @@ namespace StreamWatch.Core.Cache;
 
 public class PlaylistVideoItem
 {
+    public PlaylistVideoItem(){}
     public PlaylistVideoItem(string videoUrl, string videoTitle, string thumbnailUrl, string provider, string accountId, string userName)
     {
         VideoUrl = videoUrl;

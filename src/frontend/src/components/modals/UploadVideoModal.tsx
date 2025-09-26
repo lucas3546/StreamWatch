@@ -72,7 +72,7 @@ export default function UploadVideoModal({
         onClick={() => setIsOpen(true)}
         className="w-full h-full flex justify-center"
       >
-        + Upload
+        + Upload to Storage
       </span>
       <Dialog
         open={isOpen}
