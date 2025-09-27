@@ -1,16 +1,11 @@
-import {
-  useEffect,
-  type Dispatch,
-  type RefObject,
-  type SetStateAction,
-} from "react";
+import { useEffect, type RefObject } from "react";
 import { useSignalR } from "./useSignalR";
 import type {
   MediaPauseEvent,
   MediaPlayerInstance,
   MediaSeekedEvent,
 } from "@vidstack/react";
-import type { RoomState } from "../components/types/RoomState";
+import { useRoomStore } from "../stores/roomStore";
 
 interface UpdateVideoStateRequest {
   roomId: string;
@@ -19,16 +14,16 @@ interface UpdateVideoStateRequest {
   isPaused: boolean;
 }
 
-export function useVideoSync(
-  playerRef: RefObject<MediaPlayerInstance | null>,
-  isOwner: boolean,
-  room: RoomState | undefined,
-  setRoom: Dispatch<SetStateAction<RoomState | undefined>>,
-) {
+export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
   const { connection } = useSignalR();
+  const playlistItems = useRoomStore((state) => state.playlistItems);
+  const room = useRoomStore((state) => state.room);
+  const setRoom = useRoomStore((state) => state.setRoom);
+  const isLeader = useRoomStore((state) => state.isLeader);
 
   useEffect(() => {
-    if (!connection || isOwner) return;
+    if (!connection) return;
+    if (isLeader === true) return;
 
     connection.on(
       "RoomVideoStateUpdated",
@@ -41,7 +36,7 @@ export function useVideoSync(
           "IsPaused:",
           isPaused,
         );
-
+        console.log(isLeader);
         if (playerRef.current === null) return;
 
         const now = Date.now();
@@ -67,10 +62,33 @@ export function useVideoSync(
         playerRef.current.currentTime = videoTimestamp;
       },
     );
-  }, [connection, isOwner]);
+  }, [connection, isLeader, playerRef]);
 
   useEffect(() => {
-    if (!connection || !isOwner) return;
+    if (!connection) return;
+
+    const handler = (playlistItemId: string) => {
+      const item = playlistItems.find((x) => x.id === playlistItemId);
+      if (!item) return;
+
+      setRoom({
+        ...room!,
+        videoUrl: item.videoUrl,
+        thumbnailUrl: item.thumbnailUrl,
+        videoProvider: item.provider,
+        playlistVideoItems: playlistItems,
+      });
+    };
+
+    connection.on("OnVideoChangedFromPlaylistItem", handler);
+
+    return () => {
+      connection.off("OnVideoChangedFromPlaylistItem", handler);
+    };
+  }, [connection, isLeader, playlistItems, room]);
+
+  useEffect(() => {
+    if (!connection || !isLeader) return;
 
     const handler = async () => {
       try {
@@ -86,25 +104,25 @@ export function useVideoSync(
     return () => {
       connection.off("RefreshVideoState", handler);
     };
-  }, [connection, isOwner, sendUpdateVideoState]);
+  }, [connection, isLeader, sendUpdateVideoState]);
 
   async function onSeeked(detail: number, event: MediaSeekedEvent) {
     console.log(event, "[useVideoSync:onSeeked] Seeked to", detail);
-    if (isOwner) {
+    if (isLeader) {
       await sendUpdateVideoState();
     }
   }
 
   async function onPlay(nativeEvent: MediaPauseEvent) {
     console.log("[useVideoSync:onPlay] Play", nativeEvent);
-    if (isOwner) {
+    if (isLeader) {
       await sendUpdateVideoState();
     }
   }
 
   async function onPause(nativeEvent: MediaPauseEvent) {
     console.log("[useVideoSync:onPause] Paused", nativeEvent);
-    if (isOwner) {
+    if (isLeader) {
       await sendUpdateVideoState();
     }
   }

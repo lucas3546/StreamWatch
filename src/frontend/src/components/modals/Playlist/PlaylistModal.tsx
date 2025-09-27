@@ -64,7 +64,7 @@ export default function PlaylistModal() {
             <AddToPlaylist></AddToPlaylist>
             {playlistItems?.map((item) => (
               <PlaylistVideoItem
-                key={item.createdAt}
+                key={item.id}
                 item={item}
                 onClick={onClickVideoItem}
               ></PlaylistVideoItem>

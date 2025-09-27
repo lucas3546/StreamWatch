@@ -61,6 +61,8 @@ public class StreamWatchHub : Hub
 
         await Groups.AddToGroupAsync(connectionId, roomId);
 
+        await Clients.Group(roomId).SendAsync("ReceiveMessage",new{Id = Guid.NewGuid().ToString(), IsNotification = true,Text = $"{userName} has join to the room",});
+
 
         //Request to leader to send the actual video state.
         await Clients.User(room.LeaderAccountId).SendAsync("RefreshVideoState");

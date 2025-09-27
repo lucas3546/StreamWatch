@@ -14,19 +14,14 @@ import { useRoomStore } from "../../stores/roomStore";
 export default function RoomPage() {
   const setRoom = useRoomStore((state) => state.setRoom);
   const room = useRoomStore((state) => state.room);
-  const setIsLeader = useRoomStore((state) => state.setIsLeader);
   const resetRoomValues = useRoomStore((state) => state.reset);
   const isLeader = useRoomStore((state) => state.isLeader);
+  const setIsLeader = useRoomStore((state) => state.setIsLeader);
   const { roomId } = useParams<{ roomId: string }>();
   const { user } = useUser();
   const { connection, reloadConnection } = useSignalR();
   const player = useRef<MediaPlayerInstance>(null);
-  const { onSeeked, onPlay, onPause } = useVideoSync(
-    player,
-    isLeader,
-    room,
-    setRoom,
-  );
+  const { onSeeked, onPlay, onPause } = useVideoSync(player);
 
   useConfirmNavigation(
     true,
@@ -46,9 +41,14 @@ export default function RoomPage() {
       try {
         const roomData = await service.connectToRoom(roomId);
 
-        setRoom(roomData);
+        if (roomData.leaderAccountId == user?.nameid) {
+          setIsLeader(true);
+        }
 
-        if (roomData.leaderAccountId == user?.nameid) setIsLeader(true);
+        console.log("IS LEADER", isLeader);
+
+        setRoom(roomData);
+        console.log("_-______ASD_ASD_AD_SASD_", isLeader);
 
         service.onReconnected((id) => console.log("Reconectado con id:", id));
 
@@ -59,7 +59,7 @@ export default function RoomPage() {
         console.error("❌ Error al conectar con el room:", err);
       }
     })();
-  }, [connection, roomId]);
+  }, [connection, roomId, isLeader]);
 
   return (
     <>
