@@ -6,19 +6,14 @@ import {
 } from "@headlessui/react";
 import { useState } from "react";
 import MediaSelector from "../../media/MediaSelector";
-import {
-  roomRealtimeService,
-  type AddVideoToPlaylistType,
-} from "../../../services/roomRealtimeService";
+import { type AddVideoToPlaylistType } from "../../../services/roomRealtimeService";
 import { useSignalR } from "../../../hooks/useSignalR";
 import { addVideoToPlaylist } from "../../../services/roomService";
+import { useRoomStore } from "../../../stores/roomStore";
 
-interface AddToPlaylistProps {
-  roomId: string;
-}
-
-export default function AddToPlaylist({ roomId }: AddToPlaylistProps) {
+export default function AddToPlaylist() {
   const { connection } = useSignalR();
+  const room = useRoomStore((state) => state.room);
   const [isOpen, setIsOpen] = useState(false);
   const [provider, setProvider] = useState("youtube");
   const [youtubeUrl, setYoutubeUrl] = useState("");
@@ -27,10 +22,8 @@ export default function AddToPlaylist({ roomId }: AddToPlaylistProps) {
   const AddToPlaylist = async () => {
     if (!connection) return;
 
-    const service = roomRealtimeService(connection);
-
     const request: AddVideoToPlaylistType = {
-      roomId: roomId,
+      roomId: room?.id ?? "",
       provider: provider,
       videoUrl: youtubeUrl,
       mediaId: media,

@@ -1,18 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { roomRealtimeService } from "../../../services/roomRealtimeService";
 import { useSignalR } from "../../../hooks/useSignalR";
-import type { BasicUserRoomModel } from "../../types/BasicUserRoomModel";
 import ProfilePic from "../../avatar/ProfilePic";
 import { HiUserAdd } from "react-icons/hi";
 import Icon from "../../icon/Icon";
+import { useRoomStore } from "../../../stores/roomStore";
 
-interface RoomUsersTabProps {
-  roomId: string;
-}
-
-export default function RoomUsersTab({ roomId }: RoomUsersTabProps) {
+export default function RoomUsersTab() {
   const { connection } = useSignalR();
-  const [users, setUsers] = useState<BasicUserRoomModel[]>([]);
+  const room = useRoomStore((state) => state.room);
+  const roomUsers = useRoomStore((state) => state.roomUsers);
+  const setRoomUsers = useRoomStore((state) => state.setRoomUsers);
 
   useEffect(() => {
     if (!connection) return;
@@ -20,18 +18,18 @@ export default function RoomUsersTab({ roomId }: RoomUsersTabProps) {
     const service = roomRealtimeService(connection);
 
     const fetchUsers = async () => {
-      const basicUsers = await service.getUsersFromRoom(roomId);
+      const basicUsers = await service.getUsersFromRoom(room?.id ?? "");
 
-      setUsers((prev) => [...basicUsers, ...prev]);
+      setRoomUsers(basicUsers);
     };
 
     fetchUsers();
-  }, [roomId, connection]);
+  }, [room?.id, connection]);
 
   return (
     <div>
       <ul>
-        {users.map((user, index) => (
+        {roomUsers.map((user, index) => (
           <li
             key={index}
             className="flex flex-row p-2 text-xl gap-3 bg-neutral-800 items-center"

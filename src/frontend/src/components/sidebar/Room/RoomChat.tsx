@@ -12,6 +12,7 @@ import {
   type SendMessageRequest,
 } from "../../../services/roomService";
 import { getUsernameColor } from "../../../utils/userColors";
+import { useRoomStore } from "../../../stores/roomStore";
 
 export interface RoomChatMessage {
   id: string;
@@ -25,53 +26,15 @@ export interface RoomChatMessage {
   replyToMessageId?: string | null;
 }
 
-export interface RoomChatProps {
-  roomId: string;
-}
-
-export default function RoomChat({ roomId }: RoomChatProps) {
+export default function RoomChat() {
   const { user } = useUser();
   const { connection } = useSignalR();
+  const room = useRoomStore((state) => state.room);
+  const chatMessages = useRoomStore((state) => state.chatMessages);
+  const addChatMessage = useRoomStore((state) => state.addChatMessage);
   const [file, setFile] = useState<File | null>(null);
   const [inputMessage, setInputMessage] = useState("");
-  const [messages, setMessages] = useState<RoomChatMessage[]>([
-    {
-      id: "1",
-      userName: "OtroUsuario",
-      text: "Hola!",
-      countryCode: "ar",
-      countryName: "Argentina",
-      isNotification: false,
-      fromMe: false,
-    },
-    {
-      id: "2",
-      userName: "OtroUsuario2",
-      text: "Que tal!",
-      countryCode: "mx",
-      countryName: "México",
-      isNotification: false,
-      fromMe: false,
-    },
-    {
-      id: "3",
-      userName: "OtroUsuario3",
-      text: "Que tal!",
-      countryCode: "cl",
-      countryName: "Chile",
-      isNotification: false,
-      fromMe: false,
-    },
-    {
-      id: "4",
-      userName: "OtroUsuario2",
-      text: "Que tal!",
-      countryCode: "mx",
-      countryName: "México",
-      isNotification: false,
-      fromMe: false,
-    },
-  ]);
+
   useEffect(() => {
     if (!connection || !user?.name) return;
 
@@ -80,7 +43,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
       if (user?.name === msg.userName) {
         msg.fromMe = true;
       }
-      setMessages((prev) => [...prev, msg]);
+      addChatMessage(msg);
     };
 
     connection.off("ReceiveMessage");
@@ -95,7 +58,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
     e.preventDefault();
 
     const request: SendMessageRequest = {
-      roomId: roomId,
+      roomId: room?.id ?? "",
       message: inputMessage,
       image: file,
       replyToMessageId: "",
@@ -118,7 +81,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
     <>
       <div className="overflow-y-auto p-4 pb-20 min-h-0 h-full">
         <div className="flex-1 overflow-y-auto flex flex-col gap-2">
-          {messages.map((msg) => (
+          {chatMessages.map((msg) => (
             <div
               key={msg.id}
               className={`flex gap-1 ${!msg.isNotification && msg.fromMe ? "flex-row-reverse" : "flex-row"}`}

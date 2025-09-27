@@ -2,22 +2,25 @@ import { useParams } from "react-router";
 import RoomSidebar from "../../components/sidebar/Room/RoomSidebar";
 import VideoPlayer from "../../components/player/VideoPlayer";
 import RoomBottomBar from "../../components/bottombar/RoomBottomBar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { roomRealtimeService } from "../../services/roomRealtimeService";
-import type { RoomState } from "../../components/types/RoomState";
 import { useSignalR } from "../../hooks/useSignalR";
 import type { MediaPlayerInstance } from "@vidstack/react";
 import { useConfirmNavigation } from "../../hooks/useConfirmNavegation";
 import { useUser } from "../../contexts/UserContext";
 import { useVideoSync } from "../../hooks/useVideoSync";
+import { useRoomStore } from "../../stores/roomStore";
 
 export default function RoomPage() {
+  const setRoom = useRoomStore((state) => state.setRoom);
+  const room = useRoomStore((state) => state.room);
+  const setIsLeader = useRoomStore((state) => state.setIsLeader);
+  const resetRoomValues = useRoomStore((state) => state.reset);
+  const isLeader = useRoomStore((state) => state.isLeader);
   const { roomId } = useParams<{ roomId: string }>();
-  const [room, setRoom] = useState<RoomState>();
   const { user } = useUser();
   const { connection, reloadConnection } = useSignalR();
   const player = useRef<MediaPlayerInstance>(null);
-  const [isLeader, setIsLeader] = useState<boolean>(false);
   const { onSeeked, onPlay, onPause } = useVideoSync(
     player,
     isLeader,
@@ -30,6 +33,7 @@ export default function RoomPage() {
     "Estas seguro que deseas salir de la sala?",
     () => {
       if (connection) reloadConnection();
+      resetRoomValues();
     },
   );
 
@@ -41,14 +45,10 @@ export default function RoomPage() {
     (async () => {
       try {
         const roomData = await service.connectToRoom(roomId);
+
         setRoom(roomData);
 
-        if (roomData.leaderAccountId == user?.nameid) {
-          setIsLeader(true);
-        }
-
-        console.log("IsLeader", isLeader);
-        console.log(room);
+        if (roomData.leaderAccountId == user?.nameid) setIsLeader(true);
 
         service.onReconnected((id) => console.log("Reconectado con id:", id));
 
@@ -78,17 +78,10 @@ export default function RoomPage() {
               )}
             </div>
           </div>
-          <div className="h-auto md:h-16">
-            {room && (
-              <RoomBottomBar
-                roomId={room.id}
-                playlistVideos={room?.playlistVideoItems}
-              />
-            )}
-          </div>
+          <div className="h-auto md:h-16">{room && <RoomBottomBar />}</div>
         </div>
 
-        {roomId && <RoomSidebar roomId={roomId} />}
+        {roomId && <RoomSidebar />}
       </div>
     </>
   );

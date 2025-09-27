@@ -3,11 +3,7 @@ import { AiOutlineClose } from "react-icons/ai";
 import RoomChat from "./RoomChat";
 import RoomUsersTab from "./RoomUsersTab";
 
-export interface RoomSidebarProps {
-  roomId: string;
-}
-
-export default function RoomSidebar({ roomId }: RoomSidebarProps) {
+export default function RoomSidebar() {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const [activeTab, setActiveTab] = useState<"chat" | "users">("chat");
   const [isOpen, setIsOpen] = useState(isMobile);
@@ -68,12 +64,10 @@ export default function RoomSidebar({ roomId }: RoomSidebarProps) {
 
           {activeTab === "chat" && (
             <div className="flex-1 flex flex-col min-h-0 bg-neutral-900 text-white relative overflow-hidden">
-              <RoomChat roomId={roomId} />
+              <RoomChat />
             </div>
           )}
-          {activeTab === "users" && (
-            <RoomUsersTab roomId={roomId}></RoomUsersTab>
-          )}
+          {activeTab === "users" && <RoomUsersTab></RoomUsersTab>}
         </>
       )}
 

@@ -1,9 +1,4 @@
-import {
-  Description,
-  Dialog,
-  DialogPanel,
-  DialogTitle,
-} from "@headlessui/react";
+import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
 import { useEffect, useState } from "react";
 import type { PlaylistVideoItemModel } from "../../types/PlaylistVideoItemModel";
 import PlaylistVideoItem from "./PlaylistVideoItem";
@@ -11,17 +6,18 @@ import Icon from "../../icon/Icon";
 import { MdOutlinePlaylistPlay } from "react-icons/md";
 import AddToPlaylist from "./AddToPlaylistModal";
 import { useSignalR } from "../../../hooks/useSignalR";
-import { roomRealtimeService } from "../../../services/roomRealtimeService";
+import {
+  roomRealtimeService,
+  type ChangeVideoFromPlaylistItemType,
+} from "../../../services/roomRealtimeService";
+import { useRoomStore } from "../../../stores/roomStore";
 
-interface PlaylistModalProps {
-  items: PlaylistVideoItemModel[];
-  roomId: string;
-}
-
-export default function PlaylistModal({ items, roomId }: PlaylistModalProps) {
+export default function PlaylistModal() {
   const { connection } = useSignalR();
-  const [playlistItems, setPlaylistItems] =
-    useState<PlaylistVideoItemModel[]>(items);
+  const room = useRoomStore((state) => state.room);
+  const playlistItems = useRoomStore((state) => state.playlistItems);
+  const addPlaylistItem = useRoomStore((state) => state.addPlaylistItem);
+
   const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
@@ -31,9 +27,22 @@ export default function PlaylistModal({ items, roomId }: PlaylistModalProps) {
 
     service.onReceiveNewVideoToPlaylist((item: PlaylistVideoItemModel) => {
       console.log("New playlist item received:", item);
-      setPlaylistItems((prev) => [...prev, item]);
+      addPlaylistItem(item);
     });
   }, [connection]);
+
+  const onClickVideoItem = (itemId: string) => {
+    if (!connection) return;
+
+    const service = roomRealtimeService(connection);
+
+    const request: ChangeVideoFromPlaylistItemType = {
+      roomId: room?.id ?? "",
+      playlistItemId: itemId,
+    };
+
+    service.changeVideoFromPlaylist(request);
+  };
 
   return (
     <>
@@ -52,17 +61,15 @@ export default function PlaylistModal({ items, roomId }: PlaylistModalProps) {
         <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
           <DialogPanel className="max-w-full space-y-4 border-1 border-defaultbordercolor bg-basecolor p-5 text-center">
             <DialogTitle className="font-bold">Playlist</DialogTitle>
-            <AddToPlaylist roomId={roomId}></AddToPlaylist>
-            <Description>
-              {playlistItems?.map((item) => (
-                <PlaylistVideoItem
-                  key={item.createdAt}
-                  item={item}
-                ></PlaylistVideoItem>
-              ))}
-            </Description>
+            <AddToPlaylist></AddToPlaylist>
+            {playlistItems?.map((item) => (
+              <PlaylistVideoItem
+                key={item.createdAt}
+                item={item}
+                onClick={onClickVideoItem}
+              ></PlaylistVideoItem>
+            ))}
             <div className="flex gap-4">
-              <button onClick={() => setIsOpen(false)}>Cancel</button>
               <button onClick={() => setIsOpen(false)}>Close</button>
             </div>
           </DialogPanel>

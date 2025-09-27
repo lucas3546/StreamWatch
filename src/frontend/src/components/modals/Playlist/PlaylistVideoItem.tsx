@@ -5,19 +5,25 @@ import { FaPlay } from "react-icons/fa";
 import Icon from "../../icon/Icon";
 interface PlaylistVideoItemProps {
   item: PlaylistVideoItemModel;
+  onClick: (itemId: string) => void;
 }
 
-export default function PlaylistVideoItem({ item }: PlaylistVideoItemProps) {
+export default function PlaylistVideoItem({
+  item,
+  onClick,
+}: PlaylistVideoItemProps) {
   let thumbUrl = "";
   if (item.provider.toLowerCase() == "youtube") {
     thumbUrl = item.thumbnailUrl;
   } else {
     thumbUrl = PUBLIC_BUCKET_URL + item.thumbnailUrl;
   }
+
   return (
     <div
       className={`flex items-center gap-2 px-3 py-2 cursor-pointer border-defaultbordercolor border-1 rounded-sm
               hover:bg-neutral-700`}
+      onClick={() => onClick(item.id)}
       title={item.videoTitle}
     >
       <Icon icon={FaPlay} size={15}></Icon>

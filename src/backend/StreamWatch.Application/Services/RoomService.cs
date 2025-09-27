@@ -147,6 +147,23 @@ public class RoomService : IRoomService
 
     }
 
+    public async Task<Result> ChangeVideoFromPlaylistItemAsync(ChangeVideoFromPlaylistItemRequest request)
+    {
+        var room = await _roomRepository.GetByIdAsync(request.RoomId);
+        if (room is null) return Result.Failure(new NotFoundError("Room not found!"));
+
+        var videoItem = room.PlaylistVideoItems.FirstOrDefault(x => x.Id == request.PlaylistItemId);
+
+        room.VideoUrl = videoItem.VideoUrl;
+        room.VideoProvider = videoItem.Provider;
+        room.ThumbnailUrl = videoItem.ThumbnailUrl;
+        room.CurrentVideoTime = 0;
+        room.IsPaused = true;
+
+        await _roomRepository.UpdateAsync(room);
+
+        return Result.Success();
+    }
     public async Task<RoomCache?> GetRoomByIdAsync(string roomId)
     {
         return await _roomRepository.GetByIdAsync(roomId);

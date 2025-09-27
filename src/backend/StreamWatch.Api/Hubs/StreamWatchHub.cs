@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
+using StreamWatch.Application.Responses;
 using StreamWatch.Core.Cache;
 using StreamWatch.Core.Enums;
 
@@ -68,6 +69,14 @@ public class StreamWatchHub : Hub
         return room;
     }
 
+    [Authorize]
+    public async Task ChangeVideoRoomFromPlaylistItem(ChangeVideoFromPlaylistItemRequest request)
+    {
+        await _roomService.ChangeVideoFromPlaylistItemAsync(request);
+
+        await Clients.Group(request.RoomId).SendAsync("OnVideoChangedFromPlaylistItem", request.PlaylistItemId);
+    }
+
 
     [Authorize]
     public async Task UpdateVideoState(UpdateVideoStateRequest request)
@@ -89,14 +98,7 @@ public class StreamWatchHub : Hub
         if (!result.IsSuccess)
             throw new HubException("Error while updating video state");
 
-        await Clients
-            .Group(request.RoomId)
-            .SendAsync(
-                "RoomVideoStateUpdated",
-                request.CurrentTimestamp,
-                request.SentAt,
-                request.IsPaused
-            );
+        await Clients.Group(request.RoomId).SendAsync("RoomVideoStateUpdated",request.CurrentTimestamp,request.SentAt,request.IsPaused);
     }
 
     [Authorize]

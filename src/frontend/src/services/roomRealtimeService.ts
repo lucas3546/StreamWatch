@@ -11,6 +11,11 @@ export interface AddVideoToPlaylistType {
   provider: "YouTube" | "S3" | string;
 }
 
+export interface ChangeVideoFromPlaylistItemType {
+  roomId: string;
+  playlistItemId: string;
+}
+
 export const roomRealtimeService = (connection: HubConnection) => {
   const connectToRoom = async (roomId: string): Promise<RoomState> => {
     return await connection.invoke<RoomState>("ConnectToRoom", roomId);
@@ -29,6 +34,12 @@ export const roomRealtimeService = (connection: HubConnection) => {
     data: AddVideoToPlaylistType,
   ): Promise<void> => {
     return await connection.invoke("AddVideoToPlaylist", data);
+  };
+
+  const changeVideoFromPlaylist = async (
+    data: ChangeVideoFromPlaylistItemType,
+  ): Promise<void> => {
+    return await connection.invoke("ChangeVideoRoomFromPlaylistItem", data);
   };
 
   /*
@@ -65,6 +76,7 @@ export const roomRealtimeService = (connection: HubConnection) => {
     getUsersFromRoom,
     addVideoToPlaylist,
     onReceiveNewVideoToPlaylist,
+    changeVideoFromPlaylist,
     /*
     onVideoSourceChanged,
     onVideoAddedToPlaylist,
