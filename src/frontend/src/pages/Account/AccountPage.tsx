@@ -2,6 +2,7 @@ import FormContainer from "../../components/forms/FormContainer";
 import { Link } from "react-router";
 import { useUser } from "../../contexts/UserContext";
 import ProfilePic from "../../components/avatar/ProfilePic";
+import ChangeUsernameForm from "../../components/forms/ChangeUsernameForm";
 
 export default function AccountPage() {
   const { user } = useUser();
@@ -20,20 +21,22 @@ export default function AccountPage() {
         </div>
 
         <div className="border-t-1 m-2 border-defaultbordercolor w-full"></div>
-        <Link className="" to="/account/change-avatar">
-          Change Username
-        </Link>
-        <div className="border-t-1 m-2 border-defaultbordercolor w-full"></div>
-        <Link className="" to="/account/change-avatar">
-          Change Avatar
-        </Link>
+        <ChangeUsernameForm></ChangeUsernameForm>
         <div className="border-t-1 m-2 border-defaultbordercolor w-full"></div>
         <Link className="" to="/account/change-avatar">
           Change Password
         </Link>
         <div className="border-t-1 m-2 border-defaultbordercolor w-full"></div>
+
+        <Link className="" to="/account/change-avatar">
+          Change Avatar
+        </Link>
+        <div className="border-t-1 m-2 border-defaultbordercolor w-full"></div>
         <div className="flex items-center gap-2">
-          <button className="bg-neutral-800 p-2 rounded-md hover:bg-neutral-600">
+          <button
+            className="bg-neutral-800 p-2 rounded-md hover:bg-neutral-600"
+            onClick={() => localStorage.removeItem("jwt")}
+          >
             Logout
           </button>
           <button className="bg-red-900 p-2 rounded-md hover:bg-red-600">

@@ -30,9 +30,8 @@ export default function LoginPage() {
     };
 
     try {
-      const token = await login(data);
-      console.log(token);
-      setJwt(token);
+      const response = await login(data);
+      setJwt(response.token);
       window.location.href = "/";
     } catch (err) {
       const problem = err as ProblemDetails;

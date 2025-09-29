@@ -1,12 +1,15 @@
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
+using StreamWatch.Application.Responses;
 
 namespace StreamWatch.Application.Common.Interfaces;
 
 public interface IAccountService
 {
-    Task<Result<string>> AuthenticateAsync(LoginAccountRequest request);
-    Task<Result<string>> RegisterAsync(RegisterAccountRequest request);
+    Task<Result<AuthenticateAccountResponse>> AuthenticateAsync(LoginAccountRequest request);
+    Task<Result<RegisterAccountResponse>> RegisterAsync(RegisterAccountRequest request);
+    Task<Result<RefreshTokenResponse>> RefreshToken(string refreshToken);
     Task<Result> SetProfilePictureAsync(string mediaId);
+    Task<Result> ChangeUsernameAsync(string newUsername);
     Task<PaginatedList<UserSearchResultModel>> SearchUsersPagedAsync(SearchUsersPagedRequest request);
 }

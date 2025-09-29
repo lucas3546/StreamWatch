@@ -23,45 +23,51 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
 
   useEffect(() => {
     if (!connection) return;
-    if (isLeader === true) return;
 
-    connection.on(
-      "RoomVideoStateUpdated",
-      (videoTimestamp: number, sentAt: number, isPaused: boolean) => {
-        console.log(
-          "RoomVideoStateUpdated obtained",
-          "videoTimestamp:" + videoTimestamp,
-          "SentFromLeaderAt:",
-          sentAt,
-          "IsPaused:",
-          isPaused,
-        );
-        console.log(isLeader);
-        if (playerRef.current === null) return;
+    const handler = (
+      videoTimestamp: number,
+      sentAt: number,
+      isPaused: boolean,
+    ) => {
+      console.log("RoomVideoStateUpdated", {
+        videoTimestamp,
+        sentAt,
+        isPaused,
+      });
+      console.log("isLeader at event time:", isLeader);
 
-        const now = Date.now();
-        const latency = (now - sentAt) / 1000;
+      if (isLeader) {
+        return;
+      }
 
-        const estimatedTime = isPaused
-          ? videoTimestamp
-          : videoTimestamp + latency;
+      if (playerRef.current === null) return;
 
-        const drift = estimatedTime - playerRef.current?.currentTime;
-        if (Math.abs(drift) > 0.5) {
-          playerRef.current.currentTime = estimatedTime;
+      const now = Date.now();
+      const latency = (now - sentAt) / 1000;
+
+      const estimatedTime = isPaused
+        ? videoTimestamp
+        : videoTimestamp + latency;
+
+      const drift = estimatedTime - playerRef.current.currentTime;
+      if (Math.abs(drift) > 0.5) {
+        playerRef.current.currentTime = estimatedTime;
+      }
+
+      if (playerRef.current.paused !== isPaused) {
+        if (isPaused) {
+          playerRef.current.pause();
+        } else {
+          playerRef.current.play();
         }
+      }
+    };
 
-        if (playerRef.current.paused !== isPaused) {
-          if (isPaused) {
-            playerRef.current.pause();
-          } else {
-            playerRef.current.play();
-          }
-        }
+    connection.on("RoomVideoStateUpdated", handler);
 
-        playerRef.current.currentTime = videoTimestamp;
-      },
-    );
+    return () => {
+      connection.off("RoomVideoStateUpdated", handler);
+    };
   }, [connection, isLeader, playerRef]);
 
   useEffect(() => {

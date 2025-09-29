@@ -76,6 +76,7 @@ namespace StreamWatch.Infraestructure.Migrations
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
                     ProfilePicId = table.Column<int>(type: "integer", nullable: true),
+                    RefreshToken = table.Column<string>(type: "text", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -221,7 +222,6 @@ namespace StreamWatch.Infraestructure.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    IsRead = table.Column<bool>(type: "boolean", nullable: false),
                     Type = table.Column<int>(type: "integer", nullable: false),
                     Payload = table.Column<string>(type: "text", nullable: false),
                     FromUserName = table.Column<string>(type: "text", nullable: false),

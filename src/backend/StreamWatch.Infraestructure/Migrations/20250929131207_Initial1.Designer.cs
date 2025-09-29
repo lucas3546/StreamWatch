@@ -12,7 +12,7 @@ using StreamWatch.Infraestructure.Persistence;
 namespace StreamWatch.Infraestructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250918191350_Initial1")]
+    [Migration("20250929131207_Initial1")]
     partial class Initial1
     {
         /// <inheritdoc />
@@ -258,9 +258,6 @@ namespace StreamWatch.Infraestructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTimeOffset>("LastModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
@@ -329,6 +326,9 @@ namespace StreamWatch.Infraestructure.Migrations
 
                     b.Property<int?>("ProfilePicId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");

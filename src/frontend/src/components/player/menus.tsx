@@ -17,6 +17,7 @@ import {
 } from "@vidstack/react/icons";
 
 import { buttonClass, tooltipClass } from "./buttons";
+import VideoQualitySubmenu from "./VideoQualitySubmenu";
 
 export interface SettingsProps {
   placement: MenuPlacement;
@@ -44,6 +45,7 @@ export function Settings({ placement, tooltipPlacement }: SettingsProps) {
       </Tooltip.Root>
       <Menu.Content className={menuClass} placement={placement}>
         <CaptionSubmenu />
+        <VideoQualitySubmenu></VideoQualitySubmenu>
       </Menu.Content>
     </Menu.Root>
   );

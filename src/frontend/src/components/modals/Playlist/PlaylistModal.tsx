@@ -47,7 +47,7 @@ export default function PlaylistModal() {
   return (
     <>
       <button
-        className="bg-neutral-700 text-sm rounded-sm flex items-center px-2 ml-2 mt-1 hover:bg-sky-600"
+        className="bg-neutral-700 text-sm rounded-sm flex items-center px-2 ml-2 mt-1 cursor-pointer hover:bg-sky-600"
         onClick={() => setIsOpen(true)}
       >
         <Icon icon={MdOutlinePlaylistPlay} />
@@ -62,13 +62,16 @@ export default function PlaylistModal() {
           <DialogPanel className="max-w-full space-y-4 border-1 border-defaultbordercolor bg-basecolor p-5 text-center">
             <DialogTitle className="font-bold">Playlist</DialogTitle>
             <AddToPlaylist></AddToPlaylist>
-            {playlistItems?.map((item) => (
-              <PlaylistVideoItem
-                key={item.id}
-                item={item}
-                onClick={onClickVideoItem}
-              ></PlaylistVideoItem>
-            ))}
+            <div className="overflow-y-auto max-h-64 flex flex-col gap-2">
+              {playlistItems?.map((item) => (
+                <PlaylistVideoItem
+                  key={item.id}
+                  item={item}
+                  onClick={onClickVideoItem}
+                  currentPlayingVideoUrl={room?.videoUrl ? room.videoUrl : ""}
+                ></PlaylistVideoItem>
+              ))}
+            </div>
             <div className="flex gap-4">
               <button onClick={() => setIsOpen(false)}>Close</button>
             </div>

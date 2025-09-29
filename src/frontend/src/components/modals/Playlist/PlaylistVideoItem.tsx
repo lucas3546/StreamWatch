@@ -3,20 +3,26 @@ import type { PlaylistVideoItemModel } from "../../types/PlaylistVideoItemModel"
 import { PUBLIC_BUCKET_URL } from "../../../utils/config";
 import { FaPlay } from "react-icons/fa";
 import Icon from "../../icon/Icon";
+import { FaPause } from "react-icons/fa";
 interface PlaylistVideoItemProps {
   item: PlaylistVideoItemModel;
+  currentPlayingVideoUrl: string;
   onClick: (itemId: string) => void;
 }
 
 export default function PlaylistVideoItem({
   item,
+  currentPlayingVideoUrl,
   onClick,
 }: PlaylistVideoItemProps) {
   let thumbUrl = "";
+  let videoUrl = "";
   if (item.provider.toLowerCase() == "youtube") {
     thumbUrl = item.thumbnailUrl;
+    videoUrl = item.videoUrl;
   } else {
     thumbUrl = PUBLIC_BUCKET_URL + item.thumbnailUrl;
+    videoUrl = PUBLIC_BUCKET_URL + item.videoUrl;
   }
 
   return (
@@ -26,7 +32,12 @@ export default function PlaylistVideoItem({
       onClick={() => onClick(item.id)}
       title={item.videoTitle}
     >
-      <Icon icon={FaPlay} size={15}></Icon>
+      {videoUrl === currentPlayingVideoUrl ? (
+        <Icon icon={FaPause} size={15}></Icon>
+      ) : (
+        <Icon icon={FaPlay} size={15}></Icon>
+      )}
+
       <img
         src={thumbUrl}
         alt={item.thumbnailUrl}

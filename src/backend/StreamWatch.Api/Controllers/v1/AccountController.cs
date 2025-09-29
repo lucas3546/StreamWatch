@@ -4,6 +4,7 @@ using StreamWatch.Api.Extensions;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
+using StreamWatch.Application.Responses;
 using StreamWatch.Core.Errors;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -26,9 +27,16 @@ public class AccountController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [SwaggerOperation(Summary = "Register a new user account and return a JWT")]
-    public async Task<ActionResult<string>> Register(RegisterAccountRequest request)
+    public async Task<ActionResult<RegisterAccountResponse>> Register(RegisterAccountRequest request)
     {
         var response = await _accountService.RegisterAsync(request);
+
+        if(response.IsSuccess)
+        {
+            Response.Cookies.Append("X-Refresh-Token", response.Data.refreshToken, new CookieOptions() { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Unspecified, Expires = DateTimeOffset.UtcNow.AddHours(3), Domain = "localhost" });
+            
+            return response.ToActionResult(HttpContext);
+        }
 
         return response.ToActionResult(HttpContext);
     }
@@ -38,9 +46,34 @@ public class AccountController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [SwaggerOperation(Summary = "Authenticate user and return a JWT")]
-    public async Task<ActionResult<string>> Login(LoginAccountRequest request)
+    public async Task<ActionResult<AuthenticateAccountResponse>> Login(LoginAccountRequest request)
     {
         var response = await _accountService.AuthenticateAsync(request);
+
+        if(response.IsSuccess)
+        {
+            Response.Cookies.Append("X-Refresh-Token", response.Data.refreshToken, new CookieOptions() { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Unspecified, Expires = DateTimeOffset.UtcNow.AddHours(3), Domain = "localhost" });
+            
+            return response.ToActionResult(HttpContext);
+        }
+
+        return response.ToActionResult(HttpContext);
+    }
+
+    [HttpGet("refresh")]
+    [Authorize]
+    public async Task<ActionResult<RefreshTokenResponse>> Refresh()
+    {
+        if (!Request.Cookies.TryGetValue("X-Refresh-Token", out var refreshToken)) return BadRequest("You don't have a refresh token in the cookie!");
+
+        var response = await _accountService.RefreshToken(refreshToken);
+
+        if (response.IsSuccess)
+        {
+            Response.Cookies.Append("X-Refresh-Token", response.Data.refreshToken, new CookieOptions() { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Unspecified, Expires = DateTimeOffset.UtcNow.AddHours(3), Domain = "localhost" });
+
+            return response.ToActionResult(HttpContext);
+        }
 
         return response.ToActionResult(HttpContext);
     }
@@ -58,6 +91,14 @@ public class AccountController : ControllerBase
         var response = await _accountService.SetProfilePictureAsync(uploadResponse.Data.MediaId);
 
         return response.ToActionResult(HttpContext);
+    }
+
+    [HttpPut("change-username")]
+    public async Task<ActionResult> ChangeUsername(ChangeUsernameRequest request)
+    {
+        var result = await _accountService.ChangeUsernameAsync(request.newUsername);
+
+        return result.ToActionResult(HttpContext);
     }
 
 

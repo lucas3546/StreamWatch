@@ -33,9 +33,8 @@ export default function RegisterPage() {
     };
 
     try {
-      const token = await register(data);
-      console.log(token);
-      setJwt(token);
+      const response = await register(data);
+      setJwt(response.token);
       window.location.href = "/";
     } catch (err) {
       const problem = err as ProblemDetails;
