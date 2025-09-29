@@ -45,10 +45,10 @@ export async function register(
   return api.post("/account/register", data).then((res) => res.data);
 }
 
-export async function refreshToken(
-  data: RegisterRequest,
-): Promise<RefreshTokenResponse> {
-  return api.post("/account/refresh", data).then((res) => res.data);
+export async function refreshToken(): Promise<RefreshTokenResponse> {
+  return api
+    .get("/account/refresh", { withCredentials: true })
+    .then((res) => res.data);
 }
 
 export async function changeUsername(

@@ -9,14 +9,15 @@ export default function AccountPage() {
   return (
     <FormContainer>
       <div className="flex flex-col mx-auto overflow-hidden px-2 items-center">
-        <div className="flex flex-row gap-3">
+        <div className="flex flex-row gap-3 items-center">
           <ProfilePic
             userName={user?.name}
             fileName={user?.picture}
+            size={60}
           ></ProfilePic>
-          <div className="flex flex-col gap-1 mt-1">
-            <p className="text-2xl">@{user?.name}</p>
-            <p className="text-lg">{user?.email}</p>
+          <div className="flex flex-col">
+            <p className="text-xl">{user?.name}</p>
+            <p className="text-lg text-neutral-300">{user?.email}</p>
           </div>
         </div>
 

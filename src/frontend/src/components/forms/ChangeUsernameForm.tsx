@@ -7,12 +7,14 @@ import { CgSpinnerTwo } from "react-icons/cg";
 import Icon from "../icon/Icon";
 import {
   changeUsername,
+  refreshToken,
   type ChangeUsernameRequest,
 } from "../../services/accountService";
 import { toast } from "react-toastify";
+import type { ProblemDetails } from "../types/ProblemDetails";
 export default function ChangeUsernameForm() {
-  const { user } = useUser();
-  const [value, setValue] = useState(user?.name);
+  const { user, setAccountUser } = useUser();
+  const [value, setValue] = useState(user?.name || "");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showButtons, setShowButtons] = useState<boolean>(false);
 
@@ -22,7 +24,7 @@ export default function ChangeUsernameForm() {
   };
 
   const handleReset = () => {
-    setValue(user?.name);
+    setValue(user?.name ?? "");
     setShowButtons(false);
   };
 
@@ -33,13 +35,45 @@ export default function ChangeUsernameForm() {
       newUsername: value,
     };
 
-    const response = await toast.promise(changeUsername(request), {
-      pending: "Promise is pending",
-      success: "Promise resolved ",
-      error: "Promise rejected ",
-    });
-    console.log("a", response);
-    setIsLoading(false);
+    try {
+      await toast.promise(
+        changeUsernameAndRefreshUser(request),
+        {
+          pending: "Loading",
+          success: "Username changed!",
+          error: {
+            render({ data }) {
+              const problem = data as ProblemDetails;
+              let text = problem.detail;
+              if (problem.detail == "DuplicateUserName") {
+                text = "The username is already in use!";
+              }
+              return text;
+            },
+          },
+        },
+        {
+          theme: "dark",
+          position: "bottom-right",
+          style: {
+            background: "rgb(26, 26, 31)",
+            color: "white",
+            borderRadius: "0px",
+          },
+        },
+      );
+    } finally {
+      setIsLoading(false);
+      handleReset();
+    }
+  };
+
+  const changeUsernameAndRefreshUser = async (
+    request: ChangeUsernameRequest,
+  ) => {
+    await changeUsername(request);
+    const response = await refreshToken();
+    setAccountUser(response.token);
   };
 
   const handleEdit = () => {
