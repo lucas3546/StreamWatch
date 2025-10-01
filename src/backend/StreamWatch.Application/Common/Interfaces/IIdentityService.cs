@@ -7,6 +7,7 @@ public interface IIdentityService
 {
      Task<(IEnumerable<string> errors, Account? account)>  RegisterAsync(string email, string username, string password, string refreshToken);
      Task<(IEnumerable<string> errors, bool IsSuccess)> UpdateUsernameAsync(string currentUsername, string newUsername);
+     Task<(IEnumerable<string> errors, bool IsSuccess)> ChangePasswordAsync(Account account, string currentPassword, string newPassword);
      Task<bool> UpdateUserAsync(Account account);
      Task<Account?> FindUserByUserByIdAsync(string userId);
      Task<Account?> FindUserByEmailAsync(string email);

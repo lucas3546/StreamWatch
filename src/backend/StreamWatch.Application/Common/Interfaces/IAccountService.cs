@@ -9,6 +9,7 @@ public interface IAccountService
     Task<Result<AuthenticateAccountResponse>> AuthenticateAsync(LoginAccountRequest request);
     Task<Result<RegisterAccountResponse>> RegisterAsync(RegisterAccountRequest request);
     Task<Result<RefreshTokenResponse>> RefreshToken(string refreshToken);
+    Task<Result> ChangePasswordAsync(ChangePasswordRequest request);
     Task<Result> SetProfilePictureAsync(string mediaId);
     Task<Result> ChangeUsernameAsync(string newUsername);
     Task<PaginatedList<UserSearchResultModel>> SearchUsersPagedAsync(SearchUsersPagedRequest request);

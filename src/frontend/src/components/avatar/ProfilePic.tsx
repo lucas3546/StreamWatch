@@ -17,12 +17,16 @@ export default function ProfilePic({
   return (
     <>
       {fileName ? (
-        <img
-          src={PUBLIC_BUCKET_URL + fileName}
-          alt={userName}
-          height={size}
-          width={size}
-        />
+        <div
+          style={{ width: size, height: size }}
+          className="overflow-hidden rounded-full"
+        >
+          <img
+            src={PUBLIC_BUCKET_URL + fileName}
+            alt={userName}
+            className="w-full h-full object-cover"
+          />
+        </div>
       ) : (
         <Avatar
           size={size}

@@ -35,6 +35,11 @@ export interface ChangeUsernameRequest {
   newUsername: string;
 }
 
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export async function login(data: LoginRequest): Promise<LoginResponse> {
   return api.post("/account/login", data).then((res) => res.data);
 }
@@ -55,6 +60,12 @@ export async function changeUsername(
   data: ChangeUsernameRequest,
 ): Promise<void> {
   return api.put("/account/change-username", data).then((res) => res.data);
+}
+
+export async function changePassword(
+  data: ChangePasswordRequest,
+): Promise<void> {
+  return api.put("/account/change-password", data).then((res) => res.data);
 }
 
 export interface SearchPagedUsersResponseItem {

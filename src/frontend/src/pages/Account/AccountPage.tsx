@@ -1,8 +1,10 @@
 import FormContainer from "../../components/forms/FormContainer";
-import { Link } from "react-router";
 import { useUser } from "../../contexts/UserContext";
 import ProfilePic from "../../components/avatar/ProfilePic";
 import ChangeUsernameForm from "../../components/forms/ChangeUsernameForm";
+import ChangeProfilePicture from "../../components/modals/ChangeProfilePictureModal";
+import ChangePasswordForm from "../../components/forms/ChangePasswordForm";
+import LogoutModal from "../../components/modals/LogoutModal";
 
 export default function AccountPage() {
   const { user } = useUser();
@@ -13,7 +15,7 @@ export default function AccountPage() {
           <ProfilePic
             userName={user?.name}
             fileName={user?.picture}
-            size={60}
+            size={50}
           ></ProfilePic>
           <div className="flex flex-col">
             <p className="text-xl">{user?.name}</p>
@@ -24,22 +26,19 @@ export default function AccountPage() {
         <div className="border-t-1 m-2 border-defaultbordercolor w-full"></div>
         <ChangeUsernameForm></ChangeUsernameForm>
         <div className="border-t-1 m-2 border-defaultbordercolor w-full"></div>
-        <Link className="" to="/account/change-avatar">
-          Change Password
-        </Link>
+        <ChangePasswordForm></ChangePasswordForm>
         <div className="border-t-1 m-2 border-defaultbordercolor w-full"></div>
-
-        <Link className="" to="/account/change-avatar">
-          Change Avatar
-        </Link>
+        <div className="flex flex-row gap-2 items-center">
+          <ProfilePic
+            userName={user?.name}
+            fileName={user?.picture}
+            size={30}
+          ></ProfilePic>
+          <ChangeProfilePicture></ChangeProfilePicture>
+        </div>
         <div className="border-t-1 m-2 border-defaultbordercolor w-full"></div>
         <div className="flex items-center gap-2">
-          <button
-            className="bg-neutral-800 p-2 rounded-md hover:bg-neutral-600"
-            onClick={() => localStorage.removeItem("jwt")}
-          >
-            Logout
-          </button>
+          <LogoutModal></LogoutModal>
           <button className="bg-red-900 p-2 rounded-md hover:bg-red-600">
             Delete my account
           </button>

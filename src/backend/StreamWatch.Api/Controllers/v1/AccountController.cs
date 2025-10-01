@@ -93,6 +93,14 @@ public class AccountController : ControllerBase
         return response.ToActionResult(HttpContext);
     }
 
+    [HttpPut("change-password")]
+    public async Task<ActionResult> ChangePassword(ChangePasswordRequest request)
+    {
+        var response = await _accountService.ChangePasswordAsync(request);
+
+        return response.ToActionResult(HttpContext);
+    }
+
     [HttpPut("change-username")]
     public async Task<ActionResult> ChangeUsername(ChangeUsernameRequest request)
     {

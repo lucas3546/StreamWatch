@@ -40,8 +40,6 @@ public class AccountService : IAccountService
         var user = await _identityService.FindUserByEmailAsync(request.Email);
         if (user is null) return Result<AuthenticateAccountResponse>.Failure(new NotFoundError(nameof(request.Email), "No registered user has been found with that email address."));
 
-        var profilePic = await _context.Media.FirstOrDefaultAsync(x => x.CreatedBy == user.Id && x.FileName.StartsWith("profile_pic"));
-
         bool verification = await _identityService.VerifyPasswordAsync(user, request.Password);
         if (!verification) return Result<AuthenticateAccountResponse>.Failure(new PasswordMismatchError(nameof(request.Password), "The entered password is incorrect for this account."));
 
@@ -52,7 +50,7 @@ public class AccountService : IAccountService
 
         await _identityService.UpdateUserAsync(user);
 
-        var claims = _jwtService.GetClaimsForUser(user, profilePic?.ThumbnailFileName, role);
+        var claims = _jwtService.GetClaimsForUser(user, user.ProfilePic?.ThumbnailFileName, role);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
 
@@ -77,7 +75,7 @@ public class AccountService : IAccountService
 
         await _identityService.UpdateUserAsync(user);
 
-        var claims = _jwtService.GetClaimsForUser(user, null, role);
+        var claims = _jwtService.GetClaimsForUser(user, user.ProfilePic?.ThumbnailFileName, role);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
 
@@ -138,6 +136,23 @@ public class AccountService : IAccountService
         if (string.IsNullOrEmpty(currentUsername)) throw new ArgumentNullException(nameof(currentUsername), "CurrentUserName cannot be null or empty!");
 
         var result = await _identityService.UpdateUsernameAsync(currentUsername, newUsername);
+
+        if (result.errors.Any()) return Result.Failure(new ValidationError(string.Join(",", result.errors)));
+
+        return Result.Success();
+    }
+
+    public async Task<Result> ChangePasswordAsync(ChangePasswordRequest request)
+    {
+        var currentUserId = _currentUserService.Id;
+
+        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "currentUserId cannot be null or empty!");
+
+        var user = await _identityService.FindUserByUserByIdAsync(currentUserId);
+
+        if (user is null) return Result.Failure(new NotFoundError("User not found!"));
+
+        var result = await _identityService.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
 
         if (result.errors.Any()) return Result.Failure(new ValidationError(string.Join(",", result.errors)));
 
