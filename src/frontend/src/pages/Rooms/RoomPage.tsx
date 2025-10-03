@@ -15,6 +15,7 @@ export default function RoomPage() {
   const setRoom = useRoomStore((state) => state.setRoom);
   const room = useRoomStore((state) => state.room);
   const resetRoomValues = useRoomStore((state) => state.reset);
+  const setRoomUsers = useRoomStore((state) => state.setRoomUsers);
   const isLeader = useRoomStore((state) => state.isLeader);
   const setIsLeader = useRoomStore((state) => state.setIsLeader);
   const { roomId } = useParams<{ roomId: string }>();
@@ -40,6 +41,9 @@ export default function RoomPage() {
     (async () => {
       try {
         const roomData = await service.connectToRoom(roomId);
+
+        const users = await service.getUsersFromRoom(roomId);
+        setRoomUsers(users);
 
         if (roomData.leaderAccountId == user?.nameid) {
           setIsLeader(true);

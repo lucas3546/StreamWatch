@@ -15,10 +15,10 @@ public class S3StorageService : IStorageService
     private readonly string _publicUrl;
     private readonly IAmazonS3 _s3;
 
-    public S3StorageService(IOptions<StorageOptions> options, IAmazonS3 s3)
+    public S3StorageService(IOptions<S3StorageOptions> options, IAmazonS3 s3)
     {
-        _bucketName = options.Value.S3.Bucket;
-        _publicUrl = options.Value.PublicUrl;
+        _bucketName = options.Value.PublicBucket;
+        _publicUrl = options.Value.PublicBaseUrl;
         _s3 = s3;
     }
     
@@ -35,7 +35,7 @@ public class S3StorageService : IStorageService
         
         var response = await _s3.PutObjectAsync(request);
         
-        return new UploadedFile(fileName, _bucketName, request.ContentType, null, null);
+        return new UploadedFile(fileName, GetPublicUrl(fileName),_bucketName, request.ContentType, null, null);
     }
 
     public Task DeleteAsync(string fileName)
@@ -70,7 +70,7 @@ public class S3StorageService : IStorageService
         
         var response = await _s3.GetObjectMetadataAsync(request);
         
-        return new UploadedFile(fileName, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, null);
+        return new UploadedFile(fileName, GetPublicUrl(fileName),_bucketName, response.Headers.ContentType, response.Headers.ContentLength, null);
     }
 
     public async Task<UploadedFile?> GetPartialVideoAsync(string fileName, long startByte, long endByte)
@@ -88,11 +88,11 @@ public class S3StorageService : IStorageService
         await response.ResponseStream.CopyToAsync(memory);
         memory.Position = 0;
         
-        return new UploadedFile(response.Key, _bucketName, response.Headers.ContentType, response.Headers.ContentLength, memory);
+        return new UploadedFile(response.Key, GetPublicUrl(fileName),_bucketName, response.Headers.ContentType, response.Headers.ContentLength, memory);
     }
     
 
-    public string GetUrl(string filePath)
+    public string GetPublicUrl(string filePath)
     {
         return $"{_publicUrl}/{filePath}";
     }

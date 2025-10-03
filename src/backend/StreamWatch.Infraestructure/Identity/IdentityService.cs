@@ -65,21 +65,21 @@ public class IdentityService : IIdentityService
 
     public async Task<Account?> FindUserByEmailAsync(string email)
     {
-        var user = _userManager.Users.Include(o => o.ProfilePic).FirstOrDefault(x => x.Email == email);
+        var user = await _userManager.Users.Include(o => o.ProfilePic).FirstOrDefaultAsync(x => x.Email == email);
 
         return user;
     }
 
     public async Task<Account?> FindUserByUserNameAsync(string userName)
     {
-        var user = _userManager.Users.Include(o => o.ProfilePic).FirstOrDefault(x => x.UserName == userName);
+        var user = await _userManager.Users.Include(o => o.ProfilePic).FirstOrDefaultAsync(x => x.UserName == userName);
 
         return user;
     }
 
     public async Task<Account?> FindUserByUserByIdAsync(string userId)
     {
-        var user = _userManager.Users.Include(o => o.ProfilePic).FirstOrDefault(x => x.Id == userId);
+        var user = await _userManager.Users.Include(o => o.ProfilePic).FirstOrDefaultAsync(x => x.Id == userId);
 
         return user;
     }

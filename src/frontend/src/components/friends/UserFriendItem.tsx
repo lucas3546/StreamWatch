@@ -56,7 +56,7 @@ export default function UserFriendItem({
       className="flex items-center justify-between gap-2 p-2 rounded-sm border border-defaultbordercolor w-full md:w-[50%]"
     >
       <div className="flex items-center gap-2">
-        <ProfilePic userName={userName} fileName={profilePic} />
+        <ProfilePic userName={userName} fileUrl={profilePic} />
         <span>{userName}</span>
       </div>
 

@@ -95,7 +95,7 @@ public class RoomsController : ControllerBase
                 return BadRequest(uploadedFile.Error);
             }
 
-            uploadedFileName = uploadedFile.Data?.FileName;
+            uploadedFileName = uploadedFile.Data?.thumbPublicUrl;
         }
 
         await _hubContext

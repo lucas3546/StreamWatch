@@ -17,18 +17,21 @@ public class FriendshipService : IFriendshipService
     private readonly IApplicationDbContext _context;
     private readonly ICurrentUserService _currentUserService;
     private readonly IIdentityService _identityService;
+    private readonly IStorageService _storageService;
     private readonly IEventBus _eventBus;
 
     public FriendshipService(
         IApplicationDbContext context,
         ICurrentUserService currentUserService,
         IIdentityService identityService,
+        IStorageService storageService,
         IEventBus eventBus
     )
     {
         _context = context;
         _currentUserService = currentUserService;
         _identityService = identityService;
+        _storageService = storageService;
         _eventBus = eventBus;
     }
 
@@ -89,12 +92,12 @@ public class FriendshipService : IFriendshipService
 
         var friends = await _context.Friendships
             .AsNoTracking()
-            .Where(f => f.ReceiverId == currentUserId || f.RequesterId == currentUserId && f.Status == FriendshipStatus.Accepted)
+            .Where(f => f.ReceiverId == currentUserId || f.RequesterId == currentUserId)
             .Select(f => f.ReceiverId == currentUserId
                 ? new FriendModel(
                     f.RequesterId,
                     f.Requester.UserName,
-                    f.Requester.ProfilePic.ThumbnailFileName,
+                    f.Requester.ProfilePic != null ?_storageService.GetPublicUrl(f.Requester.ProfilePic.ThumbnailFileName) : null,
                     f.RequesterId,
                     f.Status.ToString(),
                     f.RequestDate,
@@ -103,7 +106,7 @@ public class FriendshipService : IFriendshipService
                 : new FriendModel(
                     f.ReceiverId,
                     f.Receiver.UserName,
-                    f.Receiver.ProfilePic.ThumbnailFileName,
+                    f.Receiver.ProfilePic != null ?_storageService.GetPublicUrl(f.Receiver.ProfilePic.ThumbnailFileName) : null,
                     f.RequesterId,
                     f.Status.ToString(),
                     f.RequestDate,
@@ -111,6 +114,7 @@ public class FriendshipService : IFriendshipService
                 )
             )
             .ToListAsync();
+
 
         return Result<IEnumerable<FriendModel>>.Success(friends);
     }
@@ -130,26 +134,25 @@ public class FriendshipService : IFriendshipService
             .WithStatus(FriendshipStatus.Accepted)
             .Where(f => f.ReceiverId != currentUserId || f.RequesterId != currentUserId)
             .GetPaged(request.PageNumber, request.PageSize)
-            .Select(f =>
-                f.ReceiverId == currentUserId
-                    ? new FriendModel(
-                        f.RequesterId,
-                        f.Requester.UserName,
-                        f.Requester.ProfilePic.ThumbnailFileName,
-                        f.RequesterId,
-                        f.Status.ToString(),
-                        f.RequestDate,
-                        f.ResponseDate
-                    )
-                    : new FriendModel(
-                        f.ReceiverId,
-                        f.Receiver.UserName,
-                        f.Receiver.ProfilePic.ThumbnailFileName,
-                        f.RequesterId,
-                        f.Status.ToString(),
-                        f.RequestDate,
-                        f.ResponseDate
-                    )
+            .Select(f => f.ReceiverId == currentUserId
+                ? new FriendModel(
+                    f.RequesterId,
+                    f.Requester.UserName,
+                    f.Requester.ProfilePic != null ?_storageService.GetPublicUrl(f.Requester.ProfilePic.ThumbnailFileName) : null,
+                    f.RequesterId,
+                    f.Status.ToString(),
+                    f.RequestDate,
+                    f.ResponseDate
+                )
+                : new FriendModel(
+                    f.ReceiverId,
+                    f.Receiver.UserName,
+                    f.Receiver.ProfilePic != null ?_storageService.GetPublicUrl(f.Receiver.ProfilePic.ThumbnailFileName) : null,
+                    f.RequesterId,
+                    f.Status.ToString(),
+                    f.RequestDate,
+                    f.ResponseDate
+                )
             )
             .ToListAsync();
 

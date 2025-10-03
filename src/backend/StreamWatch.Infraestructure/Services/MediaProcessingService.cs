@@ -52,9 +52,9 @@ public class MediaProcessingService : IMediaProcessingService
                     options
                         .Seek(TimeSpan.FromSeconds(1))
                         .Resize(600, 800)
-                        .WithFrameOutputCount(1) // un solo frame
+                        .WithFrameOutputCount(1) 
                         .WithVideoCodec("libwebp")
-                        .ForceFormat("webp") // formato WEBP
+                        .ForceFormat("webp")
             )
             .ProcessAsynchronously();
 

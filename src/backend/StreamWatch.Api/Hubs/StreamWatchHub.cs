@@ -117,9 +117,13 @@ public class StreamWatchHub : Hub
 
         var session = await _userSessionService.GetUserSessionAsync(connectionId);
 
-        await Clients.Group(session.RoomId).SendAsync("ReceiveMessage",new{Id = Guid.NewGuid().ToString(), IsNotification = true,Text = $"{session.UserName} has left the room",});
+        if (session != null)
+        {
+            await Clients.Group(session.RoomId).SendAsync("ReceiveMessage", new { Id = Guid.NewGuid().ToString(), IsNotification = true, Text = $"{session.UserName} has left the room", });
                     
-        await _userSessionService.EndSessionAsync(connectionId);
+            await _userSessionService.EndSessionAsync(connectionId);
+        }
+        
 
         await base.OnDisconnectedAsync(exception);
     }

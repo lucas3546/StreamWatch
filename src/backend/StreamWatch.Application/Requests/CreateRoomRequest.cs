@@ -5,7 +5,7 @@ namespace StreamWatch.Application.Requests;
 
 public record CreateRoomRequest
 {
-    public string Title { get; init; }
+    public required string Title { get; init; }
     [Range(1, 10)]
     public RoomCategory Category  { get; init; }
     public RoomVideoProvider Provider { get; init; }

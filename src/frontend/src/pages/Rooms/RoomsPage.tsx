@@ -47,7 +47,7 @@ export default function RoomsPage() {
           <RoomCard
             key={room.roomId}
             roomId={room.roomId}
-            thumbnail={room.thumbnailUrl}
+            thumbnailUrl={room.thumbnailUrl}
             title={room.title}
             category={room.category.toLowerCase()}
             provider={room.videoProvider}

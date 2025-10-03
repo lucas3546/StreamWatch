@@ -1,30 +1,13 @@
-import { useEffect } from "react";
-import { roomRealtimeService } from "../../../services/roomRealtimeService";
-import { useSignalR } from "../../../hooks/useSignalR";
 import ProfilePic from "../../avatar/ProfilePic";
 import { HiUserAdd } from "react-icons/hi";
 import Icon from "../../icon/Icon";
 import { useRoomStore } from "../../../stores/roomStore";
+import { useUser } from "../../../contexts/UserContext";
 
 export default function RoomUsersTab() {
-  const { connection } = useSignalR();
-  const room = useRoomStore((state) => state.room);
+  const { user } = useUser();
   const roomUsers = useRoomStore((state) => state.roomUsers);
-  const setRoomUsers = useRoomStore((state) => state.setRoomUsers);
-
-  useEffect(() => {
-    if (!connection) return;
-
-    const service = roomRealtimeService(connection);
-
-    const fetchUsers = async () => {
-      const basicUsers = await service.getUsersFromRoom(room?.id ?? "");
-
-      setRoomUsers(basicUsers);
-    };
-
-    fetchUsers();
-  }, [room?.id, connection]);
+  const nameid = user?.nameid;
 
   return (
     <div>
@@ -36,12 +19,16 @@ export default function RoomUsersTab() {
           >
             <ProfilePic
               userName={user.userName}
-              fileName={user.profilePic}
+              fileUrl={user.profilePic}
             ></ProfilePic>
             <p>{user.userName}</p>
-            <button className="ml-auto border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer">
-              <Icon icon={HiUserAdd}></Icon>
-            </button>
+            {user.userId === nameid ? (
+              <></>
+            ) : (
+              <button className="ml-auto border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer">
+                <Icon icon={HiUserAdd}></Icon>
+              </button>
+            )}
           </li>
         ))}
       </ul>

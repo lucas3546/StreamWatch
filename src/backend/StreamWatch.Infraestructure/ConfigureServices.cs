@@ -79,9 +79,9 @@ public static class ConfigureServices
         });
 
         //Configure R2
-        var accessKey = configuration["Storage:S3:AccessKey"];
-        var secretKey = configuration["Storage:S3:SecretKey"];
-        var serviceUrl = configuration["Storage:S3:ServiceURL"];
+        var accessKey = configuration["Storage:AccessKey"];
+        var secretKey = configuration["Storage:SecretKey"];
+        var serviceUrl = configuration["Storage:ServiceURL"];
 
         var credentials = new BasicAWSCredentials(accessKey, secretKey);
 

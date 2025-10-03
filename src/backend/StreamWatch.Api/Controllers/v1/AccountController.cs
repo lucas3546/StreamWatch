@@ -52,8 +52,10 @@ public class AccountController : ControllerBase
 
         if(response.IsSuccess)
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Response.Cookies.Append("X-Refresh-Token", response.Data.refreshToken, new CookieOptions() { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Unspecified, Expires = DateTimeOffset.UtcNow.AddHours(3), Domain = "localhost" });
-            
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+
             return response.ToActionResult(HttpContext);
         }
 

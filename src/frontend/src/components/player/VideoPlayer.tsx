@@ -13,7 +13,6 @@ import "./player.css";
 import { VideoLayout } from "./video-layout";
 import type { RoomState } from "../types/RoomState";
 import type { RefObject } from "react";
-import { PUBLIC_BUCKET_URL } from "../../utils/config";
 
 interface VideoPlayerProps {
   roomState: RoomState;
@@ -30,13 +29,7 @@ export default function VideoPlayer({
   onPlay,
   onPause,
 }: VideoPlayerProps) {
-  let videoUrl = roomState.videoUrl;
-
-  if (roomState.videoProvider.toLocaleLowerCase() == "s3") {
-    videoUrl = PUBLIC_BUCKET_URL + roomState.videoUrl;
-    console.log("URL___" + videoUrl);
-  }
-
+  const videoUrl = roomState.videoUrl;
   return (
     <MediaPlayer
       src={videoUrl}

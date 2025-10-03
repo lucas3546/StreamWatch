@@ -3,8 +3,8 @@ import {
   getOverview,
   type StorageResponse,
 } from "../../services/storageService";
-import { PUBLIC_BUCKET_URL } from "../../utils/config";
 import UploadVideoModal from "../modals/UploadVideoModal";
+import { getFilename } from "../../utils/fileExtensions";
 
 interface MediaSelectorProps {
   media: string | null;
@@ -44,11 +44,10 @@ export default function MediaSelector({ media, setMedia }: MediaSelectorProps) {
             {media === item.mediaId && <p>•</p>}
 
             <img
-              src={PUBLIC_BUCKET_URL + item.thumbnailFileName}
-              alt={item.thumbnailFileName}
+              src={item.thumbnailUrl}
               className="w-8 h-8 object-cover rounded"
             />
-            <span>{item.fileName}</span>
+            <span>{getFilename(item.thumbnailUrl)}</span>
           </div>
         ))
       ) : (

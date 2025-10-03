@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useUser } from "../../../contexts/UserContext";
 import { useSignalR } from "../../../hooks/useSignalR";
-import { PUBLIC_BUCKET_URL } from "../../../utils/config";
 import ProfilePic from "../../avatar/ProfilePic";
 import { FaRegImage } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io";
@@ -94,7 +93,7 @@ export default function RoomChat() {
                 <>
                   <ProfilePic
                     userName={msg.userName}
-                    fileName={undefined}
+                    fileUrl={undefined}
                     size={25}
                   />
                   <div
@@ -114,10 +113,7 @@ export default function RoomChat() {
                       ></img>
                     </div>
                     {msg.image && (
-                      <img
-                        src={PUBLIC_BUCKET_URL + msg.image}
-                        className="rounded-md"
-                      />
+                      <img src={msg.image} className="rounded-md" />
                     )}
                     {msg.text}
                   </div>

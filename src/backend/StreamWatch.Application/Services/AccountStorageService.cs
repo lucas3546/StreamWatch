@@ -124,7 +124,7 @@ public class AccountStorageService : IAccountStorageService
             
             Stream profilePicStream = _mediaProcessingService.ConvertImageFormat(request.Image);
         
-            UploadedFile profilePic = await _storageService.UploadAsync(profilePicStream, originalFileName, "image/webp");
+            originalFile = await _storageService.UploadAsync(profilePicStream, originalFileName, "image/webp");
 
             await profilePicStream.DisposeAsync();
         }
@@ -145,7 +145,7 @@ public class AccountStorageService : IAccountStorageService
         
         await _context.SaveChangesAsync(CancellationToken.None);
         
-        var response = new UploadImageResponse(media.FileName, media.ThumbnailFileName, media.BucketName, media.Size, _sqids.Encode(media.Id), media.ExpiresAt);
+        var response = new UploadImageResponse(originalFile?.PublicUrl ?? thumb.PublicUrl, thumb.PublicUrl, media.BucketName, media.Size, _sqids.Encode(media.Id), media.ExpiresAt);
         
         return Result<UploadImageResponse>.Success(response);
     }
@@ -187,9 +187,10 @@ public class AccountStorageService : IAccountStorageService
             var mimetype = MimeGuesser.GuessMimeType(tempVideoPath);
             if (mimetype != media.ContentType) return Result.Failure(new ValidationError("File type does not match"));
 
-            //using var thumbStream = await _mediaProcessingService.GenerateThumbnailFromFileAsync(tempVideoPath);
 
-            using var thumbStream = await _mediaProcessingService.GenerateThumbnailStreamAsync("https://pub-3d64bc11ad674a4e92d65803df99fd7e.r2.dev/" + media.FileName);
+
+
+            using var thumbStream = await _mediaProcessingService.GenerateThumbnailStreamAsync(uploadedVideo.PublicUrl);
                 
             
             var thumbName = Guid.NewGuid() + ".webp";
@@ -231,7 +232,8 @@ public class AccountStorageService : IAccountStorageService
         if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
         
         var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId && x.Status == MediaStatus.Uploaded)
-            .Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id) ,x.FileName, x.ThumbnailFileName, x.Size, x.ExpiresAt)).ToListAsync();
+            .Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id), _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt)).ToListAsync();
+
 
         decimal storageUse = medias.Sum(x => x.Size);
 

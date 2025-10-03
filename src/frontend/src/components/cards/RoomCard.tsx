@@ -7,7 +7,7 @@ import { useUser } from "../../contexts/UserContext";
 
 interface RoomCardProps {
   roomId: string;
-  thumbnail: string;
+  thumbnailUrl: string;
   title: string;
   category: string;
   connectedUsers: number;
@@ -15,7 +15,7 @@ interface RoomCardProps {
 }
 export default function RoomCard({
   roomId,
-  thumbnail,
+  thumbnailUrl,
   title,
   category,
   connectedUsers,
@@ -76,7 +76,7 @@ export default function RoomCard({
       <div className="w-full aspect-[4/3] relative">
         <img
           className="w-full h-full object-cover rounded-md"
-          src={thumbnail}
+          src={thumbnailUrl}
           alt={title}
         />
         <span

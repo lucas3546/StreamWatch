@@ -50,7 +50,13 @@ public class AccountService : IAccountService
 
         await _identityService.UpdateUserAsync(user);
 
-        var claims = _jwtService.GetClaimsForUser(user, user.ProfilePic?.ThumbnailFileName, role);
+        string? profilePicThumbnailUrl = null;
+        if (user.ProfilePic?.ThumbnailFileName != null)
+        {
+            profilePicThumbnailUrl = _storageService.GetPublicUrl(user.ProfilePic.ThumbnailFileName);
+        }
+
+        var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
 
@@ -75,7 +81,13 @@ public class AccountService : IAccountService
 
         await _identityService.UpdateUserAsync(user);
 
-        var claims = _jwtService.GetClaimsForUser(user, user.ProfilePic?.ThumbnailFileName, role);
+        string? profilePicThumbnailUrl = null;
+        if (user.ProfilePic?.ThumbnailFileName != null)
+        {
+            profilePicThumbnailUrl = _storageService.GetPublicUrl(user.ProfilePic.ThumbnailFileName);
+        }
+
+        var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
 

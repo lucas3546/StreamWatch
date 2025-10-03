@@ -14,7 +14,7 @@ export default function AccountPage() {
         <div className="flex flex-row gap-3 items-center">
           <ProfilePic
             userName={user?.name}
-            fileName={user?.picture}
+            fileUrl={user?.picture}
             size={50}
           ></ProfilePic>
           <div className="flex flex-col">
@@ -31,7 +31,7 @@ export default function AccountPage() {
         <div className="flex flex-row gap-2 items-center">
           <ProfilePic
             userName={user?.name}
-            fileName={user?.picture}
+            fileUrl={user?.picture}
             size={30}
           ></ProfilePic>
           <ChangeProfilePicture></ChangeProfilePicture>

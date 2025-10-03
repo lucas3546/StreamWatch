@@ -37,8 +37,8 @@ export default function StoragePage() {
         {videos?.medias.map((x) => (
           <VideoItemCard
             key={x.mediaId}
-            fileName={x.fileName}
-            thumbnailName={x.thumbnailFileName}
+            fileUrl={x.fileUrl}
+            thumbnailUrl={x.thumbnailUrl}
             provider={x.mediaProvider}
             size={x.size}
             expirestAt={DateTime.fromISO(x.expiresAt).toUTC()}

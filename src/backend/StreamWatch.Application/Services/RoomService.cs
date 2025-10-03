@@ -59,9 +59,9 @@ public class RoomService : IRoomService
             {
                 var media = await _context.Media.FindAsync(decodedId);
 
-                room.VideoUrl = media.FileName;
-                room.ThumbnailUrl = media.ThumbnailFileName;
-                room.VideoProvider = "S3";
+                room.VideoUrl = _storageService.GetPublicUrl(media.FileName);
+                room.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName);;
+                room.VideoProvider = "Local";
                 videoTitle = media.FileName;
             }
             else
@@ -78,7 +78,7 @@ public class RoomService : IRoomService
 
             var thumbnailUrl = VideoUrlHelper.GetThumbnailUrl(request.VideoUrl);
             room.VideoUrl = request.VideoUrl;
-            room.ThumbnailUrl = thumbnailUrl;
+            room.ThumbnailUrl = thumbnailUrl ?? "";
             room.VideoProvider = "YouTube";
             videoTitle = await VideoUrlHelper.GetVideoTitleAsync(request.VideoUrl) ?? "Unknown";
         }
@@ -116,8 +116,8 @@ public class RoomService : IRoomService
                 if (media is null) return Result<PlaylistVideoItem>.Failure(new NotFoundError("Media not found!"));
 
                 playlistVideoItem.VideoTitle = media.FileName;
-                playlistVideoItem.VideoUrl = media.FileName;
-                playlistVideoItem.ThumbnailUrl = media.ThumbnailFileName;
+                playlistVideoItem.VideoUrl = _storageService.GetPublicUrl(media.FileName);
+                playlistVideoItem.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName);
                 playlistVideoItem.Provider = "Local";
             }
             else
