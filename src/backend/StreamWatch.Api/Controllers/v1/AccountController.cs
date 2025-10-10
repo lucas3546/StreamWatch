@@ -111,6 +111,14 @@ public class AccountController : ControllerBase
         return result.ToActionResult(HttpContext);
     }
 
+    [HttpGet("profile/{userId}")]
+    public async Task<ActionResult<GetBasicUserProfileDataResponse>> GetBasicUserDataProfile(string userId)
+    {
+        var response = await _accountService.GetBasicUserProfileDataAsync(userId);
+
+        return response.ToActionResult(HttpContext);
+    }
+
 
     [HttpGet("search/paged")]
     [Authorize]
