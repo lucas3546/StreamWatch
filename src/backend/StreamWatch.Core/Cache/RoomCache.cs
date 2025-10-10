@@ -4,7 +4,7 @@ using StreamWatch.Core.Enums;
 namespace StreamWatch.Core.Cache;
 
 
-[Document(StorageType = StorageType.Json, Prefixes = new[] { "Room" })]
+[Document(StorageType = StorageType.Json, Prefixes = new[] { "RoomCache" })]
 public class RoomCache
 {
     [RedisIdField]

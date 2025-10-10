@@ -40,6 +40,12 @@ export interface ChangePasswordRequest {
   newPassword: string;
 }
 
+export interface GetAccountProfileResponse {
+  userId: string;
+  userName: string;
+  profilePicThumbnailUrl: string;
+}
+
 export async function login(data: LoginRequest): Promise<LoginResponse> {
   return api.post("/account/login", data).then((res) => res.data);
 }
@@ -54,6 +60,12 @@ export async function refreshToken(): Promise<RefreshTokenResponse> {
   return api
     .get("/account/refresh", { withCredentials: true })
     .then((res) => res.data);
+}
+
+export async function getAccountProfile(
+  userId: string,
+): Promise<GetAccountProfileResponse> {
+  return api.get(`/account/profile/${userId}`).then((res) => res.data);
 }
 
 export async function changeUsername(

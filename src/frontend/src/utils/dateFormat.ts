@@ -4,3 +4,8 @@ export function formatShort(utcString: string) {
   const dt = DateTime.fromISO(utcString, { zone: "utc" }).toLocal();
   return `${dt.toRelativeCalendar()}, ${dt.toFormat("HH:mm")}`;
 }
+
+export function formatDate(utcString: string) {
+  const dt = DateTime.fromISO(utcString, { zone: "utc" }).toLocal();
+  return `${dt.toRelativeCalendar()}`;
+}

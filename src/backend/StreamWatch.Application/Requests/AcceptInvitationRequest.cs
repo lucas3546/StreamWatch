@@ -2,5 +2,5 @@ namespace StreamWatch.Application.Requests;
 
 public record AcceptFriendshipInvitationRequest
 {
-    public required string UserName { get; init; }
+    public required string UserId { get; init; }
 }

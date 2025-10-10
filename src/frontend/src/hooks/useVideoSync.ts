@@ -76,7 +76,7 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
     const handler = (playlistItemId: string) => {
       const item = playlistItems.find((x) => x.id === playlistItemId);
       if (!item) return;
-
+      console.log("videochanged from playlist");
       setRoom({
         ...room!,
         videoUrl: item.videoUrl,

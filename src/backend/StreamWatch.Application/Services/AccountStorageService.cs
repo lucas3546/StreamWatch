@@ -222,7 +222,9 @@ public class AccountStorageService : IAccountStorageService
         var files = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId)
             .Select(o => new MediaModel(o.FileName, o.ThumbnailFileName)).ToListAsync();
 
-        return files;
+        var videoFiles = files.Where(f => ContentTypeHelper.IsVideo(f.FileName)).ToList();
+        
+        return videoFiles;
     }
 
 
@@ -230,14 +232,16 @@ public class AccountStorageService : IAccountStorageService
     {
         var currentUserId = _currentUserService.Id;
         if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+
+        var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId && x.Status == MediaStatus.Uploaded).ToListAsync();
         
-        var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId && x.Status == MediaStatus.Uploaded)
-            .Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id), _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt)).ToListAsync();
+        var filteredMedias = medias.Where(f => ContentTypeHelper.IsVideo(f.FileName)).ToList();
 
+        var videoFiles = filteredMedias.Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id), _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
+        
+        decimal storageUse = videoFiles.Sum(x => x.Size);
 
-        decimal storageUse = medias.Sum(x => x.Size);
-
-        var response = new GetStorageOverviewResponse(storageUse, medias);
+        var response = new GetStorageOverviewResponse(storageUse, videoFiles);
 
         return response;
     }

@@ -52,7 +52,7 @@ export default function CreateRoomPage() {
     <FormContainer>
       <form
         onSubmit={handleSubmit}
-        className="w-full flex flex-col items-center gap-4 text-white overflow-y-auto h-screen"
+        className="w-full flex flex-col items-center gap-2 text-white overflow-y-auto h-screen"
       >
         <h2 className="text-3xl ">Create Room</h2>
 
@@ -122,8 +122,8 @@ export default function CreateRoomPage() {
             <input
               type="radio"
               value="true"
-              checked={visibility === false}
-              onChange={() => setVisibility(false)}
+              checked={visibility === true}
+              onChange={() => setVisibility(true)}
             />
             Public
           </label>
@@ -131,8 +131,8 @@ export default function CreateRoomPage() {
             <input
               type="radio"
               value="true"
-              checked={visibility === true}
-              onChange={() => setVisibility(true)}
+              checked={visibility === false}
+              onChange={() => setVisibility(false)}
             />
             Private
           </label>
@@ -144,7 +144,7 @@ export default function CreateRoomPage() {
         {/* Submit */}
         <button
           type="submit"
-          className="bg-blue-600 hover:bg-blue-700 transition-colors px-6 py-2 rounded-md font-semibold mt-1"
+          className="bg-neutral-600 hover:bg-neutral-700 transition-colors px-6 py-2 rounded-md font-semibold mt-1 cursor-pointer"
         >
           Create Room
         </button>

@@ -91,7 +91,7 @@ export default function RoomCard({
           {connectedUsers}
         </span>
         <span
-          className={`absolute bottom-1 right-2 text-white text-lg opacity-85 font-semibold px-2 py-1 rounded flex flex-row items-center gap-0.5`}
+          className={`absolute bottom-1 right-2 text-white text-lg opacity-90 font-semibold px-2 py-1 rounded flex flex-row items-center gap-0.5`}
         >
           <Icon icon={providerIcon} size={30}></Icon>
           {providerLabel}

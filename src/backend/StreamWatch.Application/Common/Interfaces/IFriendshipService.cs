@@ -1,14 +1,15 @@
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
+using StreamWatch.Application.Responses;
 
 namespace StreamWatch.Application.Common.Interfaces;
 
 public interface IFriendshipService
 {
-    Task<Result> SendFriendshipInvitationAsync(SendFriendshipInvitationRequest request);
-    Task<Result> AcceptFriendshipInvitationAsync(AcceptFriendshipInvitationRequest request);
-    Task<Result> DeclineFriendshipInvitationAsync(DeclineFriendInvitationRequest request);
     Task<Result<IEnumerable<FriendModel>>> GetAllFriendsAsync();
     Task<Result<PaginatedList<FriendModel>>> GetPagedFriendsAsync(GetPagedFriendsRequest request);
-    Task<Result> RemoveFriendAsync(RemoveFriendRequest request);
+    Task<Result<GetFriendshipStatusResponse>> GetFriendshipStatusAsync(string userId);
+    Task<Result> SendFriendshipInvitationAsync(string targetUserId);
+    Task<Result> AcceptFriendshipInvitationAsync(string requesterId);
+    Task<Result> RemoveFriendAsync(string targetUserId);
 }

@@ -49,10 +49,7 @@ export default function RoomPage() {
           setIsLeader(true);
         }
 
-        console.log("IS LEADER", isLeader);
-
         setRoom(roomData);
-        console.log("_-______ASD_ASD_AD_SASD_", isLeader);
 
         service.onReconnected((id) => console.log("Reconectado con id:", id));
 

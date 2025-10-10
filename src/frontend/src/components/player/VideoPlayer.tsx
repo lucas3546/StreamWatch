@@ -12,7 +12,7 @@ import {
 import "./player.css";
 import { VideoLayout } from "./video-layout";
 import type { RoomState } from "../types/RoomState";
-import type { RefObject } from "react";
+import { useEffect, type RefObject } from "react";
 
 interface VideoPlayerProps {
   roomState: RoomState;
@@ -29,10 +29,10 @@ export default function VideoPlayer({
   onPlay,
   onPause,
 }: VideoPlayerProps) {
-  const videoUrl = roomState.videoUrl;
   return (
     <MediaPlayer
-      src={videoUrl}
+      key={`${roomState?.videoProvider}-${roomState?.videoUrl}`}
+      src={roomState.videoUrl}
       ref={player}
       onSeeked={onSeeked}
       onPlay={onPlay}

@@ -36,6 +36,7 @@ export default function PlaylistModal() {
 
     const service = roomRealtimeService(connection);
 
+    console.log(itemId);
     const request: ChangeVideoFromPlaylistItemType = {
       roomId: room?.id ?? "",
       playlistItemId: itemId,

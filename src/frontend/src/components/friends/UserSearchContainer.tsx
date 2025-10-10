@@ -51,15 +51,19 @@ export default function UserSearchContainer({
   return (
     <div>
       {/* Buscador */}
-      <h2 className="text-xl mb-2 mt-2">Search users</h2>
       <div className="mb-4 flex gap-2">
         <input
           placeholder="Search users..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="border-white border-1 rounded-sm"
+          className="border-white border-1 rounded-sm p-1 w-full"
         />
-        <button onClick={() => handleSearch()}>Buscar</button>
+        <button
+          className="bg-neutral-700 hover:bg-neutral-600 cursor-pointer p-2 rounded-sm"
+          onClick={() => handleSearch()}
+        >
+          Buscar
+        </button>
       </div>
 
       {/* Resultados de búsqueda */}

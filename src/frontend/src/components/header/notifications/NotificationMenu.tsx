@@ -108,7 +108,7 @@ export default function NotificationMenu() {
     <div className="relative inline-block" ref={menuRef}>
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center p-2 cursor-pointer rounded-full hover:bg-gray-500"
+        className="flex items-center cursor-pointer rounded-full hover:bg-gray-500"
       >
         <Icon icon={MdNotifications} />
         {unreadCounter > 0 && (

@@ -60,11 +60,11 @@ export function VideoUpload({ onFileSelect }: VideoUploadProps) {
         className="cursor-pointer border-2 border-dashed border-gray-400 rounded-2xl p-6 flex flex-col items-center justify-center text-center hover:bg-gray-50 transition"
       >
         {previewImage ? (
-          <div className="w-full">
+          <div className="w-full h-full">
             <img
               src={previewImage}
               alt="Preview"
-              className="w-full rounded-xl shadow-md"
+              className="w-full rounded-xl shadow-md max-h-[50vh]"
             />
             <p className="mt-2 text-sm text-gray-600 truncate">{fileName}</p>
           </div>

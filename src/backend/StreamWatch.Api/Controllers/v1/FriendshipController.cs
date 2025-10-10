@@ -6,6 +6,7 @@ using StreamWatch.Api.Hubs;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
+using StreamWatch.Application.Responses;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace StreamWatch.Api.Controllers.v1;
@@ -20,62 +21,6 @@ public class FriendshipController  : ControllerBase
     {
         _friendshipService = friendshipService;
         _hubContext = hubContext;
-    }
-
-    [HttpPost("requests/send")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [SwaggerOperation(Summary = "Send friendship request", Description = "Send friendship request to another user")]
-    public async Task<ActionResult> SendFriendshipInvitation(SendFriendshipInvitationRequest request)
-    {
-        var response = await _friendshipService.SendFriendshipInvitationAsync(request);
-
-        return response.ToActionResult(HttpContext);
-    }
-
-    [HttpPut("requests/accept")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [SwaggerOperation(Summary = "Accept friendship invitation", Description = "Accept friendship request from another user")]
-    public async Task<ActionResult> AcceptFriendshipInvitation(AcceptFriendshipInvitationRequest request)
-    {
-        var response = await _friendshipService.AcceptFriendshipInvitationAsync(request);
-        
-        return response.ToActionResult(HttpContext);
-    }
-    
-    [HttpPut("requests/decline")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [SwaggerOperation(Summary = "Decline friendship invitation", Description = "Decline friendship request from another user")]
-    public async Task<ActionResult> DeclineFriendshipInvitation(DeclineFriendInvitationRequest request)
-    {
-        var response = await _friendshipService.DeclineFriendshipInvitationAsync(request);
-        
-        return response.ToActionResult(HttpContext);
-    }
-    
-    [HttpDelete("remove")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
-    [SwaggerOperation(Summary = "Remove friendship", Description = "Remove friendship, enter the username of your friend")]
-    public async Task<ActionResult> RemoveFriend(RemoveFriendRequest request)
-    {
-        var response = await _friendshipService.RemoveFriendAsync(request);
-        
-        return response.ToActionResult(HttpContext);
     }
 
     [HttpGet("all")]
@@ -103,6 +48,62 @@ public class FriendshipController  : ControllerBase
         
         return response.ToActionResult(HttpContext);
     }
+
+    [HttpGet("status/{userId}")]
+    [Authorize]
+    public async Task<ActionResult<GetFriendshipStatusResponse>> GetFriendshipStatus(string userId)
+    {
+        var response = await _friendshipService.GetFriendshipStatusAsync(userId);
+
+        return response.ToActionResult(HttpContext);
+    }
+
+
+    [HttpPost("requests/send/{targetUserId}")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [SwaggerOperation(Summary = "Send friendship request", Description = "Send friendship request to another user")]
+    public async Task<ActionResult> SendFriendshipInvitation(string targetUserId)
+    {
+        var response = await _friendshipService.SendFriendshipInvitationAsync(targetUserId);
+
+        return response.ToActionResult(HttpContext);
+    }
+
+    [HttpPut("requests/accept/{targetUserId}")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [SwaggerOperation(Summary = "Accept friendship invitation", Description = "Accept friendship request from another user")]
+    public async Task<ActionResult> AcceptFriendshipInvitation(string targetUserId)
+    {
+        var response = await _friendshipService.AcceptFriendshipInvitationAsync(targetUserId);
+        
+        return response.ToActionResult(HttpContext);
+    }
+
+    
+    
+    [HttpDelete("remove/{targetUserId}")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [SwaggerOperation(Summary = "Remove friendship or request", Description = "Remove, cancel or decline friendship")]
+    public async Task<ActionResult> RemoveFriend(string targetUserId)
+    {
+        var response = await _friendshipService.RemoveFriendAsync(targetUserId);
+        
+        return response.ToActionResult(HttpContext);
+    }
+
+
     
 
 }

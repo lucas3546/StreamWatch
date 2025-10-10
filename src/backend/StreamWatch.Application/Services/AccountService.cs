@@ -171,6 +171,20 @@ public class AccountService : IAccountService
         return Result.Success();
     }
 
+    public async Task<Result<GetBasicUserProfileDataResponse>> GetBasicUserProfileDataAsync(string userId)
+    {
+        var user = await _identityService.FindUserByUserByIdAsync(userId);
+
+        if (user is null) return Result<GetBasicUserProfileDataResponse>.Failure(new NotFoundError("User not found!"));
+
+        string? publicUrlProfilePic = user.ProfilePic == null ? null : _storageService.GetPublicUrl(user.ProfilePic.ThumbnailFileName);
+    
+    
+        var response = new GetBasicUserProfileDataResponse(user.Id, user.UserName, publicUrlProfilePic);
+
+        return Result<GetBasicUserProfileDataResponse>.Success(response);
+    }
+
     public async Task<PaginatedList<UserSearchResultModel>> SearchUsersPagedAsync(SearchUsersPagedRequest request)
     {
         var users = await _identityService.SearchUsersPagedAsync(request.UserName, request.PageNumber, request.PageSize);
