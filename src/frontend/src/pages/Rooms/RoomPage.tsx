@@ -79,7 +79,15 @@ export default function RoomPage() {
               )}
             </div>
           </div>
-          <div className="h-auto md:h-16">{room && <RoomBottomBar />}</div>
+          {room ? (
+            <div className="h-auto md:h-16">
+              <RoomBottomBar />
+            </div>
+          ) : (
+            <div className="h-auto md:h-16 flex items-center justify-center">
+              <p>Loading room...</p>
+            </div>
+          )}
         </div>
 
         {roomId && <RoomSidebar />}

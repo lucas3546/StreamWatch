@@ -10,17 +10,28 @@ import { type AddVideoToPlaylistType } from "../../../services/roomRealtimeServi
 import { useSignalR } from "../../../hooks/useSignalR";
 import { addVideoToPlaylist } from "../../../services/roomService";
 import { useRoomStore } from "../../../stores/roomStore";
+import Icon from "../../icon/Icon";
+import { CgSpinnerTwo } from "react-icons/cg";
+import { FieldError } from "../../errors/FieldError";
+import type { ProblemDetails } from "../../types/ProblemDetails";
 
 export default function AddToPlaylist() {
   const { connection } = useSignalR();
   const room = useRoomStore((state) => state.room);
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<
+    string,
+    string[]
+  > | null>(null);
   const [provider, setProvider] = useState("youtube");
   const [youtubeUrl, setYoutubeUrl] = useState("");
   const [media, setMedia] = useState<string | null>(null);
 
   const AddToPlaylist = async () => {
     if (!connection) return;
+
+    setIsLoading(true);
 
     const request: AddVideoToPlaylistType = {
       roomId: room?.id ?? "",
@@ -29,7 +40,19 @@ export default function AddToPlaylist() {
       mediaId: media,
     };
 
-    await addVideoToPlaylist(request);
+    try {
+      await addVideoToPlaylist(request);
+      setIsOpen(false);
+    } catch (error) {
+      console.log(error);
+      const problem = error as ProblemDetails;
+      if (problem.errors) {
+        setFieldErrors(problem.errors);
+        return;
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -68,6 +91,7 @@ export default function AddToPlaylist() {
                     placeholder="https://youtube.com/..."
                     className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
                   />
+                  <FieldError errors={fieldErrors} name="videoUrl"></FieldError>
                 </>
               ) : (
                 <>
@@ -82,8 +106,29 @@ export default function AddToPlaylist() {
               )}
             </Description>
             <div className="flex gap-4">
-              <button onClick={() => setIsOpen(false)}>Cancel</button>
-              <button onClick={AddToPlaylist}>Add to playlist</button>
+              <button
+                className="bg-neutral-700 p-2 rounded-sm hover:bg-neutral-600 cursor-pointer"
+                onClick={() => setIsOpen(false)}
+              >
+                Close
+              </button>
+              {isLoading ? (
+                <button
+                  disabled
+                  className="ml-auto cursor-pointer bg-neutral-800 p-2  hover:bg-neutral-700 rounded-sm"
+                >
+                  <div className="animate-spin">
+                    <Icon icon={CgSpinnerTwo} />
+                  </div>
+                </button>
+              ) : (
+                <button
+                  className="ml-auto bg-neutral-800 p-2 rounded-sm hover:bg-neutral-500 cursor-pointer"
+                  onClick={AddToPlaylist}
+                >
+                  Add to playlist
+                </button>
+              )}
             </div>
           </DialogPanel>
         </div>

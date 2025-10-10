@@ -103,18 +103,22 @@ export default function UserFriendItem({
       {status === "Pending" && requestedByAccountId !== user?.nameid && (
         <div className="ml-auto flex gap-1">
           <span className="text-gray-500">Pending</span>
-          <button
-            onClick={acceptFriendRequest}
-            className="border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
-          >
-            <Icon icon={BiSolidUserCheck} />
-          </button>
-          <button
-            onClick={declineFriendRequest}
-            className="border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
-          >
-            <Icon icon={BiSolidUserX} />
-          </button>
+          {requestedByAccountId !== undefined && (
+            <>
+              <button
+                onClick={acceptFriendRequest}
+                className="border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
+              >
+                <Icon icon={BiSolidUserCheck} />
+              </button>
+              <button
+                onClick={declineFriendRequest}
+                className="border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
+              >
+                <Icon icon={BiSolidUserX} />
+              </button>
+            </>
+          )}
         </div>
       )}
 

@@ -17,7 +17,7 @@ export function FieldError({ errors, name }: FieldErrorProps) {
   return (
     <>
       {fieldErrors.map((msg, i) => (
-        <p key={i} className="text-red-500 text-sm">
+        <p key={i} className="text-red-500 text-sm mt-1">
           {msg}
         </p>
       ))}

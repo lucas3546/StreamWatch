@@ -128,7 +128,7 @@ public class RoomService : IRoomService
         else if (request.Provider == RoomVideoProvider.YouTube)
         {
             var platform = VideoUrlHelper.GetPlatform(request.VideoUrl);
-            if (platform is null) throw new Exception();
+            if (platform is null) return Result<PlaylistVideoItem>.Failure(new ValidationError(nameof(request.VideoUrl), "The URL entered is invalid."));
 
             playlistVideoItem.VideoUrl = request.VideoUrl;
             playlistVideoItem.ThumbnailUrl = VideoUrlHelper.GetThumbnailUrl(request.VideoUrl) ?? "";

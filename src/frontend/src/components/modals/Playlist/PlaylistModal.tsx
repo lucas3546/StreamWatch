@@ -29,6 +29,11 @@ export default function PlaylistModal() {
       console.log("New playlist item received:", item);
       addPlaylistItem(item);
     });
+
+    return () => {
+      console.log("[PlaylistModal] Cleaning up NewPlaylistVideo handler");
+      connection.off("NewPlaylistVideo");
+    };
   }, [connection]);
 
   const onClickVideoItem = (itemId: string) => {
@@ -74,7 +79,12 @@ export default function PlaylistModal() {
               ))}
             </div>
             <div className="flex gap-4">
-              <button onClick={() => setIsOpen(false)}>Close</button>
+              <button
+                className="bg-neutral-700 p-1 rounded-sm hover:bg-neutral-600 cursor-pointer"
+                onClick={() => setIsOpen(false)}
+              >
+                Close
+              </button>
             </div>
           </DialogPanel>
         </div>
