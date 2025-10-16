@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useUser } from "../../../contexts/UserContext";
 import { useSignalR } from "../../../hooks/useSignalR";
-import { PUBLIC_BUCKET_URL } from "../../../utils/config";
 import ProfilePic from "../../avatar/ProfilePic";
 import { FaRegImage } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io";
@@ -12,6 +11,7 @@ import {
   type SendMessageRequest,
 } from "../../../services/roomService";
 import { getUsernameColor } from "../../../utils/userColors";
+import { useRoomStore } from "../../../stores/roomStore";
 
 export interface RoomChatMessage {
   id: string;
@@ -25,53 +25,15 @@ export interface RoomChatMessage {
   replyToMessageId?: string | null;
 }
 
-export interface RoomChatProps {
-  roomId: string;
-}
-
-export default function RoomChat({ roomId }: RoomChatProps) {
+export default function RoomChat() {
   const { user } = useUser();
   const { connection } = useSignalR();
+  const room = useRoomStore((state) => state.room);
+  const chatMessages = useRoomStore((state) => state.chatMessages);
+  const addChatMessage = useRoomStore((state) => state.addChatMessage);
   const [file, setFile] = useState<File | null>(null);
   const [inputMessage, setInputMessage] = useState("");
-  const [messages, setMessages] = useState<RoomChatMessage[]>([
-    {
-      id: "1",
-      userName: "OtroUsuario",
-      text: "Hola!",
-      countryCode: "ar",
-      countryName: "Argentina",
-      isNotification: false,
-      fromMe: false,
-    },
-    {
-      id: "2",
-      userName: "OtroUsuario2",
-      text: "Que tal!",
-      countryCode: "mx",
-      countryName: "México",
-      isNotification: false,
-      fromMe: false,
-    },
-    {
-      id: "3",
-      userName: "OtroUsuario3",
-      text: "Que tal!",
-      countryCode: "cl",
-      countryName: "Chile",
-      isNotification: false,
-      fromMe: false,
-    },
-    {
-      id: "4",
-      userName: "OtroUsuario2",
-      text: "Que tal!",
-      countryCode: "mx",
-      countryName: "México",
-      isNotification: false,
-      fromMe: false,
-    },
-  ]);
+
   useEffect(() => {
     if (!connection || !user?.name) return;
 
@@ -80,7 +42,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
       if (user?.name === msg.userName) {
         msg.fromMe = true;
       }
-      setMessages((prev) => [...prev, msg]);
+      addChatMessage(msg);
     };
 
     connection.off("ReceiveMessage");
@@ -95,7 +57,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
     e.preventDefault();
 
     const request: SendMessageRequest = {
-      roomId: roomId,
+      roomId: room?.id ?? "",
       message: inputMessage,
       image: file,
       replyToMessageId: "",
@@ -118,7 +80,7 @@ export default function RoomChat({ roomId }: RoomChatProps) {
     <>
       <div className="overflow-y-auto p-4 pb-20 min-h-0 h-full">
         <div className="flex-1 overflow-y-auto flex flex-col gap-2">
-          {messages.map((msg) => (
+          {chatMessages.map((msg) => (
             <div
               key={msg.id}
               className={`flex gap-1 ${!msg.isNotification && msg.fromMe ? "flex-row-reverse" : "flex-row"}`}
@@ -128,37 +90,63 @@ export default function RoomChat({ roomId }: RoomChatProps) {
                   {msg.text}
                 </div>
               ) : (
-                <>
-                  <ProfilePic
-                    userName={msg.userName}
-                    fileName={undefined}
-                    size={25}
-                  />
+                <div
+                  className={`flex w-full gap-2 ${
+                    msg.fromMe
+                      ? "justify-end items-start"
+                      : "justify-start items-start"
+                  }`}
+                >
+                  {!msg.fromMe && (
+                    <ProfilePic
+                      userName={msg.userName}
+                      fileUrl={undefined}
+                      size={25}
+                    />
+                  )}
+
                   <div
-                    className={`max-w-[70%] px-3 py-1 rounded-lg break-words ${
+                    className={`max-w-[80%] px-3 py-1 text-sm rounded-lg break-words whitespace-pre-wrap overflow-hidden ${
                       msg.fromMe
-                        ? "bg-neutral-600 text-white"
+                        ? "bg-gray-600 text-white"
                         : "bg-neutral-700 text-white"
                     }`}
                   >
-                    <div className="flex flex-row items-center gap-2">
-                      <p className={getUsernameColor(msg.userName)}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <p
+                        className={`${getUsernameColor(msg.userName)} truncate max-w-[120px]`}
+                        title={msg.userName}
+                      >
                         {msg.userName}
                       </p>
+
                       <img
-                        src={`/flags/${msg.countryCode}.png`}
+                        src={`/flags2/${msg.countryCode.toUpperCase()}.svg`}
                         title={msg.countryName}
-                      ></img>
+                        className="flex-shrink-0 w-4 h-3 object-cover"
+                      />
                     </div>
+
                     {msg.image && (
                       <img
-                        src={PUBLIC_BUCKET_URL + msg.image}
-                        className="rounded-md"
+                        src={msg.image}
+                        className="rounded-md mt-1 max-w-full h-auto object-contain"
                       />
                     )}
-                    {msg.text}
+
+                    <p className="break-words whitespace-pre-wrap">
+                      {msg.text}
+                    </p>
                   </div>
-                </>
+
+                  {msg.fromMe && (
+                    <ProfilePic
+                      userName={msg.userName}
+                      fileUrl={undefined}
+                      size={25}
+                    />
+                  )}
+                </div>
               )}
             </div>
           ))}

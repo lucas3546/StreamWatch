@@ -12,11 +12,12 @@ export default function RegisterPage() {
     string[]
   > | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setJwt } = useUser();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    setIsLoading(true);
     setGeneralError(null);
 
     const formData = new FormData(e.currentTarget);
@@ -33,9 +34,8 @@ export default function RegisterPage() {
     };
 
     try {
-      const token = await register(data);
-      console.log(token);
-      setJwt(token);
+      const response = await register(data);
+      setJwt(response.token);
       window.location.href = "/";
     } catch (err) {
       const problem = err as ProblemDetails;
@@ -48,6 +48,8 @@ export default function RegisterPage() {
         setGeneralError(problem.detail);
         return;
       }
+    } finally {
+      setIsLoading(false);
     }
 
     console.log("Formulario enviado");
@@ -57,7 +59,7 @@ export default function RegisterPage() {
     <FormContainer>
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col w-full text-left gap-2 mx-auto"
+        className="flex flex-col w-full text-left gap-2 mx-auto overflow-y-auto"
       >
         <h2 className="text-3xl text-center">Register</h2>
 
@@ -65,7 +67,7 @@ export default function RegisterPage() {
         <input
           type="text"
           name="username"
-          placeholder="UserName4563"
+          placeholder="E.g JohnDoe322"
           className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
         ></input>
         <FieldError errors={fieldErrors} name="username" />
@@ -74,7 +76,7 @@ export default function RegisterPage() {
         <input
           type="email"
           name="email"
-          placeholder="youremail@email.com"
+          placeholder="example@email.com"
           className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
         ></input>
         <FieldError errors={fieldErrors} name="email" />
@@ -83,6 +85,7 @@ export default function RegisterPage() {
         <input
           type="password"
           name="password"
+          placeholder="Enter your password"
           className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
         ></input>
         <FieldError errors={fieldErrors} name="password" />
@@ -91,6 +94,7 @@ export default function RegisterPage() {
         <input
           type="password"
           name="confirmpassword"
+          placeholder="Enter your password"
           className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
         ></input>
 
@@ -104,9 +108,15 @@ export default function RegisterPage() {
           <p className="text-red-600 text-center mb-2">{generalError}</p>
         )}
 
-        <button className="bg-gray-700 rounded-sm mx-auto px-3 text-lg hover:bg-gray-500">
-          Create account
-        </button>
+        {isLoading ? (
+          <button className="disabled bg-neutral-800 rounded-sm mx-auto p-2">
+            Loading
+          </button>
+        ) : (
+          <button className="bg-neutral-700 rounded-sm mx-auto p-2 hover:bg-gray-500 cursor-pointer">
+            Sign Up
+          </button>
+        )}
       </form>
     </FormContainer>
   );

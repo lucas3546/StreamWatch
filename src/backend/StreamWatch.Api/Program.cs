@@ -8,7 +8,7 @@ using StreamWatch.Infraestructure;
 using StreamWatch.Infraestructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-var storageOptions = builder.Configuration.GetSection("Storage").Get<StorageOptions>();
+var storageOptions = builder.Configuration.GetSection("Storage").Get<S3StorageOptions>();
 
 builder.Services.AddInfraestructureServices(builder.Configuration);
 builder.Services.AddApplicationServices();
@@ -30,15 +30,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseStaticFiles(
-    new StaticFileOptions
-    {
-        FileProvider = new PhysicalFileProvider(
-            Path.Combine(Directory.GetCurrentDirectory(), storageOptions.BaseLocalPath, "media")
-        ),
-        RequestPath = "/media",
-    }
-);
 
 app.UseHangfireDashboard();
 

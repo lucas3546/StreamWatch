@@ -324,6 +324,9 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.Property<int?>("ProfilePicId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 

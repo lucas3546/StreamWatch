@@ -6,10 +6,12 @@ import { BiSolidUserCheck } from "react-icons/bi";
 import {
   acceptFriendshipRequest,
   declineFriendshipRequest,
+  removeFriendship,
   sendFriendshipRequest,
 } from "../../services/friendshipService";
 import { useState } from "react";
 import { useUser } from "../../contexts/UserContext";
+import { Link, useNavigate } from "react-router";
 
 interface UserFriendItemProps {
   userId: string;
@@ -33,21 +35,33 @@ export default function UserFriendItem({
   onFriendAction,
 }: UserFriendItemProps) {
   const { user } = useUser();
-
   console.log(status);
 
   const sendFriendRequest = async () => {
-    await sendFriendshipRequest(userName);
+    await sendFriendshipRequest(userId);
   };
 
   const acceptFriendRequest = async () => {
-    await acceptFriendshipRequest(userName);
+    await acceptFriendshipRequest(userId);
     onFriendAction(userId, "Accepted");
   };
 
   const declineFriendRequest = async () => {
-    await declineFriendshipRequest(userName);
+    await removeFriendship(userId);
     onFriendAction(userId, "Declined");
+  };
+
+  const cancelFriendRequest = async () => {
+    await removeFriendship(userId);
+    onFriendAction(userId, "Declined");
+  };
+
+  const removeFriendRequest = async () => {
+    const confirmed = confirm(`Are you sure you want to delete ${userName}`);
+    if (confirmed) {
+      await removeFriendship(userId);
+      onFriendAction(userId, "Declined");
+    }
   };
 
   return (
@@ -56,30 +70,55 @@ export default function UserFriendItem({
       className="flex items-center justify-between gap-2 p-2 rounded-sm border border-defaultbordercolor w-full md:w-[50%]"
     >
       <div className="flex items-center gap-2">
-        <ProfilePic userName={userName} fileName={profilePic} />
-        <span>{userName}</span>
+        <ProfilePic userName={userName} fileUrl={profilePic} />
+        <Link to={"/profile/" + userId}>{userName}</Link>
       </div>
 
-      {status === "Accepted" && <span className="text-green-600">Friends</span>}
+      {status === "Accepted" && (
+        <div className="flex flex-row items-center gap-1">
+          <span className="text-green-700">Friends</span>
+          <button
+            onClick={removeFriendRequest}
+            className="flex items-center gap-1 border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer text-xs"
+          >
+            <Icon icon={BiSolidUserX} />
+            Remove
+          </button>
+        </div>
+      )}
 
       {status === "Pending" && requestedByAccountId === user?.nameid && (
-        <span className="text-yellow-600">Solicitud enviada</span>
+        <div className="flex flex-row items-center gap-1">
+          <span className="text-gray-500">Pending</span>
+          <button
+            onClick={cancelFriendRequest}
+            className="flex items-center gap-1 border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer text-xs"
+          >
+            <Icon icon={BiSolidUserX} />
+            Cancel request
+          </button>
+        </div>
       )}
 
       {status === "Pending" && requestedByAccountId !== user?.nameid && (
         <div className="ml-auto flex gap-1">
-          <button
-            onClick={acceptFriendRequest}
-            className="border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
-          >
-            <Icon icon={BiSolidUserCheck} />
-          </button>
-          <button
-            onClick={declineFriendRequest}
-            className="border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
-          >
-            <Icon icon={BiSolidUserX} />
-          </button>
+          <span className="text-gray-500">Pending</span>
+          {requestedByAccountId !== undefined && (
+            <>
+              <button
+                onClick={acceptFriendRequest}
+                className="border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
+              >
+                <Icon icon={BiSolidUserCheck} />
+              </button>
+              <button
+                onClick={declineFriendRequest}
+                className="border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
+              >
+                <Icon icon={BiSolidUserX} />
+              </button>
+            </>
+          )}
         </div>
       )}
 

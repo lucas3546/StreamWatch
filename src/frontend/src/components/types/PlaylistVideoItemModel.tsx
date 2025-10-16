@@ -1,4 +1,5 @@
 export interface PlaylistVideoItemModel {
+  id: string;
   videoUrl: string;
   videoTitle: string;
   thumbnailUrl: string;

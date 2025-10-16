@@ -17,7 +17,7 @@ public static class ConfigureServices
 {
     public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
      {
-         services.Configure<StorageOptions>(configuration.GetSection("Storage"));
+         services.Configure<S3StorageOptions>(configuration.GetSection("Storage"));
          
          services.AddSignalR();
          

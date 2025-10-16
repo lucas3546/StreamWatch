@@ -2,8 +2,8 @@ import { api } from "./api";
 
 export interface Media {
   mediaId: string;
-  fileName: string;
-  thumbnailFileName: string;
+  fileUrl: string;
+  thumbnailUrl: string;
   mediaProvider: string;
   size: number;
   expiresAt: string; // o Date si lo vas a parsear

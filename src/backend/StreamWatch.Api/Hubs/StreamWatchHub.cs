@@ -5,7 +5,9 @@ using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
+using StreamWatch.Application.Responses;
 using StreamWatch.Core.Cache;
+using StreamWatch.Core.Enums;
 
 namespace StreamWatch.Api.Hubs;
 
@@ -59,6 +61,10 @@ public class StreamWatchHub : Hub
 
         await Groups.AddToGroupAsync(connectionId, roomId);
 
+        await Clients.Group(roomId).SendAsync("ReceiveMessage", new { Id = Guid.NewGuid().ToString(), IsNotification = true, Text = $"{userName} has join to the room", });
+
+        await Clients.Group(roomId).SendAsync("NewUserJoined", new BasicUserRoomModel(userId, userName, profilePic));
+
 
         //Request to leader to send the actual video state.
         await Clients.User(room.LeaderAccountId).SendAsync("RefreshVideoState");
@@ -66,6 +72,15 @@ public class StreamWatchHub : Hub
         //Return the current room state
         return room;
     }
+
+    [Authorize]
+    public async Task ChangeVideoRoomFromPlaylistItem(ChangeVideoFromPlaylistItemRequest request)
+    {
+        await _roomService.ChangeVideoFromPlaylistItemAsync(request);
+
+        await Clients.Group(request.RoomId).SendAsync("OnVideoChangedFromPlaylistItem", request.PlaylistItemId);
+    }
+
 
     [Authorize]
     public async Task UpdateVideoState(UpdateVideoStateRequest request)
@@ -87,14 +102,7 @@ public class StreamWatchHub : Hub
         if (!result.IsSuccess)
             throw new HubException("Error while updating video state");
 
-        await Clients
-            .Group(request.RoomId)
-            .SendAsync(
-                "RoomVideoStateUpdated",
-                request.CurrentTimestamp,
-                request.SentAt,
-                request.IsPaused
-            );
+        await Clients.Group(request.RoomId).SendAsync("RoomVideoStateUpdated",request.CurrentTimestamp,request.SentAt,request.IsPaused);
     }
 
     [Authorize]
@@ -111,9 +119,13 @@ public class StreamWatchHub : Hub
 
         var session = await _userSessionService.GetUserSessionAsync(connectionId);
 
-        await Clients.Group(session.RoomId).SendAsync("ReceiveMessage",new{Id = Guid.NewGuid().ToString(), IsNotification = true,Text = $"{session.UserName} has left the room",});
+        if (session != null)
+        {
+            await Clients.Group(session.RoomId).SendAsync("ReceiveMessage", new { Id = Guid.NewGuid().ToString(), IsNotification = true, Text = $"{session.UserName} has left the room", });
                     
-        await _userSessionService.EndSessionAsync(connectionId);
+            await _userSessionService.EndSessionAsync(connectionId);
+        }
+        
 
         await base.OnDisconnectedAsync(exception);
     }

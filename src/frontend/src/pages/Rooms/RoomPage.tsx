@@ -1,35 +1,35 @@
 import { useParams } from "react-router";
 import RoomSidebar from "../../components/sidebar/Room/RoomSidebar";
 import VideoPlayer from "../../components/player/VideoPlayer";
-import RoomBottomBar from "../../components/bottombar/RoomBottomBar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { roomRealtimeService } from "../../services/roomRealtimeService";
-import type { RoomState } from "../../components/types/RoomState";
 import { useSignalR } from "../../hooks/useSignalR";
 import type { MediaPlayerInstance } from "@vidstack/react";
 import { useConfirmNavigation } from "../../hooks/useConfirmNavegation";
 import { useUser } from "../../contexts/UserContext";
 import { useVideoSync } from "../../hooks/useVideoSync";
+import { useRoomStore } from "../../stores/roomStore";
+import RoomBottomBar from "../../components/bottombar/RoomBottomBar";
 
 export default function RoomPage() {
+  const setRoom = useRoomStore((state) => state.setRoom);
+  const room = useRoomStore((state) => state.room);
+  const resetRoomValues = useRoomStore((state) => state.reset);
+  const setRoomUsers = useRoomStore((state) => state.setRoomUsers);
+  const isLeader = useRoomStore((state) => state.isLeader);
+  const setIsLeader = useRoomStore((state) => state.setIsLeader);
   const { roomId } = useParams<{ roomId: string }>();
-  const [room, setRoom] = useState<RoomState>();
   const { user } = useUser();
   const { connection, reloadConnection } = useSignalR();
   const player = useRef<MediaPlayerInstance>(null);
-  const [isLeader, setIsLeader] = useState<boolean>(false);
-  const { onSeeked, onPlay, onPause } = useVideoSync(
-    player,
-    isLeader,
-    room,
-    setRoom,
-  );
+  const { onSeeked, onPlay, onPause, onError } = useVideoSync(player);
 
   useConfirmNavigation(
     true,
     "Estas seguro que deseas salir de la sala?",
     () => {
       if (connection) reloadConnection();
+      resetRoomValues();
     },
   );
 
@@ -41,14 +41,15 @@ export default function RoomPage() {
     (async () => {
       try {
         const roomData = await service.connectToRoom(roomId);
-        setRoom(roomData);
+
+        const users = await service.getUsersFromRoom(roomId);
+        setRoomUsers(users);
 
         if (roomData.leaderAccountId == user?.nameid) {
           setIsLeader(true);
         }
 
-        console.log("IsLeader", isLeader);
-        console.log(room);
+        setRoom(roomData);
 
         service.onReconnected((id) => console.log("Reconectado con id:", id));
 
@@ -59,14 +60,14 @@ export default function RoomPage() {
         console.error("❌ Error al conectar con el room:", err);
       }
     })();
-  }, [connection, roomId]);
+  }, [connection, roomId, isLeader]);
 
   return (
     <>
-      <div className="flex flex-col md:flex-row h-[calc(100vh-56px)] min-h-0  overflow-hidden">
+      <div className="flex w-full flex-col sm:flex-row md:flex-row h-[calc(100vh-56px)] min-h-0  overflow-hidden">
         <div className="flex-1 flex flex-col ">
           <div className="flex-1 min-h-0  overflow-hidden flex justify-center ">
-            <div className="w-full max-w-5xl max-h-full ">
+            <div className="aspect-video w-full max-h-full ">
               {room && (
                 <VideoPlayer
                   roomState={room}
@@ -74,18 +75,23 @@ export default function RoomPage() {
                   onSeeked={onSeeked}
                   onPlay={onPlay}
                   onPause={onPause}
+                  onError={onError}
                 />
               )}
             </div>
           </div>
-          <div className="h-auto md:h-16">
-            {room && (
-              <RoomBottomBar playlistVideos={room?.playlistVideoItems} />
-            )}
-          </div>
+          {room ? (
+            <div className="h-auto w-full  md:h-16 mt-auto">
+              <RoomBottomBar />
+            </div>
+          ) : (
+            <div className="h-auto md:h-16 flex items-center justify-center">
+              <p>Loading room...</p>
+            </div>
+          )}
         </div>
 
-        {roomId && <RoomSidebar roomId={roomId} />}
+        {roomId && <RoomSidebar />}
       </div>
     </>
   );

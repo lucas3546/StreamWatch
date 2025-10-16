@@ -4,6 +4,7 @@ import { login, type LoginRequest } from "../services/accountService";
 import type { ProblemDetails } from "../components/types/ProblemDetails";
 import FormContainer from "../components/forms/FormContainer";
 import { FieldError } from "../components/errors/FieldError";
+import { Link } from "react-router";
 
 export default function LoginPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<
@@ -11,11 +12,12 @@ export default function LoginPage() {
     string[]
   > | null>(null);
   const [generalError, setGeneralError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { setJwt } = useUser();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
+    setIsLoading(true);
     setGeneralError(null);
 
     const formData = new FormData(e.currentTarget);
@@ -30,9 +32,8 @@ export default function LoginPage() {
     };
 
     try {
-      const token = await login(data);
-      console.log(token);
-      setJwt(token);
+      const response = await login(data);
+      setJwt(response.token);
       window.location.href = "/";
     } catch (err) {
       const problem = err as ProblemDetails;
@@ -45,6 +46,8 @@ export default function LoginPage() {
         setGeneralError(problem.detail);
         return;
       }
+    } finally {
+      setIsLoading(false);
     }
 
     console.log("Formulario enviado");
@@ -74,14 +77,26 @@ export default function LoginPage() {
           className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
         ></input>
         <FieldError errors={fieldErrors} name="password" />
-
+        <p>
+          You don't have any account? Go to{" "}
+          <Link to="/register" className="text-blue-400 underline">
+            register
+          </Link>{" "}
+          page.
+        </p>
         {generalError && (
           <p className="text-red-600 text-center mb-2">{generalError}</p>
         )}
 
-        <button className="bg-gray-700 rounded-sm mx-auto px-3 text-lg hover:bg-gray-500">
-          Sign In
-        </button>
+        {isLoading ? (
+          <button className="disabled bg-neutral-800 rounded-sm mx-auto p-2">
+            Loading
+          </button>
+        ) : (
+          <button className="bg-neutral-700 rounded-sm mx-auto p-2 hover:bg-gray-500 cursor-pointer">
+            Login
+          </button>
+        )}
       </form>
     </FormContainer>
   );

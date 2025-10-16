@@ -19,9 +19,9 @@ public class IdentityService : IIdentityService
         _roleManager = roleManager;
     }
 
-    public async Task<(IEnumerable<string> errors, Account? account)> RegisterAsync(string email, string username, string password)
+    public async Task<(IEnumerable<string> errors, Account? account)> RegisterAsync(string email, string username, string password, string refreshToken)
     {
-        var account = new Account { UserName = username, Email = email };
+        var account = new Account { UserName = username, Email = email, RefreshToken = refreshToken };
 
         var result = await _userManager.CreateAsync(account, password);
 
@@ -43,26 +43,43 @@ public class IdentityService : IIdentityService
         return result.Succeeded;
     }
 
+    public async Task<(IEnumerable<string> errors, bool IsSuccess)> UpdateUsernameAsync(string currentUsername, string newUsername)
+    {
+        var user = await _userManager.FindByNameAsync(currentUsername);
+        if (user is null) return (["UserNotFound"], false);
+
+        var result = await _userManager.SetUserNameAsync(user, newUsername);
+
+        return (result.Errors.Select(x => x.Code), result.Succeeded);
+    }
+
+    public async Task<(IEnumerable<string> errors, bool IsSuccess)> ChangePasswordAsync(Account account, string currentPassword, string newPassword)
+    {
+        var result =  await _userManager.ChangePasswordAsync(account, currentPassword, newPassword);
+        
+        return (result.Errors.Select(x => x.Code), result.Succeeded);
+    }
+
     public async Task<int> CountAccountsAsync() => await _userManager.Users.CountAsync();
 
 
     public async Task<Account?> FindUserByEmailAsync(string email)
     {
-        var user = _userManager.Users.FirstOrDefault(x => x.Email == email);
+        var user = await _userManager.Users.Include(o => o.ProfilePic).FirstOrDefaultAsync(x => x.Email == email);
 
         return user;
     }
 
     public async Task<Account?> FindUserByUserNameAsync(string userName)
     {
-        var user = _userManager.Users.FirstOrDefault(x => x.UserName == userName);
+        var user = await _userManager.Users.Include(o => o.ProfilePic).FirstOrDefaultAsync(x => x.UserName == userName);
 
         return user;
     }
 
     public async Task<Account?> FindUserByUserByIdAsync(string userId)
     {
-        var user = _userManager.Users.FirstOrDefault(x => x.Id == userId);
+        var user = await _userManager.Users.Include(o => o.ProfilePic).FirstOrDefaultAsync(x => x.Id == userId);
 
         return user;
     }

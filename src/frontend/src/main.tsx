@@ -1,7 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import HomePage from "./pages/HomePage.tsx";
 import DefaultLayout from "./layouts/DefaultLayout.tsx";
 import SettingsPage from "./pages/SettingsPage.tsx";
 import RegisterPage from "./pages/RegisterPage.tsx";
@@ -18,6 +17,7 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import TrendingPage from "./pages/TrendingPage.tsx";
 import FriendsPage from "./pages/FriendsPage.tsx";
 import { ToastContainer } from "react-toastify";
+import ProfilePage from "./pages/ProfilePage.tsx";
 const router = createBrowserRouter([
   {
     element: (
@@ -35,6 +35,7 @@ const router = createBrowserRouter([
       { path: "/settings", element: <SettingsPage /> },
       { path: "/account/change-avatar", element: <ChangeAvatarPage /> },
       { path: "/account", element: <AccountPage /> },
+      { path: "/profile/:accountId", element: <ProfilePage /> },
       { path: "/storage", element: <StoragePage /> },
       { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <LoginPage /> },

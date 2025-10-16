@@ -10,6 +10,7 @@ import UserFriendItem from "../components/friends/UserFriendItem";
 
 export default function FriendsPage() {
   const [friends, setFriends] = useState<GetFriendsResponse[]>([]);
+  const [activeTab, setActiveTab] = useState<"friends" | "search">("friends");
   const [loadingFriends, setLoadingFriends] = useState(true);
 
   // 🔹 cargar amigos al montar
@@ -17,6 +18,7 @@ export default function FriendsPage() {
     const loadFriends = async () => {
       try {
         const data = await getFriends();
+        console.log(data);
         setFriends(data);
       } finally {
         setLoadingFriends(false);
@@ -39,42 +41,68 @@ export default function FriendsPage() {
         );
       }
 
-      // si es otro status, no toco nada
-      console.log("nada");
       return prev;
     });
   }
 
   return (
     <FormContainer>
-      {/* Lista de amigos */}
       <div className="flex flex-col w-full">
-        <h2 className="text-2xl mb-4">Friends</h2>
-        {loadingFriends ? (
-          <p>Loading friends...</p>
-        ) : friends.length === 0 ? (
-          <p>You don´t have any friends yet.</p>
-        ) : (
-          <ul className="flex flex-col flex-wrap md:flex-row">
-            {friends.map((f) => (
-              <UserFriendItem
-                key={f.userId}
-                userId={f.userId}
-                userName={f.userName}
-                profilePic={f.profileThumbnail}
-                status={f.status}
-                friendsSince={f.responseDate}
-                onFriendAction={onFriendAction}
-              ></UserFriendItem>
-            ))}
-          </ul>
+        <div className="flex flex-row w-full gap-2 justify-center border-b-1  border-defaultbordercolor mb-2">
+          <button
+            onClick={() => setActiveTab("friends")}
+            className={`text-xl w-full font-medium cursor-pointer ${
+              activeTab === "friends"
+                ? "border-b-2  border-neutral-200 text-neutral-200"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            Friends
+          </button>
+          <button
+            onClick={() => setActiveTab("search")}
+            className={`text-xl w-full font-medium cursor-pointer ${
+              activeTab === "search"
+                ? "border-b-2 border-neutral-200 text-neutral-200"
+                : "text-gray-400 hover:text-gray-200"
+            }`}
+          >
+            Search
+          </button>
+        </div>
+        {activeTab === "friends" && (
+          <>
+            {loadingFriends ? (
+              <p>Loading friends...</p>
+            ) : friends.length === 0 ? (
+              <p>You don´t have any friends yet.</p>
+            ) : (
+              <ul className="flex flex-col flex-wrap md:flex-row">
+                {friends.map((f) => (
+                  <UserFriendItem
+                    key={f.userId}
+                    userId={f.userId}
+                    userName={f.userName}
+                    profilePic={f.profileThumbnail}
+                    status={f.status}
+                    requestedByAccountId={f.requestedByAccountId}
+                    friendsSince={f.responseDate}
+                    onFriendAction={onFriendAction}
+                  ></UserFriendItem>
+                ))}
+              </ul>
+            )}
+          </>
         )}
-
-        <UserSearchContainer
-          friends={friends}
-          onFriendAction={onFriendAction}
-        ></UserSearchContainer>
+        {activeTab === "search" && (
+          <UserSearchContainer
+            friends={friends}
+            onFriendAction={onFriendAction}
+          ></UserSearchContainer>
+        )}
       </div>
+
+      {/* Lista de amigos */}
     </FormContainer>
   );
 }

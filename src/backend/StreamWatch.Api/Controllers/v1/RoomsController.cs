@@ -8,6 +8,7 @@ using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
+using StreamWatch.Core.Cache;
 using StreamWatch.Core.Constants;
 
 namespace StreamWatch.Api.Controllers.v1;
@@ -83,8 +84,9 @@ public class RoomsController : ControllerBase
         {
             var uploadImageRequest = new UploadImageRequest(
                 request.Image.FileName,
+                request.Image.ContentType,
                 request.Image.OpenReadStream(),
-                true,
+                UploadOnlyThumbnail: true,
                 DateTime.UtcNow.AddMinutes(10)
             );
 
@@ -94,7 +96,7 @@ public class RoomsController : ControllerBase
                 return BadRequest(uploadedFile.Error);
             }
 
-            uploadedFileName = uploadedFile.Data?.FileName;
+            uploadedFileName = uploadedFile.Data?.thumbPublicUrl;
         }
 
         await _hubContext
@@ -114,5 +116,15 @@ public class RoomsController : ControllerBase
             );
 
         return Ok();
+    }
+
+    [HttpPost("playlist/add")]
+    public async Task<ActionResult<PlaylistVideoItem>> AddVideoToPlaylist(AddVideoToPlaylistRequest request)
+    {
+        var result = await _roomService.AddVideoToPlaylist(request);
+
+        await _hubContext.Clients.Group(request.RoomId).SendAsync("NewPlaylistVideo", result.Data);
+
+        return result.ToActionResult(HttpContext);
     }
 }

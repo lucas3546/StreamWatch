@@ -12,18 +12,72 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface RegisterResponse {
+  token: string;
+  refreshToken: string;
+}
+export interface LoginResponse {
+  token: string;
+  refreshToken: string;
+}
+export interface RefreshTokenResponse {
+  token: string;
+  refreshToken: string;
+}
+
 export interface SearchPagedUsersRequest {
   pageNumber: number;
   pageSize: number;
   userName: string;
 }
 
-export async function login(data: LoginRequest): Promise<string> {
+export interface ChangeUsernameRequest {
+  newUsername: string;
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface GetAccountProfileResponse {
+  userId: string;
+  userName: string;
+  profilePicThumbnailUrl: string;
+}
+
+export async function login(data: LoginRequest): Promise<LoginResponse> {
   return api.post("/account/login", data).then((res) => res.data);
 }
 
-export async function register(data: RegisterRequest): Promise<string> {
+export async function register(
+  data: RegisterRequest,
+): Promise<RegisterResponse> {
   return api.post("/account/register", data).then((res) => res.data);
+}
+
+export async function refreshToken(): Promise<RefreshTokenResponse> {
+  return api
+    .get("/account/refresh", { withCredentials: true })
+    .then((res) => res.data);
+}
+
+export async function getAccountProfile(
+  userId: string,
+): Promise<GetAccountProfileResponse> {
+  return api.get(`/account/profile/${userId}`).then((res) => res.data);
+}
+
+export async function changeUsername(
+  data: ChangeUsernameRequest,
+): Promise<void> {
+  return api.put("/account/change-username", data).then((res) => res.data);
+}
+
+export async function changePassword(
+  data: ChangePasswordRequest,
+): Promise<void> {
+  return api.put("/account/change-password", data).then((res) => res.data);
 }
 
 export interface SearchPagedUsersResponseItem {

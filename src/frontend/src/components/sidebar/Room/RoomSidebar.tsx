@@ -2,15 +2,13 @@ import { useEffect, useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import RoomChat from "./RoomChat";
 import RoomUsersTab from "./RoomUsersTab";
+import { useRoomStore } from "../../../stores/roomStore";
 
-export interface RoomSidebarProps {
-  roomId: string;
-}
-
-export default function RoomSidebar({ roomId }: RoomSidebarProps) {
+export default function RoomSidebar() {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const [activeTab, setActiveTab] = useState<"chat" | "users">("chat");
   const [isOpen, setIsOpen] = useState(isMobile);
+  const roomUsers = useRoomStore((state) => state.roomUsers);
 
   //TO DO: Refactorize the entire responsive functionality in this component
   useEffect(() => {
@@ -29,7 +27,7 @@ export default function RoomSidebar({ roomId }: RoomSidebarProps) {
 
   return (
     <div
-      className={`flex-1 h-full md:flex-none md:h-[calc(100vh-56px)] flex flex-col bg-black border-defaultbordercolor border-l transition-all duration-300 overflow-hidden z-10
+      className={`flex-1  h-full md:flex-none md:ml-auto md:h-[calc(100vh-56px)] flex flex-col bg-black border-defaultbordercolor border-l transition-all duration-300 overflow-hidden z-10
         ${isOpen ? " md:w-70" : "w-0"}`}
     >
       {/* Contenido del sidebar */}
@@ -62,18 +60,16 @@ export default function RoomSidebar({ roomId }: RoomSidebarProps) {
                   : "text-gray-400 hover:text-gray-200"
               }`}
             >
-              Users
+              Users ({roomUsers.length})
             </button>
           </div>
 
           {activeTab === "chat" && (
             <div className="flex-1 flex flex-col min-h-0 bg-neutral-900 text-white relative overflow-hidden">
-              <RoomChat roomId={roomId} />
+              <RoomChat />
             </div>
           )}
-          {activeTab === "users" && (
-            <RoomUsersTab roomId={roomId}></RoomUsersTab>
-          )}
+          {activeTab === "users" && <RoomUsersTab></RoomUsersTab>}
         </>
       )}
 

@@ -1,11 +1,8 @@
 namespace StreamWatch.Application.Common.Helpers;
-
 using System.Text.RegularExpressions;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Web;
 
 public static class VideoUrlHelper

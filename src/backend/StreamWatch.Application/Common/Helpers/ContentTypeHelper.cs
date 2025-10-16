@@ -37,4 +37,20 @@ public static class ContentTypeHelper
 
         return "application/octet-stream"; // default
     }
+
+    public static bool IsVideo(string fileName)
+    {
+        if (string.IsNullOrWhiteSpace(fileName))
+            return false;
+
+        var ext = Path.GetExtension(fileName);
+        if (ext == null) return false;
+
+        if (_mappings.TryGetValue(ext, out var contentType))
+        {
+            return contentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase);
+        }
+
+        return false;
+    }
 }

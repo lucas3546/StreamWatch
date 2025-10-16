@@ -1,28 +1,31 @@
-import { PUBLIC_BUCKET_URL } from "../../utils/config";
 import Avatar from "boring-avatars";
 
 interface ProfilePicProps {
   userName: string | undefined;
-  fileName?: string | undefined;
+  fileUrl?: string | undefined;
   size?: number;
   isSquare?: boolean;
 }
 
 export default function ProfilePic({
   userName,
-  fileName,
+  fileUrl,
   size = 24,
   isSquare = false,
 }: ProfilePicProps) {
   return (
     <>
-      {fileName ? (
-        <img
-          src={PUBLIC_BUCKET_URL + fileName}
-          alt={userName}
-          height={size}
-          width={size}
-        />
+      {fileUrl ? (
+        <div
+          style={{ width: size, height: size }}
+          className="overflow-hidden rounded-full"
+        >
+          <img
+            src={fileUrl}
+            alt={userName}
+            className="w-full h-full object-cover"
+          />
+        </div>
       ) : (
         <Avatar
           size={size}

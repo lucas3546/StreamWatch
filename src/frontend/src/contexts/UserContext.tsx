@@ -24,6 +24,7 @@ interface UserContextType {
   user: User | null;
   setAccountUser: (token: string) => void;
   setJwt: (token: string) => void;
+  refreshUser: (token: string) => void;
   logout: () => void;
 }
 
@@ -66,6 +67,22 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const refreshUser = (newToken: string) => {
+    try {
+      const decoded = jwtDecode<DecodedToken>(newToken);
+      setUser({
+        nameid: decoded.nameid,
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+        picture: decoded.picture,
+      });
+      localStorage.setItem("jwt", newToken);
+    } catch (error) {
+      console.error("Error decoding JWT", error);
+    }
+  };
+
   const setJwt = (token: string) => {
     localStorage.setItem("jwt", token);
   };
@@ -76,7 +93,9 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, setAccountUser, setJwt, logout }}>
+    <UserContext.Provider
+      value={{ user, setAccountUser, refreshUser, setJwt, logout }}
+    >
       {children}
     </UserContext.Provider>
   );

@@ -19,7 +19,7 @@ export default function DefaultLayout() {
         ></Sidebar>
 
         {/* Contenido principal */}
-        <main className="flex-1 md:h-[calc(100vh-56px)] ">
+        <main className="flex-1 md:h-[calc(100vh-56px)] overflow-y-auto">
           <Outlet />
         </main>
       </div>

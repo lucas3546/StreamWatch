@@ -42,12 +42,12 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
       <div className="w-2/3">
         <SearchBar></SearchBar>
       </div>
-      <div className="mr-2 gap-2 w-full flex flex-row items-center justify-end">
+      <div className=" w-full flex flex-row items-center justify-end">
         {user && <NotificationMenu></NotificationMenu>}
 
         <Button
           onClick={createRoomButtonClicked}
-          className="bg-semibackground flex flex-row gap-1 text-shadow-md hover:bg-gray-700"
+          className="bg-semibackground flex flex-row gap-1 text-shadow-md hover:bg-gray-700 cursor-pointer mr-1"
         >
           <Icon icon={IoIosRadio}></Icon>Create
         </Button>

@@ -17,6 +17,7 @@ public class IndexCreationService : IHostedService
         //Drop
         await _provider.Connection.DropIndexAsync(typeof(RoomCache));
         await _provider.Connection.DropIndexAsync(typeof(UserSessionCache));
+
         //Creation
         await _provider.Connection.CreateIndexAsync(typeof(RoomCache));
         await _provider.Connection.CreateIndexAsync(typeof(UserSessionCache));

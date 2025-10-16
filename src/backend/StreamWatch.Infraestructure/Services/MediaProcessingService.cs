@@ -8,38 +8,37 @@ namespace StreamWatch.Infraestructure.Services;
 
 public class MediaProcessingService : IMediaProcessingService
 {
-    public Stream ResizeImage(Stream inputStream, int width, int height, string format = "webp")
-    {
-        var image = Image.NewFromStream(inputStream, "", access: Enums.Access.Sequential);
 
-        var resized = image.ThumbnailImage(width, height: height);
+    public async Task<Stream> GenerateThumbnailFromImageAsync(Stream input, bool isAnimated = false)
+    {
+        var options = new VOption { };
+
+        if (isAnimated) options.Add("n", -1);
+        
+        var image = Image.NewFromStream(input, "", access: Enums.Access.Sequential, null, options);
+
+        const int maxWidth = 600;
+
+        if (image.Width > maxWidth)
+        {
+            image = image.ThumbnailImage(maxWidth);
+        }
+
+
 
         var outputStream = new MemoryStream();
-        var outputBytes = resized.WriteToBuffer($".{format}");
-        outputStream.Write(outputBytes);
-        outputStream.Position = 0;
 
+        image.WriteToStream(outputStream, ".webp");
+        outputStream.Position = 0;
         image.Dispose();
-        resized.Dispose();
-
-        return outputStream;
-    }
-
-    public Stream ConvertImageFormat(Stream inputStream, string format = "webp")
-    {
-        var image = Image.NewFromStream(inputStream, "", access: Enums.Access.Sequential);
-
-        var outputStream = new MemoryStream();
-        var outputBytes = image.WriteToBuffer($".{format}");
-        outputStream.Write(outputBytes);
-        outputStream.Position = 0;
-
         image.Dispose();
 
         return outputStream;
     }
+    
 
-    public async Task<Stream> GenerateThumbnailStreamAsync(string videoUrl)
+
+    public async Task<Stream> GenerateThumbnailFromVideoUrlAsync(string videoUrl)
     {
         var ms = new MemoryStream();
         Uri uri = new Uri(videoUrl);
@@ -52,9 +51,9 @@ public class MediaProcessingService : IMediaProcessingService
                     options
                         .Seek(TimeSpan.FromSeconds(1))
                         .Resize(600, 800)
-                        .WithFrameOutputCount(1) // un solo frame
+                        .WithFrameOutputCount(1) 
                         .WithVideoCodec("libwebp")
-                        .ForceFormat("webp") // formato WEBP
+                        .ForceFormat("webp")
             )
             .ProcessAsynchronously();
 
