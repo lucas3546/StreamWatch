@@ -3,11 +3,14 @@ import { HiUserAdd } from "react-icons/hi";
 import Icon from "../../icon/Icon";
 import { useRoomStore } from "../../../stores/roomStore";
 import { useUser } from "../../../contexts/UserContext";
+import { useEffect } from "react";
 
 export default function RoomUsersTab() {
   const { user } = useUser();
   const roomUsers = useRoomStore((state) => state.roomUsers);
   const nameid = user?.nameid;
+
+  useEffect(() => {}, []);
 
   return (
     <div>
@@ -21,7 +24,10 @@ export default function RoomUsersTab() {
               userName={user.userName}
               fileUrl={user.profilePic}
             ></ProfilePic>
-            <p>{user.userName}</p>
+            <p title={user.userName} className="truncate">
+              {user.userName}
+            </p>
+
             {user.userId === nameid ? (
               <></>
             ) : (

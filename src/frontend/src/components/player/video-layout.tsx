@@ -29,12 +29,13 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
         <Controls.Group className="flex w-full items-center px-2">
           <Sliders.Time thumbnails={thumbnails} />
         </Controls.Group>
-        <Controls.Group className="-mt-0.5 flex w-full items-center px-2 pb-2">
+        <Controls.Group className="-mt-0.5 flex w-full items-center px-2 pb-2 bg-black">
           <Buttons.Play tooltipPlacement="top start" />
           <Buttons.Mute tooltipPlacement="top" />
           <Sliders.Volume />
           <TimeGroup />
           <Title />
+
           <div className="flex-1" />
           <Buttons.Caption tooltipPlacement="top" />
           <Menus.Settings placement="top end" tooltipPlacement="top" />

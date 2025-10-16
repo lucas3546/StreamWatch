@@ -90,34 +90,63 @@ export default function RoomChat() {
                   {msg.text}
                 </div>
               ) : (
-                <>
-                  <ProfilePic
-                    userName={msg.userName}
-                    fileUrl={undefined}
-                    size={25}
-                  />
+                <div
+                  className={`flex w-full gap-2 ${
+                    msg.fromMe
+                      ? "justify-end items-start"
+                      : "justify-start items-start"
+                  }`}
+                >
+                  {!msg.fromMe && (
+                    <ProfilePic
+                      userName={msg.userName}
+                      fileUrl={undefined}
+                      size={25}
+                    />
+                  )}
+
                   <div
-                    className={`max-w-[70%] px-3 py-1 rounded-lg break-words ${
+                    className={`max-w-[80%] px-3 py-1 text-sm rounded-lg break-words whitespace-pre-wrap overflow-hidden ${
                       msg.fromMe
-                        ? "bg-neutral-600 text-white"
+                        ? "bg-gray-600 text-white"
                         : "bg-neutral-700 text-white"
                     }`}
                   >
-                    <div className="flex flex-row items-center gap-2">
-                      <p className={getUsernameColor(msg.userName)}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <p
+                        className={`${getUsernameColor(msg.userName)} truncate max-w-[120px]`}
+                        title={msg.userName}
+                      >
                         {msg.userName}
                       </p>
+
                       <img
-                        src={`/flags/${msg.countryCode}.png`}
+                        src={`/flags2/${msg.countryCode.toUpperCase()}.svg`}
                         title={msg.countryName}
-                      ></img>
+                        className="flex-shrink-0 w-4 h-3 object-cover"
+                      />
                     </div>
+
                     {msg.image && (
-                      <img src={msg.image} className="rounded-md" />
+                      <img
+                        src={msg.image}
+                        className="rounded-md mt-1 max-w-full h-auto object-contain"
+                      />
                     )}
-                    {msg.text}
+
+                    <p className="break-words whitespace-pre-wrap">
+                      {msg.text}
+                    </p>
                   </div>
-                </>
+
+                  {msg.fromMe && (
+                    <ProfilePic
+                      userName={msg.userName}
+                      fileUrl={undefined}
+                      size={25}
+                    />
+                  )}
+                </div>
               )}
             </div>
           ))}

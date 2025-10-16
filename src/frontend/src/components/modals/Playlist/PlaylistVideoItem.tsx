@@ -28,8 +28,7 @@ export default function PlaylistVideoItem({
       )}
 
       <img
-        src={item.thumbnailUrl}
-        alt={item.thumbnailUrl}
+        src={item.thumbnailUrl ?? "/nopreview.jpg"}
         className="w-8 h-8 object-cover rounded"
       />
       <span className="truncate">{item.videoTitle}</span>

@@ -28,7 +28,7 @@ export default function StoragePage() {
           This is your temporal storage, you can upload videos up to 2gb, and
           will be deleted in 24 hours
         </p>
-        <button className="bg-blue-600 m-2 p-0.5 rounded-sm cursor-pointer">
+        <button className="bg-neutral-700 hover:bg-neutral-500 m-2 p-1 rounded-sm cursor-pointer">
           <UploadVideoModal onUploaded={onUploadedVideo}></UploadVideoModal>
         </button>
       </div>

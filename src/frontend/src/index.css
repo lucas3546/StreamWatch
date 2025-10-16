@@ -5,6 +5,17 @@
     --color-semibackground: rgb(26, 26, 31);
     --color-basecolor: rgb(22, 22, 26);
     --color-defaultbordercolor: rgb(60, 60, 60);
+
+    @keyframes marquee {
+        0% {
+            transform: translateX(0%);
+        }
+        100% {
+            transform: translateX(-100%);
+        }
+    }
+
+    --animate-marquee: marquee 10s linear infinite;
 }
 
 :root {

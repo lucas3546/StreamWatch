@@ -84,7 +84,7 @@ public class AccountController : ControllerBase
     public async Task<ActionResult> SetProfilePicture(UpdateProfilePicRequest request)
     {
         string fileName = "profile_pic" + Guid.NewGuid();
-        var uploadRequest = new UploadImageRequest(fileName, request.Picture.OpenReadStream(), true, null);
+        var uploadRequest = new UploadImageRequest(fileName, request.Picture.ContentType,request.Picture.OpenReadStream(), true, null);
 
         var uploadResponse = await _accountStorageService.UploadImageAsync(uploadRequest);
 

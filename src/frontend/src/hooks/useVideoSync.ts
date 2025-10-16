@@ -1,6 +1,7 @@
 import { useEffect, type RefObject } from "react";
 import { useSignalR } from "./useSignalR";
 import type {
+  MediaErrorDetail,
   MediaPauseEvent,
   MediaPlayerInstance,
   MediaSeekedEvent,
@@ -133,6 +134,11 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
     }
   }
 
+  async function onError(nativeEvent: MediaErrorDetail) {
+    console.log("[useVideoSync:onError] Error", nativeEvent);
+    alert(nativeEvent.message + ". Please change the video.");
+  }
+
   async function sendUpdateVideoState() {
     const current = playerRef.current;
     if (!current || !room?.id || !connection) return;
@@ -147,5 +153,5 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
     await connection.invoke("UpdateVideoState", request);
   }
 
-  return { onSeeked, onPlay, onPause };
+  return { onSeeked, onPlay, onPause, onError };
 }

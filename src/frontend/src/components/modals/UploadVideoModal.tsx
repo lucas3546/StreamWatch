@@ -13,6 +13,8 @@ import {
   type SetUploadedRequest,
 } from "../../services/storageService";
 import axios from "axios";
+import Icon from "../icon/Icon";
+import { CgSpinnerTwo } from "react-icons/cg";
 
 interface UploadVideoModalProps {
   onUploaded?: () => void; // callback opcional
@@ -24,6 +26,7 @@ export default function UploadVideoModal({
   const [isOpen, setIsOpen] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
 
   const handleFileSelect = (file: File) => {
     setSelectedVideo(file);
@@ -46,6 +49,12 @@ export default function UploadVideoModal({
       const response = await axios.put(presignedResponse.url, selectedVideo, {
         headers: {
           "Content-Type": "video/mp4",
+        },
+        onUploadProgress: (progressEvent) => {
+          const percent = Math.round(
+            (progressEvent.loaded * 100) / (progressEvent.total ?? 1),
+          );
+          setUploadProgress(percent);
         },
       });
 
@@ -86,20 +95,44 @@ export default function UploadVideoModal({
               Upload video to our servers for display in your rooms
             </Description>
             <VideoUpload onFileSelect={handleFileSelect} />
+            {isLoading && (
+              <div className="w-full bg-neutral-700 rounded-full h-3 mt-2">
+                <div
+                  className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            )}
+
+            {isLoading && (
+              <p className="text-sm mt-1 text-neutral-300">
+                {uploadProgress < 100
+                  ? `Uploading... ${uploadProgress}%`
+                  : "Finalizing upload..."}
+              </p>
+            )}
             <div className="flex gap-4">
               <button
                 onClick={() => setIsOpen(false)}
-                className="bg-neutral-600 rounded-md p-2"
+                className="bg-neutral-700 hover:bg-neutral-500 rounded-md p-2"
               >
                 Cancel
               </button>
               {isLoading ? (
-                <p>Uplading..</p>
+                <button
+                  onClick={handleUpload}
+                  disabled
+                  className="flex flex-row items-center gap-1 bg-gray-700 hover:bg-gray-500 cursor-pointer rounded-md p-2"
+                >
+                  <div className="animate-spin">
+                    <Icon icon={CgSpinnerTwo}></Icon>
+                  </div>
+                  Uploading
+                </button>
               ) : (
                 <button
                   onClick={handleUpload}
-                  className="bg-blue-700
-                -600 rounded-md p-2"
+                  className="bg-gray-700 hover:bg-gray-500 cursor-pointer rounded-md p-2"
                 >
                   Upload
                 </button>

@@ -1,7 +1,6 @@
 import type { Dispatch, SetStateAction } from "react";
 import { BiSolidCategory, BiSolidHome, BiTrendingUp } from "react-icons/bi";
 import SidebarItemLink from "./SidebarItemlink";
-import { TfiReload } from "react-icons/tfi";
 import SidebarDropdown from "./SidebarDropdown";
 import SidebarCategoriesItems from "./SidebarCategoriesItems";
 import { AiFillSetting } from "react-icons/ai";
@@ -43,11 +42,6 @@ export default function Sidebar({
             icon={BiSolidHome}
             label="Home"
             href="/home"
-          ></SidebarItemLink>
-          <SidebarItemLink
-            icon={TfiReload}
-            label="Latest"
-            href="/latest"
           ></SidebarItemLink>
           <SidebarItemLink
             icon={BiTrendingUp}

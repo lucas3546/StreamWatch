@@ -106,8 +106,17 @@ public class AccountStorageService : IAccountStorageService
         request.Image.Position = 0;
         //Process and upload thumbnail
         string thumbnailFileName =  "thumb_"+ Guid.NewGuid() + ".webp";
+
+        Stream thumbnailStream;
         
-        Stream thumbnailStream = _mediaProcessingService.ResizeImage(request.Image, 800, 800);
+        if (request.contentType == "image/gif" || request.contentType == "image/webp")
+        {
+            thumbnailStream = await _mediaProcessingService.GenerateThumbnailFromImageAsync(request.Image, true);
+        }
+        else
+        {
+            thumbnailStream = await  _mediaProcessingService.GenerateThumbnailFromImageAsync(request.Image);
+        }
         
         UploadedFile thumb = await _storageService.UploadAsync(thumbnailStream, thumbnailFileName, "image/webp");
 
@@ -121,9 +130,10 @@ public class AccountStorageService : IAccountStorageService
         if (!request.UploadOnlyThumbnail)
         {
             originalFileName = Guid.NewGuid() + ".webp";
+
+            Stream profilePicStream = await _mediaProcessingService.GenerateThumbnailFromImageAsync(request.Image);;
             
-            Stream profilePicStream = _mediaProcessingService.ConvertImageFormat(request.Image);
-        
+            
             originalFile = await _storageService.UploadAsync(profilePicStream, originalFileName, "image/webp");
 
             await profilePicStream.DisposeAsync();
@@ -188,9 +198,7 @@ public class AccountStorageService : IAccountStorageService
             if (mimetype != media.ContentType) return Result.Failure(new ValidationError("File type does not match"));
 
 
-
-
-            using var thumbStream = await _mediaProcessingService.GenerateThumbnailStreamAsync(uploadedVideo.PublicUrl);
+            using var thumbStream = await _mediaProcessingService.GenerateThumbnailFromVideoUrlAsync(uploadedVideo.PublicUrl);
                 
             
             var thumbName = Guid.NewGuid() + ".webp";

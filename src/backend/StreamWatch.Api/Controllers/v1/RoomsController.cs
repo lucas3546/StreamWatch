@@ -84,8 +84,9 @@ public class RoomsController : ControllerBase
         {
             var uploadImageRequest = new UploadImageRequest(
                 request.Image.FileName,
+                request.Image.ContentType,
                 request.Image.OpenReadStream(),
-                true,
+                UploadOnlyThumbnail: true,
                 DateTime.UtcNow.AddMinutes(10)
             );
 

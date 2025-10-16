@@ -1,7 +1,6 @@
 import { useParams } from "react-router";
 import RoomSidebar from "../../components/sidebar/Room/RoomSidebar";
 import VideoPlayer from "../../components/player/VideoPlayer";
-import RoomBottomBar from "../../components/bottombar/RoomBottomBar";
 import { useEffect, useRef } from "react";
 import { roomRealtimeService } from "../../services/roomRealtimeService";
 import { useSignalR } from "../../hooks/useSignalR";
@@ -10,6 +9,7 @@ import { useConfirmNavigation } from "../../hooks/useConfirmNavegation";
 import { useUser } from "../../contexts/UserContext";
 import { useVideoSync } from "../../hooks/useVideoSync";
 import { useRoomStore } from "../../stores/roomStore";
+import RoomBottomBar from "../../components/bottombar/RoomBottomBar";
 
 export default function RoomPage() {
   const setRoom = useRoomStore((state) => state.setRoom);
@@ -22,7 +22,7 @@ export default function RoomPage() {
   const { user } = useUser();
   const { connection, reloadConnection } = useSignalR();
   const player = useRef<MediaPlayerInstance>(null);
-  const { onSeeked, onPlay, onPause } = useVideoSync(player);
+  const { onSeeked, onPlay, onPause, onError } = useVideoSync(player);
 
   useConfirmNavigation(
     true,
@@ -64,10 +64,10 @@ export default function RoomPage() {
 
   return (
     <>
-      <div className="flex flex-col md:flex-row h-[calc(100vh-56px)] min-h-0  overflow-hidden">
+      <div className="flex w-full flex-col sm:flex-row md:flex-row h-[calc(100vh-56px)] min-h-0  overflow-hidden">
         <div className="flex-1 flex flex-col ">
           <div className="flex-1 min-h-0  overflow-hidden flex justify-center ">
-            <div className="w-full max-w-5xl max-h-full ">
+            <div className="aspect-video w-full max-h-full ">
               {room && (
                 <VideoPlayer
                   roomState={room}
@@ -75,12 +75,13 @@ export default function RoomPage() {
                   onSeeked={onSeeked}
                   onPlay={onPlay}
                   onPause={onPause}
+                  onError={onError}
                 />
               )}
             </div>
           </div>
           {room ? (
-            <div className="h-auto md:h-16">
+            <div className="h-auto w-full  md:h-16 mt-auto">
               <RoomBottomBar />
             </div>
           ) : (
