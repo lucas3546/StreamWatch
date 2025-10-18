@@ -75,7 +75,7 @@ export default function RoomCard({
       {/* Imagen con aspect ratio 16:9 */}
       <div className="w-full aspect-[4/3] relative">
         <img
-          className="w-full h-full object-cover rounded-md"
+          className="w-full h-full object-contain rounded-md"
           src={thumbnailUrl}
           alt={title}
         />

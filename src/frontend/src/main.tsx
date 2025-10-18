@@ -14,7 +14,6 @@ import RoomPage from "./pages/Rooms/RoomPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
 import { SignalRProvider } from "./contexts/SignalRProvider.tsx";
 import { createBrowserRouter, RouterProvider } from "react-router";
-import TrendingPage from "./pages/TrendingPage.tsx";
 import FriendsPage from "./pages/FriendsPage.tsx";
 import { ToastContainer } from "react-toastify";
 import ProfilePage from "./pages/ProfilePage.tsx";
@@ -29,8 +28,22 @@ const router = createBrowserRouter([
       </SignalRProvider>
     ),
     children: [
-      { path: "/", element: <RoomsPage /> },
-      { path: "/home", element: <RoomsPage /> },
+      {
+        path: "/",
+        element: <RoomsPage key="/" category="All" order="Recent" />,
+      },
+      {
+        path: "/home",
+        element: <RoomsPage key="home" category="All" order="Recent" />,
+      },
+      {
+        path: "/trending",
+        element: <RoomsPage key="trending" category="All" order="MostUsers" />,
+      },
+      {
+        path: "/categories/:categoryName",
+        element: <RoomsPage key={location.pathname} order="Recent" />,
+      },
       { path: "/rooms/create", element: <CreateRoomPage /> },
       { path: "/settings", element: <SettingsPage /> },
       { path: "/account/change-avatar", element: <ChangeAvatarPage /> },
@@ -39,7 +52,7 @@ const router = createBrowserRouter([
       { path: "/storage", element: <StoragePage /> },
       { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <LoginPage /> },
-      { path: "/trending", element: <TrendingPage /> },
+
       { path: "/friends", element: <FriendsPage /> },
       { path: "/room/:roomId", element: <RoomPage /> },
     ],
