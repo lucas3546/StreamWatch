@@ -28,6 +28,7 @@ public static class ConfigureServices
         #region EventsRegion
 
         services.AddSingleton<IEventBus, InMemoryEventBus>();
+        services.AddScoped<IEventHandler<AcceptFriendshipInvitationEvent>, AcceptFriendshipInvitationEventHandler>();
         services.AddScoped<IEventHandler<FriendshipCreatedEvent>, FriendshipCreatedEventHandler>();
         services.AddScoped<IEventHandler<UserJoinedRoomEvent>, UserJoinedRoomEventHandler>();
         services.AddScoped<IEventHandler<UserLeftRoomEvent>, UserLeftRoomEventHandler>();

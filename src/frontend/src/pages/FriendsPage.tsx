@@ -77,7 +77,7 @@ export default function FriendsPage() {
             ) : friends.length === 0 ? (
               <p>You don´t have any friends yet.</p>
             ) : (
-              <ul className="flex flex-col flex-wrap md:flex-row">
+              <ul className="flex flex-col flex-wrap md:flex-row gap-1">
                 {friends.map((f) => (
                   <UserFriendItem
                     key={f.userId}
@@ -86,7 +86,6 @@ export default function FriendsPage() {
                     profilePic={f.profileThumbnail}
                     status={f.status}
                     requestedByAccountId={f.requestedByAccountId}
-                    friendsSince={f.responseDate}
                     onFriendAction={onFriendAction}
                   ></UserFriendItem>
                 ))}
@@ -96,7 +95,6 @@ export default function FriendsPage() {
         )}
         {activeTab === "search" && (
           <UserSearchContainer
-            friends={friends}
             onFriendAction={onFriendAction}
           ></UserSearchContainer>
         )}

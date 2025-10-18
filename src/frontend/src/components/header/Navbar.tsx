@@ -1,5 +1,4 @@
 import { IoIosRadio } from "react-icons/io";
-import Button from "../buttons/Button";
 import Icon from "../icon/Icon";
 import SearchBar from "./searchbar/SearchBar";
 import { GiHamburgerMenu } from "react-icons/gi";
@@ -30,27 +29,40 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
   };
 
   return (
-    <div className="bg-basecolor min-h-14 w-full flex justify-between items-center border-defaultbordercolor border-b-1 shadow-md">
-      <div className="ml-4 gap-2 w-full flex flex-row items-center">
-        <button onClick={() => setSidebarOpen((prev) => !prev)}>
-          <Icon icon={GiHamburgerMenu} />
+    <div className="bg-basecolor px-2 min-h-14 w-full flex justify-between items-center border-b border-defaultbordercolor shadow-md md:px-4">
+      {/* Izquierda: menú y logo */}
+      <div className="flex items-center gap-3">
+        <button
+          onClick={() => setSidebarOpen((prev) => !prev)}
+          className="p-2 rounded-md hover:bg-neutral-700/50 transition-colors cursor-pointer"
+        >
+          <Icon icon={GiHamburgerMenu} size={24} />
         </button>
-        <Link to="/home" className="text-2xl">
+
+        <Link
+          to="/home"
+          className="text-2xl font-semibold text-white hover:text-gray-200 transition-colors"
+        >
           StreamWatch
         </Link>
       </div>
-      <div className="w-2/3">
-        <SearchBar></SearchBar>
-      </div>
-      <div className=" w-full flex flex-row items-center justify-end">
-        {user && <NotificationMenu></NotificationMenu>}
 
-        <Button
+      {/* Centro: barra de búsqueda */}
+      <div className="w-2/3">
+        <SearchBar />
+      </div>
+
+      {/* Derecha: notificaciones y crear room */}
+      <div className="flex items-center gap-3">
+        {user && <NotificationMenu />}
+
+        <button
           onClick={createRoomButtonClicked}
-          className="bg-semibackground flex flex-row gap-1 text-shadow-md hover:bg-gray-700 cursor-pointer mr-1"
+          className="flex items-center gap-2 p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 transition-shadow shadow-sm hover:shadow-md cursor-pointer text-white font-medium"
         >
-          <Icon icon={IoIosRadio}></Icon>Create
-        </Button>
+          <Icon icon={IoIosRadio} size={22} />
+          Create
+        </button>
       </div>
     </div>
   );

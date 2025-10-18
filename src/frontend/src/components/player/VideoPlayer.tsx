@@ -44,7 +44,7 @@ export default function VideoPlayer({
       // Aplica estilos directamente
       Object.assign(videoOrIframe.style, {
         maxWidth: "100%",
-        maxHeight: "80vh",
+        maxHeight: "100%",
         width: "100%",
         height: "120%",
         objectFit: "contain",

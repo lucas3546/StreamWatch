@@ -22,7 +22,7 @@ export default function NotificationMenuItem({
 
   if (type === "friendinvitation") {
     icon = <Icon icon={FaUserFriends} size={40} />;
-    route = "friends";
+    route = `profile/${notificationModel.fromUserId}`;
     message = (
       <>
         New friend request from

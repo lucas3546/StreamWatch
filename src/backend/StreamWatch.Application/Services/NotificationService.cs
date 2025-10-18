@@ -27,7 +27,7 @@ public class NotificationService : INotificationService
         
         var totalItems = await _context.Notifications.CountAsync();
         
-        var dtos = notifications.Select(x => new NotificationModel(x.Id, x.FromUserName, x.Type.ToString(), x.Payload, x.CreatedAt));
+        var dtos = notifications.Select(x => new NotificationModel(x.Id, x.FromUserName, x.CreatedBy, x.Type.ToString(), x.Payload, x.CreatedAt));
         
         var response = new PaginatedList<NotificationModel>(dtos, request.PageNumber, request.PageSize, totalItems);
         

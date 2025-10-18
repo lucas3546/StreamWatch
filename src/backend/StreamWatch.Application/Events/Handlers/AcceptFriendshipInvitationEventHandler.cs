@@ -26,6 +26,9 @@ public class AcceptFriendshipInvitationEventHandler : IEventHandler<AcceptFriend
         var userName = _currentUserService.Name;
         ArgumentNullException.ThrowIfNullOrEmpty(userName);
 
+        var userId = _currentUserService.Name;
+        ArgumentNullException.ThrowIfNullOrEmpty(userId);
+
         var notification = new Notification()
         {
             ToAccountId = @event.requesterId,
@@ -38,7 +41,7 @@ public class AcceptFriendshipInvitationEventHandler : IEventHandler<AcceptFriend
 
         await _context.SaveChangesAsync(cancellationToken);
         
-        var model = new NotificationModel(notification.Id, notification.FromUserName, notification.Type.ToString(), Payload: null, notification.CreatedAt);
+        var model = new NotificationModel(notification.Id, notification.FromUserName, userId, notification.Type.ToString(), Payload: null, notification.CreatedAt);
 
         await _realtimeMessengerService.SendToUserAsync(notification.ToAccountId, "ReceiveNotification", model);
         

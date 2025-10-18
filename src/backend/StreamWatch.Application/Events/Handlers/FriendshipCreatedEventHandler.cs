@@ -32,7 +32,7 @@ public class FriendshipCreatedEventHandler : IEventHandler<FriendshipCreatedEven
 
         await _context.SaveChangesAsync(cancellationToken);
         
-        var model = new NotificationModel(notification.Id, notification.FromUserName, notification.Type.ToString(), Payload: null,notification.CreatedAt);
+        var model = new NotificationModel(notification.Id, notification.FromUserName, @event.requesterId, notification.Type.ToString(), Payload: null,notification.CreatedAt);
 
         await _realtimeMessengerService.SendToUserAsync(@event.toaccountid, "ReceiveNotification", model);
         
