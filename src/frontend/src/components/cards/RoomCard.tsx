@@ -77,6 +77,10 @@ export default function RoomCard({
         <img
           src={thumbnailUrl}
           alt={title}
+          onError={(e) => {
+            e.currentTarget.onerror = null;
+            e.currentTarget.src = "/nopreview.jpg";
+          }}
           className="w-full h-full object-cover rounded-t-xl transition-transform duration-300 group-hover:scale-105"
         />
 

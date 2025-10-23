@@ -22,6 +22,7 @@ interface VideoPlayerProps {
   onPlay: (nativeEvent: MediaPauseEvent) => void;
   onPause: (nativeEvent: MediaPauseEvent) => void;
   onError: (nativeEvent: MediaErrorDetail) => void;
+  onEnded: () => void;
 }
 
 export default function VideoPlayer({
@@ -31,6 +32,7 @@ export default function VideoPlayer({
   onPlay,
   onPause,
   onError,
+  onEnded,
 }: VideoPlayerProps) {
   useEffect(() => {
     const mediaElement = player.current?.el; // acceso al MediaPlayer real
@@ -74,9 +76,24 @@ export default function VideoPlayer({
       onPlay={onPlay}
       onPause={onPause}
       onError={onError}
+      onEnded={onEnded}
       className="h-full w-full object-contain"
     >
-      <MediaProvider className=" w-full h-full object-contain" />
+      <MediaProvider className=" w-full h-full object-contain">
+        {/*
+        <div
+          slot="ui"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-50"
+        >
+          <div className="bg-neutral-900/80 p-3 rounded-md">
+            <input
+              type="text"
+              placeholder="Chat..."
+              className="w-40 p-1 rounded bg-neutral-800"
+            />
+          </div>
+          </div>*/}
+      </MediaProvider>
 
       <DefaultAudioLayout icons={defaultLayoutIcons} />
 

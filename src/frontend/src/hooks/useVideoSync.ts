@@ -7,6 +7,10 @@ import type {
   MediaSeekedEvent,
 } from "@vidstack/react";
 import { useRoomStore } from "../stores/roomStore";
+import {
+  roomRealtimeService,
+  type ChangeVideoFromPlaylistItemType,
+} from "../services/roomRealtimeService";
 
 interface UpdateVideoStateRequest {
   roomId: string;
@@ -139,6 +143,26 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
     alert(nativeEvent.message + ". Please change the video.");
   }
 
+  async function onEnded() {
+    console.log("Video ended");
+    if (!connection || !room?.id) return;
+    const { changeVideoFromPlaylist } = roomRealtimeService(connection);
+
+    const mostRecentPlaylistItem = playlistItems.reduce((latest, current) => {
+      return new Date(current.createdAt) > new Date(latest.createdAt)
+        ? current
+        : latest;
+    });
+
+    const request: ChangeVideoFromPlaylistItemType = {
+      roomId: room?.id,
+      playlistItemId: mostRecentPlaylistItem.id,
+    };
+
+    console.log(request);
+    await changeVideoFromPlaylist(request);
+  }
+
   async function sendUpdateVideoState() {
     const current = playerRef.current;
     if (!current || !room?.id || !connection) return;
@@ -153,5 +177,5 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
     await connection.invoke("UpdateVideoState", request);
   }
 
-  return { onSeeked, onPlay, onPause, onError };
+  return { onSeeked, onPlay, onPause, onError, onEnded };
 }

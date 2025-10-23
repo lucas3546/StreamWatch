@@ -35,11 +35,15 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
           <Sliders.Volume />
           <TimeGroup />
           <Title />
-
+          <div className="w-[20%] h-[70%] bg-semibackground opacity-10 z-50 absolute right-5 top-1/2 transform -translate-y-1/2">
+            <a href="google.com">AAS</a>
+            <input type="text"></input>
+          </div>
           <div className="flex-1" />
           <Buttons.Caption tooltipPlacement="top" />
           <Menus.Settings placement="top end" tooltipPlacement="top" />
-          <Buttons.PIP tooltipPlacement="top" />
+          {/* <Buttons.PIP tooltipPlacement="top" /> */}
+
           <Buttons.Fullscreen tooltipPlacement="top end" />
         </Controls.Group>
       </Controls.Root>

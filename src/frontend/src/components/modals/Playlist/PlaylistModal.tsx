@@ -1,6 +1,5 @@
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { useEffect, useState } from "react";
-import type { PlaylistVideoItemModel } from "../../types/PlaylistVideoItemModel";
+import { useState } from "react";
 import PlaylistVideoItem from "./PlaylistVideoItem";
 import Icon from "../../icon/Icon";
 import { MdOutlinePlaylistPlay } from "react-icons/md";
@@ -16,25 +15,8 @@ export default function PlaylistModal() {
   const { connection } = useSignalR();
   const room = useRoomStore((state) => state.room);
   const playlistItems = useRoomStore((state) => state.playlistItems);
-  const addPlaylistItem = useRoomStore((state) => state.addPlaylistItem);
 
   const [isOpen, setIsOpen] = useState(false);
-
-  useEffect(() => {
-    if (!connection) return;
-
-    const service = roomRealtimeService(connection);
-
-    service.onReceiveNewVideoToPlaylist((item: PlaylistVideoItemModel) => {
-      console.log("New playlist item received:", item);
-      addPlaylistItem(item);
-    });
-
-    return () => {
-      console.log("[PlaylistModal] Cleaning up NewPlaylistVideo handler");
-      connection.off("NewPlaylistVideo");
-    };
-  }, [connection]);
 
   const onClickVideoItem = (itemId: string) => {
     if (!connection) return;

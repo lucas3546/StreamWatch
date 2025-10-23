@@ -14,6 +14,13 @@ export interface CreateRoomResponse {
   roomId: string;
 }
 
+export interface UpdateRoomRequest {
+  id: string;
+  title: string;
+  category: string;
+  isPublic: boolean;
+}
+
 export interface GetPagedRoomsRequest {
   pageNumber: number;
   pageSize: number;
@@ -95,4 +102,8 @@ export async function addVideoToPlaylist(
   data: AddVideoToPlaylistType,
 ): Promise<void> {
   return api.post("/rooms/playlist/add", data).then((res) => res.data);
+}
+
+export async function updateRoom(data: UpdateRoomRequest): Promise<void> {
+  return api.put("/rooms/update", data).then((res) => res.data);
 }

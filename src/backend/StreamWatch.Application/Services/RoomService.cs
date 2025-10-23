@@ -60,7 +60,7 @@ public class RoomService : IRoomService
                 var media = await _context.Media.FindAsync(decodedId);
 
                 room.VideoUrl = _storageService.GetPublicUrl(media.FileName);
-                room.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName);;
+                room.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName); ;
                 room.VideoProvider = "Local";
                 videoTitle = media.FileName;
             }
@@ -92,6 +92,26 @@ public class RoomService : IRoomService
         var response = new CreateRoomResponse(roomId);
 
         return Result<CreateRoomResponse>.Success(response);
+    }
+    
+    public async Task<Result> UpdateRoomAsync(UpdateRoomRequest request)
+    {
+        var currentUserId = _currentUserService.Id;
+        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserId cannot be null or empty!");
+
+        var room = await _roomRepository.GetByIdAsync(request.Id);
+
+        if (room is null) return Result.Failure(new NotFoundError("Room not found!"));
+
+        if (currentUserId != room.LeaderAccountId) return Result.Failure(new ValidationError("You are not the leader of the room"));
+
+        room.Title = request.Title;
+        room.Category = request.Category;
+        room.IsPublic = request.IsPublic;
+
+        await _roomRepository.UpdateAsync(room);
+
+        return Result.Success();
     }
 
     public async Task<Result<PlaylistVideoItem>> AddVideoToPlaylist(AddVideoToPlaylistRequest request)

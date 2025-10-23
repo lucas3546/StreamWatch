@@ -10,19 +10,22 @@ import { useUser } from "../../contexts/UserContext";
 import { useVideoSync } from "../../hooks/useVideoSync";
 import { useRoomStore } from "../../stores/roomStore";
 import RoomBottomBar from "../../components/bottombar/RoomBottomBar";
+import { RoomHubUsersHandlers } from "../../signalr/RoomHubUsersHandlers";
+import { RoomHubChatHandlers } from "../../signalr/RoomHubMessagesHandlers";
+import { RoomHubPlaylistHandlers } from "../../signalr/RoomHubPlaylistHandlers";
+import { RoomHubGeneralHandlers } from "../../signalr/RoomHubGeneralHandlers";
 
 export default function RoomPage() {
   const setRoom = useRoomStore((state) => state.setRoom);
   const room = useRoomStore((state) => state.room);
   const resetRoomValues = useRoomStore((state) => state.reset);
   const setRoomUsers = useRoomStore((state) => state.setRoomUsers);
-  const isLeader = useRoomStore((state) => state.isLeader);
   const setIsLeader = useRoomStore((state) => state.setIsLeader);
   const { roomId } = useParams<{ roomId: string }>();
   const { user } = useUser();
   const { connection, reloadConnection } = useSignalR();
   const player = useRef<MediaPlayerInstance>(null);
-  const { onSeeked, onPlay, onPause, onError } = useVideoSync(player);
+  const { onSeeked, onPlay, onPause, onError, onEnded } = useVideoSync(player);
 
   useConfirmNavigation(
     true,
@@ -34,9 +37,20 @@ export default function RoomPage() {
   );
 
   useEffect(() => {
-    if (!connection || !roomId) return;
+    if (!connection || !roomId || !user) return;
 
     const service = roomRealtimeService(connection);
+
+    const generalHandlers = new RoomHubGeneralHandlers(connection, user);
+    const userHandlers = new RoomHubUsersHandlers(connection);
+    const chatHandlers = new RoomHubChatHandlers(connection, user);
+    const playlisHandlers = new RoomHubPlaylistHandlers(connection, user);
+
+    //Register all
+    generalHandlers.registerAll();
+    userHandlers.registerAll();
+    chatHandlers.registerAll();
+    playlisHandlers.registerAll();
 
     (async () => {
       try {
@@ -52,16 +66,21 @@ export default function RoomPage() {
         setRoom(roomData);
 
         service.onReconnected((id) => console.log("Reconectado con id:", id));
-
         service.onReconnecting((err) =>
           console.warn("Intentando reconectar...", err),
         );
-      } catch (err) {
+      } catch (err: any) {
         console.error("❌ Error al conectar con el room:", err);
       }
     })();
-  }, [connection, roomId, isLeader]);
 
+    return () => {
+      generalHandlers.unregisterAll();
+      userHandlers.unregisterAll();
+      chatHandlers.unregisterAll();
+      playlisHandlers.unregisterAll();
+    };
+  }, [connection, roomId, user]);
   return (
     <>
       <div className="flex w-full flex-col sm:flex-row md:flex-row h-[calc(100vh-56px)] min-h-0  overflow-hidden">
@@ -76,6 +95,7 @@ export default function RoomPage() {
                   onPlay={onPlay}
                   onPause={onPause}
                   onError={onError}
+                  onEnded={onEnded}
                 />
               )}
             </div>

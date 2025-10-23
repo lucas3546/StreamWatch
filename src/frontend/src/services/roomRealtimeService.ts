@@ -63,6 +63,12 @@ export const roomRealtimeService = (connection: HubConnection) => {
     connection.on("ReceiveMessage", handler);
   };
 
+  const onReceiveNewUserJoined = (
+    handler: (src: BasicUserRoomModel) => void,
+  ) => {
+    connection.on("NewUserJoined", handler);
+  };
+
   const onReconnected = (handler: (id?: string) => void) => {
     connection.onreconnected(handler);
   };
@@ -77,6 +83,7 @@ export const roomRealtimeService = (connection: HubConnection) => {
     addVideoToPlaylist,
     onReceiveNewVideoToPlaylist,
     changeVideoFromPlaylist,
+    onReceiveNewUserJoined,
     /*
     onVideoSourceChanged,
     onVideoAddedToPlaylist,

@@ -35,12 +35,29 @@ public class RoomsController : ControllerBase
         _currentUserService = currentUserService;
     }
 
-    [HttpPost("Create")]
+    [HttpPost("create")]
+    [Authorize]
     public async Task<ActionResult<CreateRoomResponse>> Create(CreateRoomRequest request)
     {
         var response = await _roomService.CreateRoomAsync(request);
 
         return response.ToActionResult(HttpContext);
+    }
+
+    [HttpPut("update")]
+    [Authorize]
+    public async Task<ActionResult> Update(UpdateRoomRequest request)
+    {
+        var response = await _roomService.UpdateRoomAsync(request);
+
+        if (response.IsSuccess)
+        {
+            await _hubContext.Clients.Group(request.Id).SendAsync("RoomUpdated", new RoomUpdatedModel(request.Title, request.Category.ToString(), request.IsPublic));
+
+            return response.ToActionResult(HttpContext);
+        }
+        return response.ToActionResult(HttpContext);
+        
     }
 
     [HttpGet("paged")]
