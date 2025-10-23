@@ -1,8 +1,8 @@
 import PlaylistModal from "../modals/Playlist/PlaylistModal";
-import Icon from "../icon/Icon";
-import { HiUsers } from "react-icons/hi";
+
 import { useRoomStore } from "../../stores/roomStore";
 import RoomSettingsModal from "../modals/RoomSettingsModal";
+import RoomInviteModal from "../modals/RoomInviteModal";
 
 export default function RoomBottomBar() {
   const room = useRoomStore((state) => state.room);
@@ -11,10 +11,7 @@ export default function RoomBottomBar() {
       <div className="flex items-center gap-2 flex-shrink-0">
         <PlaylistModal />
         <RoomSettingsModal />
-        <button className="flex items-center gap-1 bg-defaultbordercolor p-1 rounded-sm cursor-pointer hover:bg-neutral-700 transition-colors">
-          <Icon icon={HiUsers} size={20} />
-          Invite
-        </button>
+        <RoomInviteModal />
       </div>
 
       <div className="flex-1" />
