@@ -16,31 +16,34 @@ builder.Services.AddApiServices(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-app.UseStatusCodePages();
+
+app.UseRouting();
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.UseStatusCodePages();
+
+app.MapOpenApi();
+app.UseSwagger();
+app.UseSwaggerUI();
+
 app.MapControllers();
 
+app.MapHealthChecks("/health");
+
+app.MapHub<StreamWatchHub>("/hubs/streamwatch");
 
 app.UseHangfireDashboard();
+
+
 
 RecurringJob.AddOrUpdate<MediaCleanupService>(
     "cleanup",
     svc => svc.CleanExpiredFiles(),
     Cron.Hourly
 );
-
-app.MapHub<StreamWatchHub>("api/hubs/streamwatch");
-
-app.UseCors();
 
 app.Run();

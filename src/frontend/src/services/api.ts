@@ -1,9 +1,10 @@
 // api/api.ts
 import axios from "axios";
 import type { ProblemDetails } from "../components/types/ProblemDetails";
+import { BASE_URL } from "../utils/config";
 
 export const api = axios.create({
-  baseURL: "http://localhost:5100/api/v1",
+  baseURL: BASE_URL,
 });
 
 api.interceptors.request.use(

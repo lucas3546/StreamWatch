@@ -15,7 +15,7 @@ export const SignalRProvider = ({
 
   const initConnection = useCallback(async () => {
     const conn = new signalR.HubConnectionBuilder()
-      .withUrl(BASE_URL + "/hubs/streamwatch", {
+      .withUrl(window.location.origin + "/api" + "/hubs/streamwatch", {
         accessTokenFactory: () => localStorage.getItem("jwt") || "",
       })
       .withAutomaticReconnect()

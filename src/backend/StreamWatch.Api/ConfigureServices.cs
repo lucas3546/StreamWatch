@@ -17,7 +17,9 @@ public static class ConfigureServices
 {
     public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
      {
-         services.Configure<S3StorageOptions>(configuration.GetSection("Storage"));
+        services.Configure<S3StorageOptions>(configuration.GetSection("Storage"));
+         
+        services.AddHealthChecks();
          
          services.AddSignalR();
          
@@ -63,7 +65,7 @@ public static class ConfigureServices
                          // If the request is for our hub...
                          var path = context.HttpContext.Request.Path;
                          if (!string.IsNullOrEmpty(accessToken) &&
-                             (path.StartsWithSegments("/api/hubs/streamwatch")))
+                             (path.StartsWithSegments("/hubs/streamwatch")))
                          {
                              // Read the token out of the query string
                              context.Token = accessToken;

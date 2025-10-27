@@ -14,7 +14,7 @@ using StreamWatch.Core.Constants;
 namespace StreamWatch.Api.Controllers.v1;
 
 [ApiController]
-[Route("api/v1/[controller]/")]
+[Route("v1/[controller]/")]
 public class RoomsController : ControllerBase
 {
     private readonly IRoomService _roomService;
@@ -77,18 +77,6 @@ public class RoomsController : ControllerBase
         var userName = _currentUserService.Name;
 
         var role = _currentUserService.Role;
-
-        string? countryCode = null;
-        string? countryName = null;
-        if (role != null && role == Roles.Admin)
-        {
-            countryCode = "staff";
-            countryName = "staff";
-        }
-        else
-        {
-            (countryCode, countryName) = _currentUserService.Country;
-        }
 
         var room = await _roomService.GetRoomByIdAsync(request.RoomId);
 
