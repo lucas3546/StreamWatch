@@ -2,6 +2,8 @@ import {
   MediaPlayer,
   MediaPlayerInstance,
   MediaProvider,
+  TextTrack,
+  Track,
   type MediaErrorDetail,
   type MediaPauseEvent,
   type MediaSeekedEvent,
@@ -52,31 +54,34 @@ export default function VideoPlayer({
         objectFit: "contain",
         margin: "0 auto",
         display: "block",
-        padding: "50px",
+        padding: "5px",
         backgroundColor: "black",
       });
     }
   }, [player, roomState.videoUrl]);
 
-  const getSanitizedUrl = (url: string) => {
-    if (!url.includes("youtube.com") && !url.includes("youtu.be")) return url;
-
-    const hasQuery = url.includes("?");
-    const params =
-      "modestbranding=1&controls=0&showinfo=0&rel=0&iv_load_policy=3";
-    return `${url}${hasQuery ? "&" : "?"}${params}`;
+  const putTrack = () => {
+    player.current?.textTracks.add({
+      src: "https://pub-3d64bc11ad674a4e92d65803df99fd7e.r2.dev/alteredstatesubtitles.vtt",
+      kind: "subtitles",
+      label: "Spanish",
+      language: "es",
+      type: "vtt",
+      default: true,
+    });
   };
 
   return (
     <MediaPlayer
       key={`${roomState?.videoProvider}-${roomState?.videoUrl}`}
-      src={getSanitizedUrl(roomState.videoUrl)}
+      src={roomState.videoUrl}
       ref={player}
       onSeeked={onSeeked}
       onPlay={onPlay}
       onPause={onPause}
       onError={onError}
       onEnded={onEnded}
+      onTextTrackChange={() => console.log(player.current?.state.textTrack)}
       className="h-full w-full object-contain"
     >
       <MediaProvider className=" w-full h-full object-contain">
@@ -94,9 +99,15 @@ export default function VideoPlayer({
           </div>
           </div>*/}
       </MediaProvider>
-
+      <Track
+        src="https://pub-3d64bc11ad674a4e92d65803df99fd7e.r2.dev/alteredstatesubtitles.srt"
+        kind="subtitles"
+        label="English"
+        lang="en-US"
+        type="srt"
+        default
+      />
       <DefaultAudioLayout icons={defaultLayoutIcons} />
-
       <VideoLayout></VideoLayout>
     </MediaPlayer>
   );

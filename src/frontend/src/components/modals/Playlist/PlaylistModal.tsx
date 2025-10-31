@@ -35,7 +35,7 @@ export default function PlaylistModal() {
   return (
     <>
       <button
-        className="bg-neutral-700 text-sm rounded-md flex items-center p-1 ml-2 cursor-pointer hover:bg-neutral-600 transition-colors"
+        className="bg-neutral-700 text-sm py-1 px-3 rounded-2xl flex items-center ml-2 cursor-pointer hover:bg-neutral-600 transition-colors"
         onClick={() => setIsOpen(true)}
       >
         <Icon icon={MdOutlinePlaylistPlay} />

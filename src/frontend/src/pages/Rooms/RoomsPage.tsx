@@ -81,17 +81,17 @@ export default function RoomsPage({ category, order }: RoomPageProps) {
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
       <RoomGrid>
-        {rooms.map((room) => (
+        {rooms?.map((room) => (
           <RoomCard
             key={room.roomId}
             roomId={room.roomId}
             thumbnailUrl={room.thumbnailUrl}
             title={room.title}
-            category={room.category.toLowerCase()}
+            category={room.category?.toLowerCase?.() ?? ""}
             provider={room.videoProvider}
             connectedUsers={room.userCount}
           />
-        ))}
+        )) || null}
         {loading && <p className="col-span-full text-center">Loading...</p>}
       </RoomGrid>
     </div>

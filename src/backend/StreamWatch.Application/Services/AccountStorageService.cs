@@ -48,7 +48,7 @@ public class AccountStorageService : IAccountStorageService
         
         var expiration = DateTime.UtcNow.AddMinutes(40);
 
-        var fileName = Guid.NewGuid() + Path.GetExtension(request.FileName);
+        var fileName = Path.GetFileNameWithoutExtension(request.FileName) + $"_{new Random().Next(1, 1000000)}" +  Path.GetExtension(request.FileName);
         
         var contentType = ContentTypeHelper.GetContentType(fileName);
         

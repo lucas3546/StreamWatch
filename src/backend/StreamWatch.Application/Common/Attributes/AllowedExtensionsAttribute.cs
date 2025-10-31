@@ -16,8 +16,8 @@ public class AllowedExtensionsAttribute : ValidationAttribute
 
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
-        if (value == null) 
-            return ValidationResult.Success; // No valida si está vacío
+        if (value == null) return ValidationResult.Success; 
+            
 
         string fileName = null;
 
@@ -35,10 +35,12 @@ public class AllowedExtensionsAttribute : ValidationAttribute
             var extension = Path.GetExtension(fileName).ToLower();
             if (!_extensions.Contains(extension))
             {
-                return new ValidationResult(ErrorMessage);
+                return new ValidationResult(ErrorMessage, new[] { validationContext.MemberName ?? string.Empty });
+
             }
         }
 
         return ValidationResult.Success;
     }
+
 }

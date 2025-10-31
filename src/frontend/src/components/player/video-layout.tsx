@@ -18,7 +18,7 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
     <>
       <Gestures />
       <Captions
-        className={`${captionStyles.captions}  media-preview:opacity-0 media-controls:bottom-[85px] media-captions:opacity-100 absolute inset-0 bottom-2 z-10 select-none break-words opacity-0 transition-[opacity,bottom] duration-300`}
+        className={`${captionStyles.captions}  media-preview:opacity-0 media-controls:bottom-[85px] opacity-100 absolute inset-0 bottom-2 z-10 select-none break-words  transition-[opacity,bottom] duration-300`}
       />
       <Controls.Root
         className="absolute inset-0 z-10 flex h-full w-full flex-col
@@ -35,10 +35,6 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
           <Sliders.Volume />
           <TimeGroup />
           <Title />
-          <div className="w-[20%] h-[70%] bg-semibackground opacity-10 z-50 absolute right-5 top-1/2 transform -translate-y-1/2">
-            <a href="google.com">AAS</a>
-            <input type="text"></input>
-          </div>
           <div className="flex-1" />
           <Buttons.Caption tooltipPlacement="top" />
           <Menus.Settings placement="top end" tooltipPlacement="top" />

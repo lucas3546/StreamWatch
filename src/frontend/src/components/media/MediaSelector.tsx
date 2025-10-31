@@ -5,13 +5,15 @@ import {
 } from "../../services/storageService";
 import UploadVideoModal from "../modals/UploadVideoModal";
 import { getFilename } from "../../utils/fileExtensions";
-
+import Icon from "../icon/Icon";
+import { IoMdCloudUpload } from "react-icons/io";
 interface MediaSelectorProps {
   media: string | null;
   setMedia: Dispatch<SetStateAction<string | null>>;
 }
 export default function MediaSelector({ media, setMedia }: MediaSelectorProps) {
   const [medias, setMedias] = useState<StorageResponse | null>(null);
+  const [modalKey, setModalKey] = useState<number>(1);
   const [newVideo, setNewVideoUploaded] = useState<boolean>(false);
 
   useEffect(() => {
@@ -24,14 +26,22 @@ export default function MediaSelector({ media, setMedia }: MediaSelectorProps) {
   }, [newVideo]);
 
   const onUploadedNewVideo = () => {
-    setNewVideoUploaded(true);
+    setNewVideoUploaded(!newVideo);
+    setModalKey(modalKey + 1);
   };
 
   return (
     <div className="flex flex-col gap-2 w-full h-full">
-      <div className="w-full flex items-center p-2 bg-neutral-500 cursor-pointer">
-        <UploadVideoModal onUploaded={onUploadedNewVideo} />
-      </div>
+      <UploadVideoModal
+        key={modalKey}
+        openButtonClassname="w-full flex items-center p-2 bg-neutral-600 hover:bg-neutral-700 cursor-pointer justify-center"
+        openButtonContent={
+          <span className="flex items-center gap-1">
+            <Icon icon={IoMdCloudUpload}></Icon>Upload video
+          </span>
+        }
+        onUploaded={onUploadedNewVideo}
+      />
       {medias && medias.medias.length > 0 ? (
         medias.medias.map((item) => (
           <div

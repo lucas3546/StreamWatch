@@ -25,7 +25,7 @@ export default function RoomSidebar() {
 
   return (
     <div
-      className={`flex-1  h-full md:flex-none md:ml-auto md:h-[calc(100vh-56px)] flex flex-col bg-black border-defaultbordercolor border-l transition-all duration-300 overflow-hidden z-10
+      className={`flex-1 sm:max-w-[30%]  h-full md:flex-none md:ml-auto md:h-[calc(100vh-56px)] flex flex-col bg-black border-defaultbordercolor border-l transition-all duration-300 overflow-hidden z-10
         ${isOpen ? " md:w-70" : "w-0"}`}
     >
       {/* Contenido del sidebar */}

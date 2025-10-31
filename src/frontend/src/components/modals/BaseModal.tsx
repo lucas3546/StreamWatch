@@ -1,5 +1,4 @@
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { useState } from "react";
 
 interface BaseModalProps {
   blurBackground: boolean;
@@ -8,6 +7,8 @@ interface BaseModalProps {
   openButtonClassname: string;
   children: React.ReactNode;
   footerButtons?: React.ReactNode;
+  isOpen: boolean;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function BaseModal({
@@ -17,11 +18,13 @@ export default function BaseModal({
   openButtonContent,
   children,
   footerButtons,
+  isOpen,
+  setIsOpen,
 }: BaseModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
   return (
     <>
       <button
+        type="button"
         className={` ${openButtonClassname}`}
         onClick={() => setIsOpen(true)}
       >
@@ -45,7 +48,7 @@ export default function BaseModal({
 
             <div className="flex justify-center gap-4">
               <button
-                className="bg-neutral-700 text-white p-2 rounded-lg hover:bg-neutral-600 transition-colors cursor-pointer"
+                className="bg-neutral-700 text-white py-2 px-3 rounded-2xl hover:bg-neutral-600 transition-colors cursor-pointer"
                 onClick={() => setIsOpen(false)}
               >
                 Close

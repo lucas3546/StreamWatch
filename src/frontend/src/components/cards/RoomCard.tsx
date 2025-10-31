@@ -86,7 +86,7 @@ export default function RoomCard({
 
         {/* Cinta de categoría */}
         <span
-          className={`absolute top-2 left-2 backdrop-blur-sm ${categoryColor} text-white text-[11px] font-medium px-2 py-0.5 rounded-md shadow-md backdrop-blur-sm bg-opacity-80`}
+          className={`absolute top-2 left-2 backdrop-blur-sm ${categoryColor} text-white text-[11px] font-medium px-2 py-0.5 rounded-md shadow-md bg-opacity-80`}
         >
           /{category}/
         </span>

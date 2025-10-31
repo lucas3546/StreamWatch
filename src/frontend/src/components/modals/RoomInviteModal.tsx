@@ -10,6 +10,7 @@ import {
 import RoomUserInviteItem from "./Friends/RoomUserInviteItem";
 import { FaShareAlt } from "react-icons/fa";
 export default function RoomInviteModal() {
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [friends, setFriends] = useState<GetFriendsResponse[]>();
   const [loadingFriends, setLoadingFriends] = useState<boolean>();
   const canShare = typeof navigator !== "undefined" && !!navigator.share;
@@ -63,9 +64,11 @@ export default function RoomInviteModal() {
     <BaseModal
       blurBackground={true}
       title="Invite Friends"
-      openButtonClassname="bg-neutral-700 gap-1 text-sm rounded-md flex items-center p-1 cursor-pointer hover:bg-neutral-600 transition-colors"
+      openButtonClassname="bg-neutral-700 gap-1 text-sm py-1 px-3 rounded-2xl flex items-center cursor-pointer hover:bg-neutral-600 transition-colors"
       openButtonContent={openButtonContent}
       footerButtons={footerButtons}
+      setIsOpen={setIsOpen}
+      isOpen={isOpen}
     >
       <>
         <h3>Share this link</h3>

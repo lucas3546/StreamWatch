@@ -5,6 +5,7 @@ using StreamWatch.Api.Hubs;
 using StreamWatch.Application;
 using StreamWatch.Core.Options;
 using StreamWatch.Infraestructure;
+using StreamWatch.Infraestructure.Persistence;
 using StreamWatch.Infraestructure.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +17,7 @@ builder.Services.AddApiServices(builder.Configuration);
 
 var app = builder.Build();
 
+await app.InitialiseDatabaseAsync();
 
 app.UseRouting();
 

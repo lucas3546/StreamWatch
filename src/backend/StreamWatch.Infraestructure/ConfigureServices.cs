@@ -47,6 +47,8 @@ public static class ConfigureServices
             provider.GetRequiredService<ApplicationDbContext>()
         );
 
+        services.AddScoped<ApplicationDbContextInitialiser>();
+
         //Redis Stack
         var redisConnectionString = configuration.GetConnectionString("RedisConnection");
 

@@ -1,9 +1,3 @@
-import {
-  Description,
-  Dialog,
-  DialogPanel,
-  DialogTitle,
-} from "@headlessui/react";
 import { useState } from "react";
 import { VideoUpload } from "../upload/VideoUpload";
 import {
@@ -15,19 +9,30 @@ import {
 import axios from "axios";
 import Icon from "../icon/Icon";
 import { CgSpinnerTwo } from "react-icons/cg";
+import { FieldError } from "../errors/FieldError";
+import type { ProblemDetails } from "../types/ProblemDetails";
+import BaseModal from "./BaseModal";
 
 interface UploadVideoModalProps {
   onUploaded?: () => void; // callback opcional
+  openButtonClassname: string;
+  openButtonContent: React.ReactNode;
 }
 
 export default function UploadVideoModal({
   onUploaded,
+  openButtonClassname,
+  openButtonContent,
 }: UploadVideoModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
-
+  const [fieldErrors, setFieldErrors] = useState<Record<
+    string,
+    string[]
+  > | null>(null);
+  const [generalError, setGeneralError] = useState<string | null>();
   const handleFileSelect = (file: File) => {
     setSelectedVideo(file);
   };
@@ -43,9 +48,21 @@ export default function UploadVideoModal({
       fileName: selectedVideo.name,
       size: selectedVideo.size,
     };
-    const presignedResponse = await generatePresigned(generatePresignedRequest);
+
+    let presignedResponse;
 
     try {
+      presignedResponse = await generatePresigned(generatePresignedRequest);
+    } catch (err) {
+      const problem = err as ProblemDetails;
+      if (problem.errors) {
+        setFieldErrors(problem.errors);
+      }
+      setIsLoading(false);
+    }
+
+    try {
+      if (!presignedResponse) return;
       const response = await axios.put(presignedResponse.url, selectedVideo, {
         headers: {
           "Content-Type": "video/mp4",
@@ -67,80 +84,76 @@ export default function UploadVideoModal({
       await setUploaded(request);
 
       setIsLoading(false);
-      if (onUploaded !== undefined) onUploaded();
-
       setIsOpen(false);
+      if (onUploaded !== undefined) onUploaded();
     } catch (err) {
       console.error("Error subiendo video:", err);
+      setGeneralError(
+        "Some error has ocurred with the storage provider when trying to upload the file",
+      );
     }
   };
 
-  return (
+  const footerButtons = (
     <>
-      <span
-        onClick={() => setIsOpen(true)}
-        className="w-full h-full flex justify-center"
-      >
-        + Upload to Storage
-      </span>
-      <Dialog
-        open={isOpen}
-        onClose={() => setIsOpen(false)}
-        className="relative z-50"
-      >
-        <div className="fixed inset-0 flex w-screen items-center justify-center p-4">
-          <DialogPanel className="max-w-lg space-y-4 border-1 border-defaultbordercolor bg-neutral-900 rounded-md p-12 text-center">
-            <DialogTitle className="font-bold">Upload Video</DialogTitle>
-            <Description>
-              Upload video to our servers for display in your rooms
-            </Description>
-            <VideoUpload onFileSelect={handleFileSelect} />
-            {isLoading && (
-              <div className="w-full bg-neutral-700 rounded-full h-3 mt-2">
-                <div
-                  className="bg-blue-600 h-3 rounded-full transition-all duration-300"
-                  style={{ width: `${uploadProgress}%` }}
-                />
-              </div>
-            )}
-
-            {isLoading && (
-              <p className="text-sm mt-1 text-neutral-300">
-                {uploadProgress < 100
-                  ? `Uploading... ${uploadProgress}%`
-                  : "Finalizing upload..."}
-              </p>
-            )}
-            <div className="flex gap-4">
-              <button
-                onClick={() => setIsOpen(false)}
-                className="bg-neutral-700 hover:bg-neutral-500 rounded-md p-2"
-              >
-                Cancel
-              </button>
-              {isLoading ? (
-                <button
-                  onClick={handleUpload}
-                  disabled
-                  className="flex flex-row items-center gap-1 bg-gray-700 hover:bg-gray-500 cursor-pointer rounded-md p-2"
-                >
-                  <div className="animate-spin">
-                    <Icon icon={CgSpinnerTwo}></Icon>
-                  </div>
-                  Uploading
-                </button>
-              ) : (
-                <button
-                  onClick={handleUpload}
-                  className="bg-gray-700 hover:bg-gray-500 cursor-pointer rounded-md p-2"
-                >
-                  Upload
-                </button>
-              )}
-            </div>
-          </DialogPanel>
-        </div>
-      </Dialog>
+      {isLoading ? (
+        <button
+          onClick={handleUpload}
+          disabled
+          className="flex flex-row items-center gap-1 bg-gray-700 hover:bg-gray-500 cursor-pointer py-2 px-3 rounded-2xl"
+        >
+          <div className="animate-spin">
+            <Icon icon={CgSpinnerTwo}></Icon>
+          </div>
+          Uploading
+        </button>
+      ) : (
+        <button
+          onClick={handleUpload}
+          className="bg-gray-700 hover:bg-gray-500 cursor-pointer py-2 px-3 rounded-2xl"
+        >
+          Upload
+        </button>
+      )}
     </>
+  );
+
+  return (
+    <BaseModal
+      title="Upload Video"
+      blurBackground={true}
+      openButtonClassname={openButtonClassname}
+      openButtonContent={openButtonContent}
+      footerButtons={footerButtons}
+      setIsOpen={setIsOpen}
+      isOpen={isOpen}
+    >
+      <>
+        <h2 className="text-xl">
+          Upload video to our servers for display in your rooms
+        </h2>
+        <VideoUpload onFileSelect={handleFileSelect} />
+        {isLoading && (
+          <div className="w-full bg-neutral-700 rounded-full h-3 mt-2">
+            <div
+              className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+        )}
+
+        {isLoading && (
+          <p className="text-sm mt-1 text-neutral-300">
+            {uploadProgress < 100
+              ? `Uploading... ${uploadProgress}%`
+              : "Finalizing upload..."}
+          </p>
+        )}
+        <FieldError errors={fieldErrors} name="filename"></FieldError>
+        {generalError && (
+          <p className="text-red-600 text-center mb-2">{generalError}</p>
+        )}
+      </>
+    </BaseModal>
   );
 }

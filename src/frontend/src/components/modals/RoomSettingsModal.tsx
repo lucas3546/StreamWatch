@@ -9,7 +9,7 @@ import { useRoomStore } from "../../stores/roomStore";
 
 export default function RoomSettingsModal() {
   const room = useRoomStore((state) => state.room);
-
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Movies");
@@ -56,7 +56,7 @@ export default function RoomSettingsModal() {
       {isLoading ? (
         <button
           disabled
-          className="bg-neutral-700 text-white p-2 rounded-lg transition-colors cursor-pointer"
+          className="bg-neutral-700 text-white py-2 px-3 rounded-2xl transition-colors cursor-pointer"
         >
           <div className="animate-spin">
             <Icon icon={CgSpinnerTwo} />
@@ -65,7 +65,7 @@ export default function RoomSettingsModal() {
       ) : (
         <button
           onClick={handleSave}
-          className="bg-neutral-600 text-white p-2 rounded-lg flex items-center gap-1 hover:bg-neutral-500 transition-colors cursor-pointer"
+          className="bg-neutral-600 text-white py-2 px-3 rounded-2xl flex items-center gap-1 hover:bg-neutral-500 transition-colors cursor-pointer"
         >
           <FaSave size={18} />
           Save
@@ -78,9 +78,11 @@ export default function RoomSettingsModal() {
     <BaseModal
       blurBackground={true}
       title="Room Settings"
-      openButtonClassname="bg-neutral-700 text-sm rounded-md flex items-center p-1 cursor-pointer hover:bg-neutral-600 transition-colors"
+      openButtonClassname="bg-neutral-700 text-sm py-1 px-3 rounded-2xl flex items-center cursor-pointer hover:bg-neutral-600 transition-colors"
       openButtonContent={openButtonContent}
       footerButtons={footerButtons}
+      isOpen={isOpen}
+      setIsOpen={setIsOpen}
     >
       <div className="w-full flex flex-col text-left gap-3">
         <label className="text-gray-300 text-sm">Room title:</label>
