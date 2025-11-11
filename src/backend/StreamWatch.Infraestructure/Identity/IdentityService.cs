@@ -12,16 +12,20 @@ public class IdentityService : IIdentityService
 {
     private readonly UserManager<Account> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
+    private readonly ICurrentUserService _user;
 
-    public IdentityService(UserManager<Account> userManager, RoleManager<IdentityRole> roleManager)
+    public IdentityService(UserManager<Account> userManager, RoleManager<IdentityRole> roleManager, ICurrentUserService currentUserService)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _user = currentUserService;
     }
 
     public async Task<(IEnumerable<string> errors, Account? account)> RegisterAsync(string email, string username, string password, string refreshToken)
     {
-        var account = new Account { UserName = username, Email = email, RefreshToken = refreshToken };
+        ArgumentException.ThrowIfNullOrEmpty(_user.IpAddress);
+
+        var account = new Account { UserName = username, Email = email, RefreshToken = refreshToken, IpAddress = _user.IpAddress };
 
         var result = await _userManager.CreateAsync(account, password);
 

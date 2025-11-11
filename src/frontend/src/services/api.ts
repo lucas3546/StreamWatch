@@ -28,3 +28,14 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const problem = error as ProblemDetails;
+    if (problem.status === 423) {
+      window.location.href = "/banned";
+    }
+    return Promise.reject(error);
+  },
+);

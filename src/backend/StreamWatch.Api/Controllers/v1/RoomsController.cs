@@ -1,6 +1,7 @@
 using MaxMind.GeoIP2.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Api.Extensions;
 using StreamWatch.Api.Hubs;
@@ -21,24 +22,29 @@ public class RoomsController : ControllerBase
     private readonly IAccountStorageService _accountStorageService;
     private readonly IHubContext<StreamWatchHub> _hubContext;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger<RoomsController> _logger;
 
     public RoomsController(
         IRoomService roomService,
         IAccountStorageService accountStorageService,
         IHubContext<StreamWatchHub> hubContext,
-        ICurrentUserService currentUserService
+        ICurrentUserService currentUserService,
+        ILogger<RoomsController> logger
     )
     {
         _roomService = roomService;
         _accountStorageService = accountStorageService;
         _hubContext = hubContext;
         _currentUserService = currentUserService;
+        _logger = logger;
     }
 
     [HttpPost("create")]
     [Authorize]
+    [EnableRateLimiting("OnceEvery5Minutes")]
     public async Task<ActionResult<CreateRoomResponse>> Create(CreateRoomRequest request)
     {
+        _logger.LogInformation("Creating a room {@Request}", request);
         var response = await _roomService.CreateRoomAsync(request);
 
         return response.ToActionResult(HttpContext);
@@ -61,10 +67,9 @@ public class RoomsController : ControllerBase
     }
 
     [HttpGet("paged")]
-    public async Task<ActionResult<PaginatedList<GetPagedRoomItemResponse>>> GetPaged(
-        [FromQuery] GetPagedRoomsRequest request
-    )
+    public async Task<ActionResult<PaginatedList<GetPagedRoomItemResponse>>> GetPaged([FromQuery] GetPagedRoomsRequest request)
     {
+        _logger.LogInformation("Fetching paged rooms with filter: {@Request}", request);
         var response = await _roomService.GetPagedRooms(request);
 
         return Ok(response);

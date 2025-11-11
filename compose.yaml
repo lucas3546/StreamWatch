@@ -60,6 +60,21 @@
       - redis_data:/data
     restart: unless-stopped
 
+  seq:
+    image: datalust/seq:latest
+    ports:
+      - "5341:80"
+    environment:
+      ACCEPT_EULA: Y
+      SEQ_FIRSTRUN_ADMINPASSWORD: 1234
+      # Optional: Set an initial admin password.
+      # SEQ_FIRSTRUN_ADMINPASSWORD: your_strong_password 
+      # Or, if you prefer a pre-hashed password:
+      # SEQ_FIRSTRUN_ADMINPASSWORDHASH: your_hashed_password_value
+    volumes:
+      - ./seq-data:/data
+    restart: unless-stopped
+
 volumes:
   redis_data:
   postgres-db-volume:

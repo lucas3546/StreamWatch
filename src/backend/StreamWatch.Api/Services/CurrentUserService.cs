@@ -20,7 +20,8 @@ public class CurrentUserService : ICurrentUserService
     public string? Name =>
         _httpContextAccessor.HttpContext?.User?.FindFirstValue(JwtRegisteredClaimNames.Name);
     public string? Role => _httpContextAccessor.HttpContext?.User?.FindFirstValue("role");
-    public (string? isoCode, string? name) Country //TO DO: Read the ip from the header of the reverse proxy
+    public string? IpAddress => _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+    public (string? isoCode, string? name) Country 
     {
         get
         {

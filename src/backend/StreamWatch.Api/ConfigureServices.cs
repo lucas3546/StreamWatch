@@ -1,11 +1,14 @@
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Threading.RateLimiting;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using StreamWatch.Api.Middlewares;
 using StreamWatch.Api.Services;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Core.Options;
@@ -16,12 +19,23 @@ namespace StreamWatch.Api;
 public static class ConfigureServices
 {
     public static IServiceCollection AddApiServices(this IServiceCollection services, IConfiguration configuration)
-     {
+    {
         services.Configure<S3StorageOptions>(configuration.GetSection("Storage"));
-         
+
+        services.AddTransient<BanCheckFactoryMiddleware>(); 
+        
         services.AddHealthChecks();
+
+        services.AddSignalR();
          
-         services.AddSignalR();
+         services.AddHttpLogging(o =>
+        {
+            o.LoggingFields = HttpLoggingFields.RequestMethod
+                            | HttpLoggingFields.RequestPath
+                            | HttpLoggingFields.ResponseStatusCode
+                            | HttpLoggingFields.Duration;
+        });
+
          
          services.AddCors(options =>
          {
@@ -117,7 +131,45 @@ public static class ConfigureServices
         services.AddSingleton<IUserIdProvider, NameUserIdProvider>();
 
         services.AddSingleton<IRealtimeMessengerService, RealtimeMessengerService>();
-         
-         return services;
+
+
+        services.AddRateLimiter(options =>
+        {
+            options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+                RateLimitPartition.GetSlidingWindowLimiter(
+                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    factory: _ => new SlidingWindowRateLimiterOptions
+                    {
+                        PermitLimit = 100,                
+                        Window = TimeSpan.FromMinutes(1),  
+                        SegmentsPerWindow = 2,             
+                        QueueLimit = 0,                    
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                    })
+            );
+
+            options.AddPolicy("OnceEvery5Minutes", context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "default",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 1,             
+                        Window = TimeSpan.FromSeconds(30), 
+                        QueueLimit = 0,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                    }));
+                    
+             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+            options.OnRejected = async (context, cancellationToken) =>
+            {
+                context.HttpContext.Response.ContentType = "application/json";
+                await context.HttpContext.Response.WriteAsync("""
+                    { "error": "Too many requests." }
+                """, cancellationToken);
+            };
+        });
+ 
+        return services;
      }
 }

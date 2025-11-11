@@ -64,7 +64,7 @@ public class ApplicationDbContextInitialiser
 
 
         // Default users
-        var administrator = new Account { UserName = "Admin", Email = "admin@streamwatch.com" };
+        var administrator = new Account { UserName = "Admin", Email = "admin@streamwatch.com", IpAddress = "127.0.0.1" };
 
         if (_userManager.Users.All(u => u.UserName != administrator.UserName))
         {

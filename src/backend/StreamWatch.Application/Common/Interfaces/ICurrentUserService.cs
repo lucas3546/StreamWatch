@@ -4,6 +4,7 @@ public interface ICurrentUserService
 {
     string? Id { get; }
     string? Name { get; }
+    string? IpAddress { get; }
     (string? isoCode, string? name) Country { get; }
     string? Role { get; }
 }

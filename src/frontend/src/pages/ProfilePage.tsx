@@ -158,6 +158,7 @@ export default function ProfilePage() {
             </button>
           </div>
         )}
+        {user?.role === "Admin" && <button>Ban</button>}
       </div>
     </div>
   );

@@ -20,10 +20,11 @@ public static class ConfigureServices
         services.AddScoped<IAccountStorageService, AccountStorageService>();
         services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddScoped<IRoomService, RoomService>();
+        services.AddScoped<IBanService, BanService>();
         services.AddSingleton(new SqidsEncoder<int>(new()
         {
             Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-            MinLength = 6,
+            MinLength = 10,
         }));
         #region EventsRegion
 

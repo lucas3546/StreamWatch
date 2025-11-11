@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Sqids;
 using StreamWatch.Application.Common.Helpers;
 using StreamWatch.Application.Common.Interfaces;
@@ -14,29 +15,29 @@ namespace StreamWatch.Application.Services;
 public class RoomService : IRoomService
 {
     private readonly IApplicationDbContext _context;
-    private readonly ICurrentUserService _currentUserService;
+    private readonly ICurrentUserService _user;
     private readonly IRoomRepository _roomRepository;
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly IStorageService _storageService;
     private readonly SqidsEncoder<int> _sqids;
+    private readonly ILogger<RoomService> _logger;
 
-    public RoomService(IApplicationDbContext context, ICurrentUserService currentUserService, IRoomRepository roomRepository, SqidsEncoder<int> squids, IMediaProcessingService processingService, IStorageService storageService)
+    public RoomService(IApplicationDbContext context, ICurrentUserService currentUserService, IRoomRepository roomRepository, SqidsEncoder<int> squids, IMediaProcessingService processingService, IStorageService storageService, ILogger<RoomService> logger)
     {
         _context = context;
-        _currentUserService = currentUserService;
+        _user = currentUserService;
         _roomRepository = roomRepository;
         _sqids = squids;
         _mediaProcessingService = processingService;
         _storageService = storageService;
+        _logger = logger;
     }
 
     public async Task<Result<CreateRoomResponse>> CreateRoomAsync(CreateRoomRequest request)
     {
-        var currentUserId = _currentUserService.Id;
-        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserId cannot be null or empty!");
+        ArgumentException.ThrowIfNullOrEmpty(_user.Id);
 
-        var currentUserName = _currentUserService.Name;
-        if (string.IsNullOrEmpty(currentUserName)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserName cannot be null or empty!");
+        ArgumentException.ThrowIfNullOrEmpty(_user.Name);
 
         var room = new RoomCache()
         {
@@ -44,8 +45,8 @@ public class RoomService : IRoomService
             Category = request.Category,
             IsPaused = true,
             IsPublic = request.IsPublic,
-            LeaderAccountId = currentUserId,
-            CreatedByAccountId = currentUserId,
+            LeaderAccountId = _user.Id,
+            CreatedByAccountId = _user.Name,
             LastLeaderUpdateTime = 0,
             CurrentVideoTime = 0,
             CreatedAt = DateTime.UtcNow,
@@ -55,10 +56,21 @@ public class RoomService : IRoomService
         string videoTitle = "";
         if (request.Provider == RoomVideoProvider.Local)
         {
-            if (_sqids.Decode(request.MediaId) is [var decodedId] && request.MediaId == _sqids.Encode(decodedId))
+            if (string.IsNullOrEmpty(request.MediaId))
+            {
+                _logger.LogWarning("MediaId cannon't be null when the selected provider is local");
+                return Result<CreateRoomResponse>.Failure(new ValidationError("MediaId cannon't be null"));
+            }
+
+            if (_sqids.TrySafeDecode(request.MediaId, out var decodedId))
             {
                 var media = await _context.Media.FindAsync(decodedId);
 
+                if (media is null)
+                {
+                    _logger.LogWarning("Media entity not found: MediaId={MediaId}, UserId={UserId}", request.MediaId, _user.Id);
+                    return Result<CreateRoomResponse>.Failure(new ValidationError("Media not found"));
+                }
                 room.VideoUrl = _storageService.GetPublicUrl(media.FileName);
                 room.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName); ;
                 room.VideoProvider = "Local";
@@ -66,6 +78,7 @@ public class RoomService : IRoomService
             }
             else
             {
+                _logger.LogWarning("Invalid MediaId provided: {MediaId}, UserId={UserId}", request.MediaId, _user.Id);
                 return Result<CreateRoomResponse>.Failure(new ValidationError("MediaId is invalid"));
             }
 
@@ -73,8 +86,19 @@ public class RoomService : IRoomService
         }
         else if (request.Provider == RoomVideoProvider.YouTube)
         {
+
+            if (string.IsNullOrEmpty(request.VideoUrl))
+            {
+                _logger.LogWarning("Missing VideoUrl for YouTube provider, UserId={UserId}", _user.Id);
+                return Result<CreateRoomResponse>.Failure(new ValidationError("VideoUrl can't be null with the selected provider"));
+            }
+
             var platform = VideoUrlHelper.GetPlatform(request.VideoUrl);
-            if (platform is null) throw new Exception();
+            if (platform is null)
+            {
+                _logger.LogWarning("Invalid youtube url provided, VideoUrl={VideoUrl}, UserId={UserId}", request.VideoUrl, _user.Id);
+                return Result<CreateRoomResponse>.Failure(new ValidationError("Invalid YoutubeUrl"));
+            }
 
             var thumbnailUrl = VideoUrlHelper.GetThumbnailUrl(request.VideoUrl);
             room.VideoUrl = request.VideoUrl;
@@ -82,12 +106,18 @@ public class RoomService : IRoomService
             room.VideoProvider = "YouTube";
             videoTitle = await VideoUrlHelper.GetVideoTitleAsync(request.VideoUrl) ?? "Unknown";
         }
+        else
+        {
+            
+        }
 
-        var playlistItem = new PlaylistVideoItem(room.VideoUrl, videoTitle, room.ThumbnailUrl, room.VideoProvider.ToString(), currentUserId, currentUserName);
+        var playlistItem = new PlaylistVideoItem(room.VideoUrl, videoTitle, room.ThumbnailUrl, room.VideoProvider.ToString(), _user.Id, _user.Name);
 
         room.PlaylistVideoItems.Add(playlistItem);
 
         var roomId = await _roomRepository.SaveAsync(room);
+
+        _logger.LogInformation("Room created successfully: RoomId={RoomId}, UserId={UserId}, Title={Title}", roomId, _user.Id, request.Title);
 
         var response = new CreateRoomResponse(roomId);
 
@@ -96,14 +126,14 @@ public class RoomService : IRoomService
     
     public async Task<Result> UpdateRoomAsync(UpdateRoomRequest request)
     {
-        var currentUserId = _currentUserService.Id;
-        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserId cannot be null or empty!");
+        ArgumentException.ThrowIfNullOrEmpty(_user.Id);
+
 
         var room = await _roomRepository.GetByIdAsync(request.Id);
 
         if (room is null) return Result.Failure(new NotFoundError("Room not found!"));
 
-        if (currentUserId != room.LeaderAccountId) return Result.Failure(new ValidationError("You are not the leader of the room"));
+        if (_user.Id != room.LeaderAccountId) return Result.Failure(new ValidationError("You are not the leader of the room"));
 
         room.Title = request.Title;
         room.Category = request.Category;
@@ -116,11 +146,9 @@ public class RoomService : IRoomService
 
     public async Task<Result<PlaylistVideoItem>> AddVideoToPlaylist(AddVideoToPlaylistRequest request)
     {
-        var currentUserId = _currentUserService.Id;
-        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserId cannot be null or empty!");
+        ArgumentException.ThrowIfNullOrEmpty(_user.Id);
 
-        var currentUserName = _currentUserService.Name;
-        if (string.IsNullOrEmpty(currentUserName)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserName cannot be null or empty!");
+        ArgumentException.ThrowIfNullOrEmpty(_user.Name);
 
         var room = await _roomRepository.GetByIdAsync(request.RoomId);
         if (room is null) return Result<PlaylistVideoItem>.Failure(new NotFoundError("Room not found!"));
@@ -156,8 +184,8 @@ public class RoomService : IRoomService
             playlistVideoItem.VideoTitle = await VideoUrlHelper.GetVideoTitleAsync(request.VideoUrl) ?? "Unknown";
         }
 
-        playlistVideoItem.AccountId = currentUserId;
-        playlistVideoItem.UserName = currentUserName;
+        playlistVideoItem.AccountId = _user.Id;
+        playlistVideoItem.UserName = _user.Name;
 
         room.PlaylistVideoItems.Add(playlistVideoItem);
 

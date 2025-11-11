@@ -154,6 +154,54 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("StreamWatch.Core.Entities.Ban", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ExpirationTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsExpired")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PrivateReason")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublicReason")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("Bans");
+                });
+
             modelBuilder.Entity("StreamWatch.Core.Entities.Friendship", b =>
                 {
                     b.Property<int>("Id")
@@ -298,6 +346,10 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("boolean");
 
@@ -402,6 +454,17 @@ namespace StreamWatch.Infraestructure.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("StreamWatch.Core.Entities.Ban", b =>
+                {
+                    b.HasOne("StreamWatch.Core.Identity.Account", "Account")
+                        .WithMany("Bans")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("StreamWatch.Core.Entities.Friendship", b =>
                 {
                     b.HasOne("StreamWatch.Core.Identity.Account", "Receiver")
@@ -443,6 +506,8 @@ namespace StreamWatch.Infraestructure.Migrations
 
             modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>
                 {
+                    b.Navigation("Bans");
+
                     b.Navigation("Notifications");
                 });
 #pragma warning restore 612, 618

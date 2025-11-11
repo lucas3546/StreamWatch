@@ -17,6 +17,7 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import FriendsPage from "./pages/FriendsPage.tsx";
 import { ToastContainer } from "react-toastify";
 import ProfilePage from "./pages/ProfilePage.tsx";
+import BanPage from "./pages/BanPage.tsx";
 const router = createBrowserRouter([
   {
     element: (
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
       { path: "/friends", element: <FriendsPage /> },
       { path: "/room/:roomId", element: <RoomPage /> },
     ],
+  },
+  {
+    path: "/banned",
+    element: <BanPage></BanPage>,
   },
 ]);
 
