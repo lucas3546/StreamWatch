@@ -43,22 +43,22 @@ public class AccountStorageService : IAccountStorageService
     };
     public async Task<Result<GetPresignedUrlResponse>> GetPresignedUrl(GetPresignedUrlRequest request)
     {
-        var currentUserId = _currentUserService.Id; 
-        if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
-        
+        var currentUserId = _currentUserService.Id;
+        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+
         var expiration = DateTime.UtcNow.AddMinutes(40);
 
-        var fileName = Path.GetFileNameWithoutExtension(request.FileName) + $"_{new Random().Next(1, 1000000)}" +  Path.GetExtension(request.FileName);
-        
+        var fileName = Path.GetFileNameWithoutExtension(request.FileName) + $"_{new Random().Next(1, 1000000)}" + Path.GetExtension(request.FileName);
+
         var contentType = ContentTypeHelper.GetContentType(fileName);
-        
+
         var presignedUrl = await _storageService.GetPresignedUrl(fileName, contentType, expiration);
-        
+
         var headers = new Dictionary<string, string>()
         {
             ["Content-Type"] = contentType
         };
-        
+
         var media = new Media()
         {
             FileName = fileName,
@@ -70,13 +70,15 @@ public class AccountStorageService : IAccountStorageService
         };
 
         await _context.Media.AddAsync(media);
-        
+
         await _context.SaveChangesAsync(CancellationToken.None);
-        
-        var response = new GetPresignedUrlResponse( presignedUrl, "PUT", headers, media.Id, expiration);
-        
+
+        var response = new GetPresignedUrlResponse(presignedUrl, "PUT", headers, media.Id, expiration);
+
         return Result<GetPresignedUrlResponse>.Success(response);
     }
+    
+
 
     public async Task<Result<UploadImageResponse>> UploadImageAsync(UploadImageRequest request)
     {
@@ -239,20 +241,33 @@ public class AccountStorageService : IAccountStorageService
     public async Task<GetStorageOverviewResponse> GetStorageOverview()
     {
         var currentUserId = _currentUserService.Id;
-        if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
         var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId && x.Status == MediaStatus.Uploaded).ToListAsync();
-        
+
         var filteredMedias = medias.Where(f => ContentTypeHelper.IsVideo(f.FileName)).ToList();
 
         var videoFiles = filteredMedias.Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id), _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
-        
+
         decimal storageUse = videoFiles.Sum(x => x.Size);
 
         var response = new GetStorageOverviewResponse(storageUse, videoFiles);
 
         return response;
     }
+    
+        public async Task<GetUserFullStorageOverviewResponse> GetUserFullStorageOverview(string accountId)
+        {
+            var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == accountId && x.Status == MediaStatus.Uploaded).ToListAsync();
+
+            var files = medias.Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id), _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
+
+            decimal storageUse = files.Sum(x => x.Size);
+
+            var response = new GetUserFullStorageOverviewResponse(storageUse, files);
+
+            return response;
+        }
     
     
     

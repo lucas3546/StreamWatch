@@ -4,3 +4,6 @@ obj/
 riderModule.iml
 /_ReSharper.Caches/
 *.pem
+seq-data/
+.idea/
+.vscode/

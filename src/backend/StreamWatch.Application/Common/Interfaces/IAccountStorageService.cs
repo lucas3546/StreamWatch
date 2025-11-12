@@ -11,4 +11,5 @@ public interface IAccountStorageService
     Task<Result<UploadImageResponse>> UploadImageAsync(UploadImageRequest request);
     Task<IEnumerable<MediaModel>> GetAllMediaFiles();
     Task<GetStorageOverviewResponse> GetStorageOverview();
+    Task<GetUserFullStorageOverviewResponse> GetUserFullStorageOverview(string accountId);
 }

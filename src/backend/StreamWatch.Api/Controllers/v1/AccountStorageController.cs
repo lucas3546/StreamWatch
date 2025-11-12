@@ -58,4 +58,19 @@ public class AccountStorageController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpGet("full-overview/{accountId}")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [SwaggerOperation(
+        Summary = "List all uploaded media files from a user",
+        Description = "Retrieves a list of all media files stored from a user"
+    )]
+    public async Task<ActionResult<GetUserFullStorageOverviewResponse>> GetFullStorageOverviewFromUser(string accountId)
+    {
+        var response = await _accountStorage.GetUserFullStorageOverview(accountId);
+
+        return Ok(response);
+    }
 }
