@@ -3,6 +3,7 @@ import BaseModal from "./BaseModal";
 import ProfilePic from "../avatar/ProfilePic";
 import { IoBan } from "react-icons/io5";
 import Icon from "../icon/Icon";
+import { banAccount, type BanAccountRequest } from "../../services/banService";
 
 interface BanUserModalProps {
   accountId: string;
@@ -26,12 +27,14 @@ export default function BanUserModal({
 
   const [privateReason, setPrivateReason] = useState("");
   const [publicReason, setPublicReason] = useState("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleChange = (field: keyof typeof banUntil, value: number) => {
     setBanUntil({ ...banUntil, [field]: value });
   };
 
-  const handleBan = () => {
+  const handleBan = async () => {
+    setIsLoading(true);
     const untilDate = new Date(
       banUntil.year,
       banUntil.month - 1,
@@ -40,18 +43,32 @@ export default function BanUserModal({
       banUntil.minute,
     );
 
-    console.log("Ban data:", {
-      accountId,
-      until: untilDate.toISOString(),
-      privateReason,
-      publicReason,
-    });
+    const request: BanAccountRequest = {
+      targetUserId: accountId,
+      expiresAt: untilDate.toISOString(),
+      privateReason: privateReason,
+      publicReason: publicReason,
+    };
 
-    // Acá iría tu lógica real de ban (llamado al backend, etc.)
-    setIsOpen(false);
+    try {
+      await banAccount(request);
+      alert(`${userName} unbanned!`);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsLoading(false);
+      setIsOpen(false);
+    }
   };
 
-  const footerButtons = (
+  const footerButtons = isLoading ? (
+    <button
+      disabled
+      className="py-2 px-4 rounded-2xl bg-neutral-600-600  text-white font-semibold transition-all shadow-md"
+    >
+      Loading
+    </button>
+  ) : (
     <button
       onClick={handleBan}
       className="py-2 px-4 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-semibold transition-all shadow-md"

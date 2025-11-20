@@ -24,7 +24,7 @@ export default function RoomCard({
   const { user } = useUser();
 
   let categoryColor;
-  switch (category) {
+  switch (category.toLowerCase()) {
     case "music":
       categoryColor = "bg-rose-800";
       break;
@@ -47,7 +47,7 @@ export default function RoomCard({
 
   let providerLabel;
   let providerIcon;
-  switch (provider.toLocaleLowerCase()) {
+  switch (provider?.toLowerCase() ?? "") {
     case "youtube":
       providerLabel = "YouTube";
       providerIcon = AiFillYoutube;
@@ -88,7 +88,7 @@ export default function RoomCard({
         <span
           className={`absolute top-2 left-2 backdrop-blur-sm ${categoryColor} text-white text-[11px] font-medium px-2 py-0.5 rounded-md shadow-md bg-opacity-80`}
         >
-          /{category}/
+          /{category.toLowerCase()}/
         </span>
 
         {/* Usuarios conectados */}

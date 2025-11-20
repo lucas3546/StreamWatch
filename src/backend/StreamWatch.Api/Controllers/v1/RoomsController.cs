@@ -41,10 +41,11 @@ public class RoomsController : ControllerBase
 
     [HttpPost("create")]
     [Authorize]
-    [EnableRateLimiting("OnceEvery5Minutes")]
+    //[EnableRateLimiting("OnceEvery5Minutes")]
     public async Task<ActionResult<CreateRoomResponse>> Create(CreateRoomRequest request)
     {
         _logger.LogInformation("Creating a room {@Request}", request);
+
         var response = await _roomService.CreateRoomAsync(request);
 
         return response.ToActionResult(HttpContext);

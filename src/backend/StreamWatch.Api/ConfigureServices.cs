@@ -1,10 +1,12 @@
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
 using Hangfire;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpLogging;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -140,7 +142,7 @@ public static class ConfigureServices
                     partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
                     factory: _ => new SlidingWindowRateLimiterOptions
                     {
-                        PermitLimit = 100,                
+                        PermitLimit = 200,                
                         Window = TimeSpan.FromMinutes(1),  
                         SegmentsPerWindow = 2,             
                         QueueLimit = 0,                    
@@ -163,10 +165,20 @@ public static class ConfigureServices
 
             options.OnRejected = async (context, cancellationToken) =>
             {
-                context.HttpContext.Response.ContentType = "application/json";
-                await context.HttpContext.Response.WriteAsync("""
-                    { "error": "Too many requests." }
-                """, cancellationToken);
+                var problem = new ProblemDetails
+                {
+                    Type = "https://tools.ietf.org/html/rfc6585#section-4", 
+                    Title = "Too Many Requests",
+                    Status = StatusCodes.Status429TooManyRequests,
+                    Detail = "You have exceeded the allowed request limit."
+                };
+
+                context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+                context.HttpContext.Response.ContentType = "application/problem+json";
+
+                var json = JsonSerializer.Serialize(problem);
+
+                await context.HttpContext.Response.WriteAsync(json, cancellationToken);
             };
         });
  

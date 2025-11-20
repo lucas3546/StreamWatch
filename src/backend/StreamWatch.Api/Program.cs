@@ -65,7 +65,7 @@ RecurringJob.AddOrUpdate<MediaCleanupService>(
 RecurringJob.AddOrUpdate<BanUpdateJob>(
     "updatebans",
     svc => svc.UpdateBans(),
-    Cron.MinuteInterval(5)
+    Cron.Minutely
 );
 
 app.Run();

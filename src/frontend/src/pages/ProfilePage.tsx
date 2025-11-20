@@ -21,6 +21,7 @@ import { formatDate, formatShort } from "../utils/dateFormat";
 import { HiUserAdd } from "react-icons/hi";
 import BanUserModal from "../components/modals/BanUserModal";
 import StorageFromUserModal from "../components/modals/StorageFromUserModal";
+import BanHistoryModal from "../components/modals/BanHistoryModal";
 
 export default function ProfilePage() {
   const { accountId } = useParams<{ accountId: string }>();
@@ -168,6 +169,11 @@ export default function ProfilePage() {
                 userName={profileData?.userName}
                 profilePicUrl={profileData?.profilePicThumbnailUrl}
               ></BanUserModal>
+              <BanHistoryModal
+                accountId={profileData?.userId}
+                userName={profileData?.userName}
+                profilePicUrl={profileData?.profilePicThumbnailUrl}
+              ></BanHistoryModal>
               <StorageFromUserModal
                 accountId={profileData?.userId}
                 userName={profileData?.userName}

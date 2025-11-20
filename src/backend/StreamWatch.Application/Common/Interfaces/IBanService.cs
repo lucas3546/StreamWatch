@@ -9,4 +9,6 @@ public interface IBanService
 {
     Task<Result<string>> BanAsync(BanAccountRequest request);
     Task<Result<GetActiveBanForCurrentUserResponse>> GetActiveBanForCurrentUser();
+    Task<IEnumerable<GetBansHistoryFromUserItemResponse>> GetBansHistoryFromUser(string accountId);
+    Task<Result> UnbanAsync(string accountId);
 }

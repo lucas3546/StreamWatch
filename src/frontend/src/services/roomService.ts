@@ -24,15 +24,7 @@ export interface UpdateRoomRequest {
 export interface GetPagedRoomsRequest {
   pageNumber: number;
   pageSize: number;
-  category:
-    | "All"
-    | "Movies"
-    | "Series"
-    | "Music"
-    | "Anime"
-    | "Videos"
-    | "Sports"
-    | "Nsfw";
+  category: string;
   includeNswf: boolean;
   orderBy: "Recent" | "MostUsers" | "DateAsc" | "DateDesc";
 }
@@ -43,7 +35,7 @@ export interface GetPagedRoomsItem {
   thumbnailUrl: string;
   category: string;
   userCount: number;
-  videoProvider: "YouTube" | "S3" | string;
+  provider: string;
   createdAt: string;
 }
 

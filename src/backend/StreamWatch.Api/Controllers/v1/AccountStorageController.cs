@@ -73,4 +73,15 @@ public class AccountStorageController : ControllerBase
 
         return Ok(response);
     }
+
+
+
+    [HttpDelete("remove/{mediaId}")]
+    [Authorize]
+    public async Task<ActionResult> RemoveMedia(string mediaId)
+    {
+        var response = await _accountStorage.RemoveMedia(mediaId);
+
+        return response.ToActionResult(HttpContext);
+    }
 }

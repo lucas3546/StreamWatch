@@ -30,6 +30,7 @@ public static class ConfigureServices
 
         services.AddSingleton<IEventBus, InMemoryEventBus>();
         services.AddScoped<IEventHandler<AcceptFriendshipInvitationEvent>, AcceptFriendshipInvitationEventHandler>();
+        services.AddScoped<IEventHandler<RoomCreatedEvent>, RoomCreatedEventHandler>();
         services.AddScoped<IEventHandler<FriendshipCreatedEvent>, FriendshipCreatedEventHandler>();
         services.AddScoped<IEventHandler<UserJoinedRoomEvent>, UserJoinedRoomEventHandler>();
         services.AddScoped<IEventHandler<UserLeftRoomEvent>, UserLeftRoomEventHandler>();

@@ -32,5 +32,21 @@ public class BanController : ControllerBase
 
         return response.ToActionResult(HttpContext);
     }
+
+    [HttpGet("history/{accountId}")]
+    public async Task<ActionResult<IEnumerable<GetBansHistoryFromUserItemResponse>>> GetBansHistoryFromUser(string accountId)
+    {
+        var response = await _banService.GetBansHistoryFromUser(accountId);
+
+        return Ok(response);
+    }
+
+    [HttpDelete("unban/{accountId}")]
+    public async Task<ActionResult> Unban(string accountId)
+    {
+        var response = await _banService.UnbanAsync(accountId);
+
+        return response.ToActionResult(HttpContext);
+    }
 }    
 

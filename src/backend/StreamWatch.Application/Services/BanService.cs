@@ -64,16 +64,36 @@ public class BanService : IBanService
         return Result<string>.Success(_sqids.Encode(ban.Id));
     }
 
-    public async Task<Result> UnbanAsync(string TargetUserId)
+    public async Task<Result> UnbanAsync(string accountId)
     {
-        throw new NotImplementedException();
+        var ban = await _context.Bans.Where(x => x.IsExpired != true).FirstOrDefaultAsync(x => x.AccountId == accountId);
+
+        if (ban is null) return Result.Failure(new NotFoundError("NotFound", "Active ban not found for this account"));
+
+        ban.IsExpired = true;
+
+        _context.Bans.Update(ban);
+
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        _logger.LogInformation("Active ban deleted from database, Id={BanId}", ban.Id);
+
+        await _banCacheService.UnbanAccountIdAsync(accountId);
+        await _banCacheService.UnbanIpAsync(ban.IpAddress);
+
+        _logger.LogInformation("AccountId={AccountId} and Ip Address={IP} removed from cache", accountId, ban.IpAddress);
+
+
+        return Result.Success();
     }
-    
+
     public async Task<Result<GetActiveBanForCurrentUserResponse>> GetActiveBanForCurrentUser()
     {
+        ArgumentException.ThrowIfNullOrEmpty(_user.IpAddress);
+
         ArgumentException.ThrowIfNullOrEmpty(_user.Id);
 
-        var ban = await _context.Bans.FirstOrDefaultAsync(x => x.AccountId == _user.Id && x.IsExpired == false);
+        var ban = await _context.Bans.FirstOrDefaultAsync(x => x.AccountId == _user.Id && x.IsExpired == false || x.IpAddress == _user.IpAddress && x.IsExpired == false);
 
         if (ban is null) return Result<GetActiveBanForCurrentUserResponse>.Failure(new NotFoundError("NotFound", "Ban not found"));
 
@@ -81,6 +101,27 @@ public class BanService : IBanService
 
         return Result<GetActiveBanForCurrentUserResponse>.Success(response);
     }
+    
+    public async Task<IEnumerable<GetBansHistoryFromUserItemResponse>> GetBansHistoryFromUser(string accountId)
+{
+    var bans = await _context.Bans
+        .AsNoTracking()
+        .Where(x => x.AccountId == accountId)
+        .Select(x => new GetBansHistoryFromUserItemResponse(
+            _sqids.Encode(x.Id),
+            x.AccountId,
+            x.PrivateReason,
+            x.PublicReason,
+            x.ExpirationTime,
+            x.IsExpired,
+            x.CreatedAt.ToString()
+        ))
+        .ToListAsync();
+
+
+
+    return bans;
+}
 
     public async Task GetBanInfoAsync(string banId)
     {

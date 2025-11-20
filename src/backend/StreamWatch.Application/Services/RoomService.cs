@@ -2,7 +2,9 @@ using Microsoft.Extensions.Logging;
 using Sqids;
 using StreamWatch.Application.Common.Helpers;
 using StreamWatch.Application.Common.Interfaces;
+using StreamWatch.Application.Common.Interfaces.Events;
 using StreamWatch.Application.Common.Models;
+using StreamWatch.Application.Events.DomainEvents;
 using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
 using StreamWatch.Core.Cache;
@@ -21,8 +23,9 @@ public class RoomService : IRoomService
     private readonly IStorageService _storageService;
     private readonly SqidsEncoder<int> _sqids;
     private readonly ILogger<RoomService> _logger;
+    private readonly IEventBus _eventBus;
 
-    public RoomService(IApplicationDbContext context, ICurrentUserService currentUserService, IRoomRepository roomRepository, SqidsEncoder<int> squids, IMediaProcessingService processingService, IStorageService storageService, ILogger<RoomService> logger)
+    public RoomService(IApplicationDbContext context, ICurrentUserService currentUserService, IRoomRepository roomRepository, SqidsEncoder<int> squids, IMediaProcessingService processingService, IStorageService storageService, ILogger<RoomService> logger, IEventBus eventBus)
     {
         _context = context;
         _user = currentUserService;
@@ -31,10 +34,13 @@ public class RoomService : IRoomService
         _mediaProcessingService = processingService;
         _storageService = storageService;
         _logger = logger;
+        _eventBus = eventBus;
     }
 
     public async Task<Result<CreateRoomResponse>> CreateRoomAsync(CreateRoomRequest request)
     {
+        if(request.Category == RoomCategory.All) return Result<CreateRoomResponse>.Failure(new ValidationError("InvalidCategory", "Invalid value for category"));
+        
         ArgumentException.ThrowIfNullOrEmpty(_user.Id);
 
         ArgumentException.ThrowIfNullOrEmpty(_user.Name);
@@ -120,6 +126,8 @@ public class RoomService : IRoomService
         _logger.LogInformation("Room created successfully: RoomId={RoomId}, UserId={UserId}, Title={Title}", roomId, _user.Id, request.Title);
 
         var response = new CreateRoomResponse(roomId);
+
+        await _eventBus.PublishAsync(new RoomCreatedEvent(room));
 
         return Result<CreateRoomResponse>.Success(response);
     }

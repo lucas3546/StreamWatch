@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using HeyRed.Mime;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Sqids;
 using StreamWatch.Application.Common.Helpers;
 using StreamWatch.Application.Common.Interfaces;
@@ -20,9 +21,10 @@ public class AccountStorageService : IAccountStorageService
     private readonly IBackgroundService _backgroundService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
+    private readonly ILogger<AccountStorageService> _logger;
     private readonly SqidsEncoder<int> _sqids;
 
-    public AccountStorageService(IStorageService storageService,  IApplicationDbContext context, IBackgroundService backgroundService, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, SqidsEncoder<int> squids)
+    public AccountStorageService(IStorageService storageService,  IApplicationDbContext context, IBackgroundService backgroundService, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, SqidsEncoder<int> squids, ILogger<AccountStorageService> logger)
     {
         _storageService = storageService;
         _context = context;
@@ -30,6 +32,7 @@ public class AccountStorageService : IAccountStorageService
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
         _sqids = squids;
+        _logger = logger;
     }
     
     private static readonly HashSet<string> SupportedImageFormats = new HashSet<string>
@@ -235,6 +238,39 @@ public class AccountStorageService : IAccountStorageService
         var videoFiles = files.Where(f => ContentTypeHelper.IsVideo(f.FileName)).ToList();
         
         return videoFiles;
+    }
+
+    public async  Task<Result> RemoveMedia(string mediaId)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.Id);
+
+
+        long decodedId = 0;
+        try
+        {
+            if(!_sqids.TrySafeDecode(mediaId, out decodedId)) return Result.Failure(new ValidationError("DecodeFailure","The media id can't be decoded"));
+        }
+        catch
+        {
+            _logger.LogError("Some error has ocurred trying to decode the mediaId, MediaId={mediaId}", mediaId);
+            return Result.Failure(new ValidationError("DecodeFailure","The media id can't be decoded"));
+        }
+
+        var media = await _context.Media.FirstOrDefaultAsync(x => x.Id == decodedId && x.CreatedBy == _currentUserService.Id && x.Status == MediaStatus.Uploaded);
+
+        if(media is null) return Result.Failure(new NotFoundError("NotFound", "Media not found"));
+
+        _backgroundService.Enqueue(() => _storageService.DeleteAsync(media.FileName));
+
+        _backgroundService.Enqueue(() => _storageService.DeleteAsync(media.ThumbnailFileName));
+
+        _context.Media.Remove(media);
+
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        _logger.LogInformation("Media removed by user, MediaId={id}", decodedId);
+
+        return Result.Success();
     }
 
 

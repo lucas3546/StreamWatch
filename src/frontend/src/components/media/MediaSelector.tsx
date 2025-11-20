@@ -55,6 +55,10 @@ export default function MediaSelector({ media, setMedia }: MediaSelectorProps) {
 
             <img
               src={item.thumbnailUrl}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = "/nopreview.jpg";
+              }}
               className="w-8 h-8 object-cover rounded"
             />
             <span>{getFilename(item.thumbnailUrl)}</span>

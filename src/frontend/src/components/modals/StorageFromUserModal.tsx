@@ -24,13 +24,14 @@ export default function StorageFromUserModal({
   const [isOpen, setIsOpen] = useState(false);
   const [storageResp, setStorageResp] = useState<StorageResponse>();
   useEffect(() => {
+    if (!isOpen) return;
     const fetchData = async () => {
       const data = await getFullStorageForomUser(accountId);
       setStorageResp(data);
     };
 
     fetchData();
-  }, [storageResp, accountId]);
+  }, [isOpen, accountId]);
   return (
     <BaseModal
       blurBackground
@@ -60,6 +61,7 @@ export default function StorageFromUserModal({
           {storageResp?.medias.map((media) => (
             <>
               <VideoItemCard
+                id={media.mediaId}
                 size={media.size}
                 fileUrl={media.fileUrl}
                 provider={media.mediaProvider}

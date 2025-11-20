@@ -44,6 +44,7 @@ export default function StoragePage() {
       <div className="grid gap-2 p-2 grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">
         {videos?.medias.map((x) => (
           <VideoItemCard
+            id={x.mediaId}
             key={x.mediaId}
             fileUrl={x.fileUrl}
             thumbnailUrl={x.thumbnailUrl}

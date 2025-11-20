@@ -6,6 +6,9 @@ import {
 import RoomCard from "../../components/cards/RoomCard";
 import RoomGrid from "../../components/grids/RoomGrid";
 import { useParams } from "react-router";
+import { useSignalR } from "../../hooks/useSignalR";
+import { TbReload } from "react-icons/tb";
+import Icon from "../../components/icon/Icon";
 
 interface RoomPageProps {
   category?: string;
@@ -13,12 +16,21 @@ interface RoomPageProps {
 }
 
 export default function RoomsPage({ category, order }: RoomPageProps) {
-  const { categoryName } = useParams(); // <-- viene de la URL
+  const { categoryName } = useParams();
   category = categoryName || "All";
   const [page, setPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [rooms, setRooms] = useState<GetPagedRoomsItem[]>([]);
+  const [pendingRooms, setPendingRooms] = useState<GetPagedRoomsItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const { connection } = useSignalR();
+
+  useEffect(() => {
+    console.log("Category changed, resetting state:", category);
+    setRooms([]);
+    setPage(1);
+    setTotalPages(0);
+  }, [category]);
 
   useEffect(() => {
     const fetchRooms = async () => {
@@ -43,9 +55,43 @@ export default function RoomsPage({ category, order }: RoomPageProps) {
       }
     };
     fetchRooms();
-  }, [page, category, order]);
+  }, [order, page]);
 
-  // Scroll automático
+  useEffect(() => {
+    if (!connection || !category) return;
+
+    connection
+      .invoke("JoinRoomCreatedCategoryGroup", category)
+      .catch((err) => console.error("Error joining group:", err));
+
+    const handler = (data: any) => {
+      const newRoom: GetPagedRoomsItem = {
+        roomId: data.roomId,
+        thumbnailUrl: data.thumbnailUrl,
+        title: data.title,
+        category: data.category,
+        provider: data.provider,
+        userCount: data.userCount,
+        createdAt: data.createdAt,
+      };
+
+      setPendingRooms((prev) => [newRoom, ...prev]);
+    };
+
+    connection.off(`ReceiveCreatedRoom`, handler);
+
+    if (order !== "MostUsers") {
+      connection.on(`ReceiveCreatedRoom`, handler);
+    }
+
+    return () => {
+      connection.off(`ReceiveCreatedRoom`, handler);
+      connection
+        .invoke("LeaveRoomCreatedCategoryGroup", category)
+        .catch((err) => console.error("Error leaving group:", err));
+    };
+  }, [connection, category]);
+
   useEffect(() => {
     const handleScroll = () => {
       if (
@@ -71,12 +117,10 @@ export default function RoomsPage({ category, order }: RoomPageProps) {
     }
   }, [rooms, loading, totalPages, page]);
 
-  useEffect(() => {
-    console.log("Category changed, resetting state:", category);
-    setRooms([]);
-    setPage(1);
-    setTotalPages(0);
-  }, [category]);
+  const onClickSetPendingRooms = () => {
+    setRooms((prev) => [...pendingRooms, ...prev]);
+    setPendingRooms([]);
+  };
 
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
@@ -87,13 +131,31 @@ export default function RoomsPage({ category, order }: RoomPageProps) {
             roomId={room.roomId}
             thumbnailUrl={room.thumbnailUrl}
             title={room.title}
-            category={room.category?.toLowerCase?.() ?? ""}
-            provider={room.videoProvider}
+            category={room.category}
+            provider={room.provider}
             connectedUsers={room.userCount}
           />
         )) || null}
         {loading && <p className="col-span-full text-center">Loading...</p>}
       </RoomGrid>
+      {pendingRooms.length > 0 && (
+        <button
+          className="
+            fixed bottom-6 right-6
+            hover:bg-neutral-700
+            bg-neutral-800 text-white
+            rounded-sm
+            shadow-xl
+            cursor-pointer
+            px-4 py-2
+            flex items-center gap-2
+          "
+          onClick={onClickSetPendingRooms}
+        >
+          <Icon icon={TbReload}></Icon>
+          Load {pendingRooms.length} new rooms
+        </button>
+      )}
     </div>
   );
 }

@@ -38,6 +38,13 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     if (storedToken) {
       try {
         const decoded = jwtDecode<DecodedToken>(storedToken);
+
+        const now = Date.now() / 1000;
+        if (decoded.exp && decoded.exp < now) {
+          localStorage.removeItem("jwt");
+          return;
+        }
+
         setUser({
           nameid: decoded.nameid,
           name: decoded.name,

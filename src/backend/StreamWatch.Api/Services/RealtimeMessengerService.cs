@@ -18,9 +18,9 @@ public class RealtimeMessengerService : IRealtimeMessengerService
         throw new NotImplementedException();
     }
 
-    public Task SendToGroupAsync(string group, string method, params object[] args)
+    public async Task SendToGroupAsync(string group, string method, object obj)
     {
-        throw new NotImplementedException();
+        await _hubContext.Clients.Group(group).SendAsync(method, obj);
     }
 
     public async Task SendToUserAsync(string userId, string method, params object[] args)
