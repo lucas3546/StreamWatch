@@ -8,6 +8,7 @@ namespace StreamWatch.Application.Common.Interfaces;
 public interface IRoomService
 {
     Task<Result<CreateRoomResponse>> CreateRoomAsync(CreateRoomRequest request);
+    Task<Result> UpdateRoomAsync(UpdateRoomRequest request);
     Task<Result> UpdateVideoStateAsync(UpdateVideoStateRequest request);
     Task<Result<PlaylistVideoItem>> AddVideoToPlaylist(AddVideoToPlaylistRequest request);
     Task<PaginatedList<GetPagedRoomItemResponse>> GetPagedRooms(GetPagedRoomsRequest request);

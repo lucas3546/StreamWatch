@@ -3,7 +3,7 @@ import { api } from "./api";
 export interface GetFriendsResponse {
   userId: string;
   userName: string;
-  profileThumbnail: string;
+  thumbnailUrl: string;
   status: string;
   requestedByAccountId: string;
   responseDate: string;

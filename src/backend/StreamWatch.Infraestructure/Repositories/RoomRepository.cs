@@ -26,8 +26,8 @@ public class RoomRepository : IRoomRepository
     public async Task<string> SaveAsync(RoomCache room, CancellationToken ct = default)
     {
         var roomId = await _rooms.InsertAsync(room);
-
-        return roomId.Replace("Room:", "");
+        
+        return roomId.Replace("RoomCache:", "");
     }
     
     public async Task UpdateAsync(RoomCache room, CancellationToken ct = default)

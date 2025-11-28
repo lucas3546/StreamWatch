@@ -29,3 +29,13 @@
     margin-inline: auto;
     max-width: 300px;
 }
+
+media-player:not([data-can-play]) .player-controls {
+    opacity: 0;
+    pointer-events: none;
+}
+
+:global(media-player[data-user-idle] .player-controls) {
+    opacity: 0;
+    pointer-events: none;
+}

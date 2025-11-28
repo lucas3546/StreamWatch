@@ -3,6 +3,8 @@ import VideoItemCard from "../components/cards/VideoItemCard";
 import { DateTime } from "luxon";
 import { getOverview, type StorageResponse } from "../services/storageService";
 import UploadVideoModal from "../components/modals/UploadVideoModal";
+import { IoMdCloudUpload } from "react-icons/io";
+import Icon from "../components/icon/Icon";
 
 export default function StoragePage() {
   const [videos, setVideos] = useState<StorageResponse | null>();
@@ -28,14 +30,21 @@ export default function StoragePage() {
           This is your temporal storage, you can upload videos up to 2gb, and
           will be deleted in 24 hours
         </p>
-        <button className="bg-neutral-700 hover:bg-neutral-500 m-2 p-1 rounded-sm cursor-pointer">
-          <UploadVideoModal onUploaded={onUploadedVideo}></UploadVideoModal>
-        </button>
+        <UploadVideoModal
+          openButtonClassname="bg-neutral-700 hover:bg-neutral-500 m-2 p-2 rounded-sm cursor-pointer"
+          openButtonContent={
+            <span className="flex flex-row items-center gap-1">
+              <Icon icon={IoMdCloudUpload}></Icon>Upload video
+            </span>
+          }
+          onUploaded={onUploadedVideo}
+        ></UploadVideoModal>
       </div>
 
       <div className="grid gap-2 p-2 grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">
         {videos?.medias.map((x) => (
           <VideoItemCard
+            id={x.mediaId}
             key={x.mediaId}
             fileUrl={x.fileUrl}
             thumbnailUrl={x.thumbnailUrl}

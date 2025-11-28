@@ -10,7 +10,7 @@ export default function AccountPage() {
   const { user } = useUser();
   return (
     <FormContainer>
-      <div className="flex flex-col mx-auto overflow-hidden px-2 items-center">
+      <div className="flex flex-col mx-auto overflow-hidden p-2 items-center">
         <div className="flex flex-row gap-3 items-center">
           <ProfilePic
             userName={user?.name}
@@ -43,29 +43,6 @@ export default function AccountPage() {
             Delete my account
           </button>
         </div>
-
-        {/*
-        <div>
-          <p className="text-lg"> Change Password</p>
-          <div className="flex flex-row items-center">
-            <div className="flex flex-col">
-              <input
-                type="text"
-                className="border-white border-1 rounded-sm px-1"
-                placeholder="Your current password"
-              ></input>
-              <input
-                type="text"
-                className=""
-                placeholder="Your new password"
-              ></input>
-            </div>
-            <button className="bg-sky-700 text-lg rounded-sm px-2 mt-1 hover:bg-sky-600 ml-auto">
-              Upload
-            </button>
-          </div>
-        </div>
-        */}
       </div>
     </FormContainer>
   );

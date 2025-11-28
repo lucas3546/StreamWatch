@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BASE_URL } from "../utils/config";
+import { BASE_ORIGIN_URL } from "../utils/config";
 import { SignalRContext } from "./SignalRContext";
 import * as signalR from "@microsoft/signalr";
 
@@ -15,7 +15,7 @@ export const SignalRProvider = ({
 
   const initConnection = useCallback(async () => {
     const conn = new signalR.HubConnectionBuilder()
-      .withUrl(BASE_URL + "/hubs/streamwatch", {
+      .withUrl(BASE_ORIGIN_URL + "/hubs/streamwatch", {
         accessTokenFactory: () => localStorage.getItem("jwt") || "",
       })
       .withAutomaticReconnect()

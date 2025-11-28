@@ -13,23 +13,24 @@ public class AcceptFriendshipInvitationEventHandler : IEventHandler<AcceptFriend
 {
     private readonly IApplicationDbContext _context;
     private readonly IRealtimeMessengerService _realtimeMessengerService;
-    private readonly ICurrentUserService _currentUserService;
+    private readonly ICurrentUserService _user;
     public AcceptFriendshipInvitationEventHandler(IApplicationDbContext context, IRealtimeMessengerService realtimeMessengerService, ICurrentUserService currentUserService)
     {
         _context = context;
         _realtimeMessengerService = realtimeMessengerService;
-        _currentUserService = currentUserService;
+        _user = currentUserService;
     }
 
     public async Task HandleAsync(AcceptFriendshipInvitationEvent @event, CancellationToken cancellationToken = default)
     {
-        var userName = _currentUserService.Name;
-        ArgumentNullException.ThrowIfNullOrEmpty(userName);
+        ArgumentNullException.ThrowIfNullOrEmpty(_user.Id);
+
+        ArgumentNullException.ThrowIfNullOrEmpty(_user.Name);
 
         var notification = new Notification()
         {
             ToAccountId = @event.requesterId,
-            FromUserName = userName,
+            FromUserName = _user.Name,
             Payload = "",
             Type = NotificationType.FriendRequestAccepted
         };
@@ -38,9 +39,11 @@ public class AcceptFriendshipInvitationEventHandler : IEventHandler<AcceptFriend
 
         await _context.SaveChangesAsync(cancellationToken);
         
-        var model = new NotificationModel(notification.Id, notification.FromUserName, notification.Type.ToString(), Payload: null, notification.CreatedAt);
+        var model = new NotificationModel(notification.Id, _user.Name, _user.Id, _user.ProfilePicUrl, notification.Type.ToString(), Payload: null, notification.CreatedAt);
 
         await _realtimeMessengerService.SendToUserAsync(notification.ToAccountId, "ReceiveNotification", model);
+
+        await _realtimeMessengerService.SendToUsersAsync(_user.Id, @event.requesterId, "UpdateFriendState", new UpdateFriendshipStatusModel(@event.requesterId, _user.Id, FriendInvitationStatus.Accepted.ToString(), @event.requestDate, @event.responseDate));
         
     }
 }

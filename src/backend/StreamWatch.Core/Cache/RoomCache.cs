@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Redis.OM.Modeling;
 using StreamWatch.Core.Enums;
 
@@ -13,6 +14,7 @@ public class RoomCache
     [Indexed]
     public string Title { get; set; }
     [Indexed]
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public RoomCategory Category { get; set; }
     [Indexed]
     public string VideoUrl { get; set; }

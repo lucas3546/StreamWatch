@@ -26,8 +26,27 @@ public class StreamWatchHub : Hub
     {
         return base.OnConnectedAsync();
     }
+        
+    public async Task JoinRoomCreatedCategoryGroup(string category)
+    {
+        if (!Enum.TryParse<RoomCategory>(category, ignoreCase: true, out var parsed))
+            throw new HubException("Invalid category");
 
+        var normalized = parsed.ToString();
 
+        await Groups.AddToGroupAsync(Context.ConnectionId, $"RoomCreated:{normalized}");
+    }
+
+    public async Task LeaveRoomCreatedCategoryGroup(string category)
+    {
+        if (!Enum.TryParse<RoomCategory>(category, ignoreCase: true, out var parsed))
+            throw new HubException("Invalid category");
+
+        var normalized = parsed.ToString();
+
+        await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"RoomCreated:{normalized}");
+    }
+        
     [Authorize]
     public async Task<RoomCache> ConnectToRoom(string roomId)
     {
@@ -68,6 +87,7 @@ public class StreamWatchHub : Hub
 
         //Request to leader to send the actual video state.
         await Clients.User(room.LeaderAccountId).SendAsync("RefreshVideoState");
+
 
         //Return the current room state
         return room;
@@ -122,7 +142,9 @@ public class StreamWatchHub : Hub
         if (session != null)
         {
             await Clients.Group(session.RoomId).SendAsync("ReceiveMessage", new { Id = Guid.NewGuid().ToString(), IsNotification = true, Text = $"{session.UserName} has left the room", });
-                    
+
+            await Clients.Group(session.RoomId).SendAsync("UserLeftRoom", session.UserId);
+
             await _userSessionService.EndSessionAsync(connectionId);
         }
         

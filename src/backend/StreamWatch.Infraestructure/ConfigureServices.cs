@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Redis.OM;
+using StackExchange.Redis;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Services;
 using StreamWatch.Core.Identity;
@@ -47,6 +48,8 @@ public static class ConfigureServices
             provider.GetRequiredService<ApplicationDbContext>()
         );
 
+        services.AddScoped<ApplicationDbContextInitialiser>();
+
         //Redis Stack
         var redisConnectionString = configuration.GetConnectionString("RedisConnection");
 
@@ -55,7 +58,15 @@ public static class ConfigureServices
 
         services.AddHostedService<IndexCreationService>();
 
-        services.AddSingleton(new RedisConnectionProvider(redisConnectionString));
+        //services.AddSingleton(new RedisConnectionProvider(redisConnectionString));
+        var multiplexer = ConnectionMultiplexer.Connect(redisConnectionString);
+
+        // Registrás el multiplexer para inyección directa
+        services.AddSingleton<IConnectionMultiplexer>(multiplexer);
+
+        // Y lo usás para Redis OM (solo se construye con el mismo multiplexer)
+        var provider = new RedisConnectionProvider(multiplexer);
+        services.AddSingleton(provider);
 
         //Hangfire
         services.AddHangfire(config =>
@@ -110,7 +121,9 @@ public static class ConfigureServices
 
         //Other DI
         services.AddTransient<IIdentityService, IdentityService>();
+        services.AddScoped<IBanCacheService, BanCacheService>();
         services.AddScoped<MediaCleanupService>();
+        services.AddScoped<BanUpdateJob>();
         services.AddScoped<IRoomRepository, RoomRepository>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         services.AddScoped<IMediaProcessingService, MediaProcessingService>();
@@ -118,6 +131,9 @@ public static class ConfigureServices
         services.AddScoped<IJwtService, JwtService>();
         services.AddSingleton(TimeProvider.System);
         services.AddSingleton<IGeoIpService, GeoIpService>();
+
+        
+
 
         return services;
     }

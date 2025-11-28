@@ -20,14 +20,19 @@ public static class ConfigureServices
         services.AddScoped<IAccountStorageService, AccountStorageService>();
         services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddScoped<IRoomService, RoomService>();
+        services.AddScoped<IRoomInvitationService, RoomInvitationService>();
+        services.AddScoped<IBanService, BanService>();
         services.AddSingleton(new SqidsEncoder<int>(new()
         {
             Alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
-            MinLength = 6,
+            MinLength = 10,
         }));
         #region EventsRegion
 
         services.AddSingleton<IEventBus, InMemoryEventBus>();
+        services.AddScoped<IEventHandler<AcceptFriendshipInvitationEvent>, AcceptFriendshipInvitationEventHandler>();
+        services.AddScoped<IEventHandler<RoomCreatedEvent>, RoomCreatedEventHandler>();
+        services.AddScoped<IEventHandler<DeleteFriendshipEvent>, DeleteFriendshipEventHandler>();
         services.AddScoped<IEventHandler<FriendshipCreatedEvent>, FriendshipCreatedEventHandler>();
         services.AddScoped<IEventHandler<UserJoinedRoomEvent>, UserJoinedRoomEventHandler>();
         services.AddScoped<IEventHandler<UserLeftRoomEvent>, UserLeftRoomEventHandler>();

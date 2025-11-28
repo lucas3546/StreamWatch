@@ -9,7 +9,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace StreamWatch.Api.Controllers.v1;
 
 [ApiController]
-[Route("api/v1/[controller]/")]
+[Route("v1/[controller]/")]
 public class NotificationController : ControllerBase
 {
     private readonly INotificationService _notificationService;

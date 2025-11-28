@@ -15,7 +15,9 @@ interface RoomStore {
   setRoom: (room: RoomState) => void;
   addPlaylistItem: (item: PlaylistVideoItemModel) => void;
   addChatMessage: (msg: RoomChatMessage) => void;
+  addUserRoom: (user: BasicUserRoomModel) => void;
   setRoomUsers: (users: BasicUserRoomModel[]) => void;
+  removeUserRoom: (userId: string) => void;
   setIsLeader: (isleader: boolean) => void;
   reset: () => void;
 }
@@ -48,6 +50,16 @@ export const useRoomStore = create<RoomStore>((set) => ({
     })),
 
   setRoomUsers: (users) => set({ roomUsers: users }),
+
+  addUserRoom: (user) =>
+    set((state) => ({
+      roomUsers: [...state.roomUsers, user],
+    })),
+
+  removeUserRoom: (userId: string) =>
+    set((state) => ({
+      roomUsers: state.roomUsers.filter((u) => u.userId !== userId),
+    })),
 
   setIsLeader: (isleader) => set({ isLeader: isleader }),
 

@@ -1,26 +1,20 @@
 import ProfilePic from "../avatar/ProfilePic";
 import Icon from "../icon/Icon";
-import { HiUserAdd } from "react-icons/hi";
 import { BiSolidUserX } from "react-icons/bi";
 import { BiSolidUserCheck } from "react-icons/bi";
 import {
   acceptFriendshipRequest,
-  declineFriendshipRequest,
   removeFriendship,
-  sendFriendshipRequest,
 } from "../../services/friendshipService";
-import { useState } from "react";
 import { useUser } from "../../contexts/UserContext";
-import { Link, useNavigate } from "react-router";
+import { Link } from "react-router";
 
 interface UserFriendItemProps {
   userId: string;
   userName: string;
   profilePic?: string;
-  status: string;
+  status?: string | undefined;
   requestedByAccountId?: string;
-  friendsSince?: string;
-  friendsRequest?: string;
   onFriendAction: (userId: string, newStatus: string) => void;
 }
 
@@ -30,16 +24,9 @@ export default function UserFriendItem({
   profilePic,
   status,
   requestedByAccountId,
-  friendsSince,
-  friendsRequest,
   onFriendAction,
 }: UserFriendItemProps) {
   const { user } = useUser();
-  console.log(status);
-
-  const sendFriendRequest = async () => {
-    await sendFriendshipRequest(userId);
-  };
 
   const acceptFriendRequest = async () => {
     await acceptFriendshipRequest(userId);
@@ -57,7 +44,7 @@ export default function UserFriendItem({
   };
 
   const removeFriendRequest = async () => {
-    const confirmed = confirm(`Are you sure you want to delete ${userName}`);
+    const confirmed = confirm(`Are you sure you want to delete ${userName}?`);
     if (confirmed) {
       await removeFriendship(userId);
       onFriendAction(userId, "Declined");
@@ -67,19 +54,27 @@ export default function UserFriendItem({
   return (
     <li
       key={userId}
-      className="flex items-center justify-between gap-2 p-2 rounded-sm border border-defaultbordercolor w-full md:w-[50%]"
+      className="flex items-center justify-between gap-3 p-2 rounded-xl border border-neutral-700 bg-neutral-900/50 hover:bg-neutral-800 transition-all shadow-sm w-full md:w-[48%]"
     >
-      <div className="flex items-center gap-2">
+      {/* Perfil */}
+      <div className="flex items-center gap-1">
         <ProfilePic userName={userName} fileUrl={profilePic} />
-        <Link to={"/profile/" + userId}>{userName}</Link>
+        <Link
+          to={`/profile/${userId}`}
+          className="font-medium text-gray-100 hover:underline hover:text-white transition-colors flex-shrink truncate max-w-[80%]"
+          title={userName}
+        >
+          {userName}
+        </Link>
       </div>
 
+      {/* Estado */}
       {status === "Accepted" && (
-        <div className="flex flex-row items-center gap-1">
-          <span className="text-green-700">Friends</span>
+        <div className="flex items-center gap-2">
+          <span className="text-green-500 text-sm font-medium">Friends</span>
           <button
             onClick={removeFriendRequest}
-            className="flex items-center gap-1 border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer text-xs"
+            className="cursor-pointer flex items-center gap-1 bg-neutral-800 hover:bg-red-700 text-gray-200 hover:text-white rounded-lg px-2 py-1 text-xs transition-colors"
           >
             <Icon icon={BiSolidUserX} />
             Remove
@@ -88,11 +83,10 @@ export default function UserFriendItem({
       )}
 
       {status === "Pending" && requestedByAccountId === user?.nameid && (
-        <div className="flex flex-row items-center gap-1">
-          <span className="text-gray-500">Pending</span>
+        <div className="flex items-center gap-2">
           <button
             onClick={cancelFriendRequest}
-            className="flex items-center gap-1 border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer text-xs"
+            className="cursor-pointer flex items-center gap-1 bg-neutral-800 hover:bg-neutral-700 text-gray-200 hover:text-white rounded-lg px-2 py-1 text-xs transition-colors"
           >
             <Icon icon={BiSolidUserX} />
             Cancel request
@@ -101,34 +95,22 @@ export default function UserFriendItem({
       )}
 
       {status === "Pending" && requestedByAccountId !== user?.nameid && (
-        <div className="ml-auto flex gap-1">
-          <span className="text-gray-500">Pending</span>
-          {requestedByAccountId !== undefined && (
-            <>
-              <button
-                onClick={acceptFriendRequest}
-                className="border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
-              >
-                <Icon icon={BiSolidUserCheck} />
-              </button>
-              <button
-                onClick={declineFriendRequest}
-                className="border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
-              >
-                <Icon icon={BiSolidUserX} />
-              </button>
-            </>
-          )}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={acceptFriendRequest}
+            className="cursor-pointer flex items-center justify-center bg-green-600 hover:bg-green-700 text-white rounded-lg p-1 transition-colors"
+            title="Aceptar solicitud"
+          >
+            <Icon icon={BiSolidUserCheck} />
+          </button>
+          <button
+            onClick={declineFriendRequest}
+            className="cursor-pointer flex items-center justify-center bg-red-600 hover:bg-red-700 text-white rounded-lg p-1 transition-colors"
+            title="Rechazar solicitud"
+          >
+            <Icon icon={BiSolidUserX} />
+          </button>
         </div>
-      )}
-
-      {!status && (
-        <button
-          onClick={sendFriendRequest}
-          className="ml-auto border border-defaultbordercolor hover:bg-neutral-700 rounded-md p-1 cursor-pointer"
-        >
-          <Icon icon={HiUserAdd} />
-        </button>
       )}
     </li>
   );

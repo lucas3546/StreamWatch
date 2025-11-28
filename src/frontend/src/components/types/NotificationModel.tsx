@@ -1,8 +1,11 @@
+import type { NotificationType } from "./NotificationTypeModel";
+
 export interface NotificationModel {
   id: string;
   fromUserName: string;
-  type: string;
+  fromUserId: string;
+  type: NotificationType;
   payload: string | undefined;
   sentAt: string;
-  image?: string;
+  pictureUrl?: string;
 }

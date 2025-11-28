@@ -80,6 +80,8 @@ export default function Sidebar({
               ></SidebarItemLink>
               <SidebarItemLink
                 icon={RxAvatar}
+                thumbnailUrl={user.picture}
+                userName={user.name}
                 label="Account"
                 href="/account"
               ></SidebarItemLink>

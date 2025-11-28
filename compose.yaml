@@ -1,4 +1,21 @@
 ﻿services:
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+      - ./key.pem:/root/ssl/key.pem
+      - ./cert.pem:/root/ssl/cert.pem
+      - ./templates:/etc/nginx/templates
+      - ./src/frontend/build:/usr/share/nginx/html:ro
+    ports:
+      - "433:443"
+      - "12345:80"
+    environment:
+      - NGINX_HOST=example.com
+      - NGINX_PORT=80
+
+   
   streamwatch.api:
     image: streamwatch.api
     build:
@@ -10,17 +27,25 @@
     environment:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=pgdb;Username=postgres;Password=postgres;Trust Server Certificate=true
       - ConnectionStrings__RedisConnection=redis://redis:6379
-    depends_on:
-      - redis          
-      - postgres
-      
+
+    
+  frontend:
+    build: 
+      context: ./src/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "4444:80"
+    environment:
+      NODE_ENV: production
+
+
   postgres:
     image: postgres
     restart: always
     ports:
       - "5432:5432"
     volumes:
-      - postgres-db-volume:/var/lib/postgresql/data
+      - postgres-db-volume:/var/lib/postgresql/MAJOR/docker
     environment:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_USER=postgres
@@ -33,6 +58,21 @@
       - "6379:6379"
     volumes:
       - redis_data:/data
+    restart: unless-stopped
+
+  seq:
+    image: datalust/seq:latest
+    ports:
+      - "5341:80"
+    environment:
+      ACCEPT_EULA: Y
+      SEQ_FIRSTRUN_ADMINPASSWORD: 1234
+      # Optional: Set an initial admin password.
+      # SEQ_FIRSTRUN_ADMINPASSWORD: your_strong_password 
+      # Or, if you prefer a pre-hashed password:
+      # SEQ_FIRSTRUN_ADMINPASSWORDHASH: your_hashed_password_value
+    volumes:
+      - ./seq-data:/data
     restart: unless-stopped
 
 volumes:

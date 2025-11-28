@@ -1,7 +1,10 @@
 import {
+  Gesture,
   MediaPlayer,
   MediaPlayerInstance,
   MediaProvider,
+  TextTrack,
+  Track,
   type MediaErrorDetail,
   type MediaPauseEvent,
   type MediaSeekedEvent,
@@ -22,6 +25,7 @@ interface VideoPlayerProps {
   onPlay: (nativeEvent: MediaPauseEvent) => void;
   onPause: (nativeEvent: MediaPauseEvent) => void;
   onError: (nativeEvent: MediaErrorDetail) => void;
+  onEnded: () => void;
 }
 
 export default function VideoPlayer({
@@ -31,6 +35,7 @@ export default function VideoPlayer({
   onPlay,
   onPause,
   onError,
+  onEnded,
 }: VideoPlayerProps) {
   useEffect(() => {
     const mediaElement = player.current?.el; // acceso al MediaPlayer real
@@ -44,42 +49,72 @@ export default function VideoPlayer({
       // Aplica estilos directamente
       Object.assign(videoOrIframe.style, {
         maxWidth: "100%",
-        maxHeight: "80vh",
+        maxHeight: "100%",
         width: "100%",
         height: "120%",
         objectFit: "contain",
         margin: "0 auto",
         display: "block",
-        padding: "50px",
+        padding: "5px",
         backgroundColor: "black",
       });
     }
   }, [player, roomState.videoUrl]);
 
-  const getSanitizedUrl = (url: string) => {
-    if (!url.includes("youtube.com") && !url.includes("youtu.be")) return url;
+  const putTrack = () => {
+    player.current?.textTracks.add({
+      src: "https://pub-3d64bc11ad674a4e92d65803df99fd7e.r2.dev/alteredstatesubtitles.vtt",
+      kind: "subtitles",
+      label: "Spanish",
+      language: "es",
+      type: "vtt",
+      default: true,
+    });
+  };
 
-    const hasQuery = url.includes("?");
-    const params =
-      "modestbranding=1&controls=0&showinfo=0&rel=0&iv_load_policy=3";
-    return `${url}${hasQuery ? "&" : "?"}${params}`;
+  const hideControls = () => {
+    console.log("hide");
+    player.current?.controls.hide();
   };
 
   return (
     <MediaPlayer
       key={`${roomState?.videoProvider}-${roomState?.videoUrl}`}
-      src={getSanitizedUrl(roomState.videoUrl)}
+      src={roomState.videoUrl}
       ref={player}
       onSeeked={onSeeked}
       onPlay={onPlay}
       onPause={onPause}
       onError={onError}
+      onEnded={onEnded}
+      onMouseLeave={hideControls}
+      onTextTrackChange={() => console.log(player.current?.state.textTrack)}
       className="h-full w-full object-contain"
     >
-      <MediaProvider className=" w-full h-full object-contain" />
-
+      <MediaProvider className=" w-full h-full object-contain">
+        {/*
+        <div
+          slot="ui"
+          className="absolute right-4 top-1/2 -translate-y-1/2 z-50"
+        >
+          <div className="bg-neutral-900/80 p-3 rounded-md">
+            <input
+              type="text"
+              placeholder="Chat..."
+              className="w-40 p-1 rounded bg-neutral-800"
+            />
+          </div>
+          </div>*/}
+      </MediaProvider>
+      <Track
+        src="https://pub-3d64bc11ad674a4e92d65803df99fd7e.r2.dev/alteredstatesubtitles.srt"
+        kind="subtitles"
+        label="English"
+        lang="en-US"
+        type="srt"
+        default
+      />
       <DefaultAudioLayout icons={defaultLayoutIcons} />
-
       <VideoLayout></VideoLayout>
     </MediaPlayer>
   );

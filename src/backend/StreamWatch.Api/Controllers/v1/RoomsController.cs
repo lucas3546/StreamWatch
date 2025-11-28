@@ -1,6 +1,7 @@
 using MaxMind.GeoIP2.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Api.Extensions;
 using StreamWatch.Api.Hubs;
@@ -14,40 +15,65 @@ using StreamWatch.Core.Constants;
 namespace StreamWatch.Api.Controllers.v1;
 
 [ApiController]
-[Route("api/v1/[controller]/")]
+[Route("v1/[controller]/")]
 public class RoomsController : ControllerBase
 {
     private readonly IRoomService _roomService;
+    private readonly IRoomInvitationService _roomInvitationService;
     private readonly IAccountStorageService _accountStorageService;
     private readonly IHubContext<StreamWatchHub> _hubContext;
     private readonly ICurrentUserService _currentUserService;
+    private readonly ILogger<RoomsController> _logger;
 
     public RoomsController(
         IRoomService roomService,
+        IRoomInvitationService roomInvitationService,
         IAccountStorageService accountStorageService,
         IHubContext<StreamWatchHub> hubContext,
-        ICurrentUserService currentUserService
+        ICurrentUserService currentUserService,
+        ILogger<RoomsController> logger
     )
     {
         _roomService = roomService;
+        _roomInvitationService = roomInvitationService;
         _accountStorageService = accountStorageService;
         _hubContext = hubContext;
         _currentUserService = currentUserService;
+        _logger = logger;
     }
 
-    [HttpPost("Create")]
+    [HttpPost("create")]
+    [Authorize]
+    //[EnableRateLimiting("OnceEvery5Minutes")]
     public async Task<ActionResult<CreateRoomResponse>> Create(CreateRoomRequest request)
     {
+        _logger.LogInformation("Creating a room {@Request}", request);
+
         var response = await _roomService.CreateRoomAsync(request);
 
         return response.ToActionResult(HttpContext);
     }
 
-    [HttpGet("paged")]
-    public async Task<ActionResult<PaginatedList<GetPagedRoomItemResponse>>> GetPaged(
-        [FromQuery] GetPagedRoomsRequest request
-    )
+    [HttpPut("update")]
+    [Authorize]
+    public async Task<ActionResult> Update(UpdateRoomRequest request)
     {
+        var response = await _roomService.UpdateRoomAsync(request);
+
+        if (response.IsSuccess)
+        {
+            await _hubContext.Clients.Group(request.Id).SendAsync("RoomUpdated", new RoomUpdatedModel(request.Title, request.Category.ToString(), request.IsPublic));
+
+            return response.ToActionResult(HttpContext);
+        }
+        return response.ToActionResult(HttpContext);
+        
+    }
+
+    [HttpGet("paged")]
+    public async Task<ActionResult<PaginatedList<GetPagedRoomItemResponse>>> GetPaged([FromQuery] GetPagedRoomsRequest request)
+    {
+        _logger.LogInformation("Fetching paged rooms with filter: {@Request}", request);
         var response = await _roomService.GetPagedRooms(request);
 
         return Ok(response);
@@ -60,18 +86,6 @@ public class RoomsController : ControllerBase
         var userName = _currentUserService.Name;
 
         var role = _currentUserService.Role;
-
-        string? countryCode = null;
-        string? countryName = null;
-        if (role != null && role == Roles.Admin)
-        {
-            countryCode = "staff";
-            countryName = "staff";
-        }
-        else
-        {
-            (countryCode, countryName) = _currentUserService.Country;
-        }
 
         var room = await _roomService.GetRoomByIdAsync(request.RoomId);
 
@@ -124,6 +138,15 @@ public class RoomsController : ControllerBase
         var result = await _roomService.AddVideoToPlaylist(request);
 
         await _hubContext.Clients.Group(request.RoomId).SendAsync("NewPlaylistVideo", result.Data);
+
+        return result.ToActionResult(HttpContext);
+    }
+
+    [HttpPost("invite")]
+    [Authorize]
+    public async Task<ActionResult> InviteFriendToRoom(InviteToRoomRequest request)
+    {
+        var result = await _roomInvitationService.InviteToRoomAsync(request);
 
         return result.ToActionResult(HttpContext);
     }

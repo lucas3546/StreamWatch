@@ -14,18 +14,17 @@ export interface CreateRoomResponse {
   roomId: string;
 }
 
+export interface UpdateRoomRequest {
+  id: string;
+  title: string;
+  category: string;
+  isPublic: boolean;
+}
+
 export interface GetPagedRoomsRequest {
   pageNumber: number;
   pageSize: number;
-  category:
-    | "All"
-    | "Movies"
-    | "Series"
-    | "Music"
-    | "Anime"
-    | "Videos"
-    | "Sports"
-    | "Nsfw";
+  category: string;
   includeNswf: boolean;
   orderBy: "Recent" | "MostUsers" | "DateAsc" | "DateDesc";
 }
@@ -36,7 +35,7 @@ export interface GetPagedRoomsItem {
   thumbnailUrl: string;
   category: string;
   userCount: number;
-  videoProvider: "YouTube" | "S3" | string;
+  provider: string;
   createdAt: string;
 }
 
@@ -53,6 +52,11 @@ export interface SendMessageRequest {
   message: string;
   image?: File | null;
   replyToMessageId?: string;
+}
+
+export interface InviteToRoomRequest {
+  roomId: string;
+  targetAccountId: string;
 }
 
 export async function getPagedRooms(req: GetPagedRoomsRequest) {
@@ -91,8 +95,18 @@ export async function createRoom(
   return api.post("/rooms/create", data).then((res) => res.data);
 }
 
+export async function inviteToRoom(
+  data: InviteToRoomRequest,
+): Promise<CreateRoomResponse> {
+  return api.post("/rooms/invite", data).then((res) => res.data);
+}
+
 export async function addVideoToPlaylist(
   data: AddVideoToPlaylistType,
 ): Promise<void> {
   return api.post("/rooms/playlist/add", data).then((res) => res.data);
+}
+
+export async function updateRoom(data: UpdateRoomRequest): Promise<void> {
+  return api.put("/rooms/update", data).then((res) => res.data);
 }

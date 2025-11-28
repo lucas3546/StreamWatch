@@ -7,8 +7,11 @@ import {
 
 import UserSearchContainer from "../components/friends/UserSearchContainer";
 import UserFriendItem from "../components/friends/UserFriendItem";
+import { useSignalR } from "../hooks/useSignalR";
+import type { UpdateFriendshipStatusModel } from "../components/types/UpdatedFriendshipStatusModel";
 
 export default function FriendsPage() {
+  const { connection } = useSignalR();
   const [friends, setFriends] = useState<GetFriendsResponse[]>([]);
   const [activeTab, setActiveTab] = useState<"friends" | "search">("friends");
   const [loadingFriends, setLoadingFriends] = useState(true);
@@ -26,6 +29,44 @@ export default function FriendsPage() {
     };
     loadFriends();
   }, []);
+
+  useEffect(() => {
+    if (!connection) return;
+
+    const handler = (state: UpdateFriendshipStatusModel) => {
+      console.log("New friendship state received:", state);
+
+      setFriends((prev) => {
+        // buscar si existe el amigo en la lista
+        const exists = prev.find(
+          (f) =>
+            f.userId === state.requesterId || f.userId === state.receiverId,
+        );
+
+        // si no existe → no hacer nada
+        if (!exists) return prev;
+
+        // si existe → mutarlo
+        return prev.map((f) => {
+          if (f.userId === state.requesterId || f.userId === state.receiverId) {
+            return {
+              ...f,
+              requestDate: state.requestedDate,
+              requestedByAccountId: state.requesterId,
+              status: state.friendshipStatus,
+            };
+          }
+          return f;
+        });
+      });
+    };
+
+    connection.on("UpdateFriendState", handler);
+
+    return () => {
+      connection.off("UpdateFriendState", handler);
+    };
+  }, [connection]);
 
   function onFriendAction(userId: string, newStatus: string) {
     setFriends((prev) => {
@@ -77,16 +118,15 @@ export default function FriendsPage() {
             ) : friends.length === 0 ? (
               <p>You don´t have any friends yet.</p>
             ) : (
-              <ul className="flex flex-col flex-wrap md:flex-row">
+              <ul className="flex flex-col flex-wrap md:flex-row gap-1">
                 {friends.map((f) => (
                   <UserFriendItem
                     key={f.userId}
                     userId={f.userId}
                     userName={f.userName}
-                    profilePic={f.profileThumbnail}
+                    profilePic={f.thumbnailUrl}
                     status={f.status}
                     requestedByAccountId={f.requestedByAccountId}
-                    friendsSince={f.responseDate}
                     onFriendAction={onFriendAction}
                   ></UserFriendItem>
                 ))}
@@ -96,7 +136,6 @@ export default function FriendsPage() {
         )}
         {activeTab === "search" && (
           <UserSearchContainer
-            friends={friends}
             onFriendAction={onFriendAction}
           ></UserSearchContainer>
         )}

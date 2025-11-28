@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using HeyRed.Mime;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Sqids;
 using StreamWatch.Application.Common.Helpers;
 using StreamWatch.Application.Common.Interfaces;
@@ -20,9 +21,10 @@ public class AccountStorageService : IAccountStorageService
     private readonly IBackgroundService _backgroundService;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
+    private readonly ILogger<AccountStorageService> _logger;
     private readonly SqidsEncoder<int> _sqids;
 
-    public AccountStorageService(IStorageService storageService,  IApplicationDbContext context, IBackgroundService backgroundService, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, SqidsEncoder<int> squids)
+    public AccountStorageService(IStorageService storageService,  IApplicationDbContext context, IBackgroundService backgroundService, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, SqidsEncoder<int> squids, ILogger<AccountStorageService> logger)
     {
         _storageService = storageService;
         _context = context;
@@ -30,6 +32,7 @@ public class AccountStorageService : IAccountStorageService
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
         _sqids = squids;
+        _logger = logger;
     }
     
     private static readonly HashSet<string> SupportedImageFormats = new HashSet<string>
@@ -43,22 +46,22 @@ public class AccountStorageService : IAccountStorageService
     };
     public async Task<Result<GetPresignedUrlResponse>> GetPresignedUrl(GetPresignedUrlRequest request)
     {
-        var currentUserId = _currentUserService.Id; 
-        if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
-        
+        var currentUserId = _currentUserService.Id;
+        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+
         var expiration = DateTime.UtcNow.AddMinutes(40);
 
-        var fileName = Guid.NewGuid() + Path.GetExtension(request.FileName);
-        
+        var fileName = Path.GetFileNameWithoutExtension(request.FileName) + $"_{new Random().Next(1, 1000000)}" + Path.GetExtension(request.FileName);
+
         var contentType = ContentTypeHelper.GetContentType(fileName);
-        
+
         var presignedUrl = await _storageService.GetPresignedUrl(fileName, contentType, expiration);
-        
+
         var headers = new Dictionary<string, string>()
         {
             ["Content-Type"] = contentType
         };
-        
+
         var media = new Media()
         {
             FileName = fileName,
@@ -70,13 +73,15 @@ public class AccountStorageService : IAccountStorageService
         };
 
         await _context.Media.AddAsync(media);
-        
+
         await _context.SaveChangesAsync(CancellationToken.None);
-        
-        var response = new GetPresignedUrlResponse( presignedUrl, "PUT", headers, media.Id, expiration);
-        
+
+        var response = new GetPresignedUrlResponse(presignedUrl, "PUT", headers, media.Id, expiration);
+
         return Result<GetPresignedUrlResponse>.Success(response);
     }
+    
+
 
     public async Task<Result<UploadImageResponse>> UploadImageAsync(UploadImageRequest request)
     {
@@ -235,24 +240,70 @@ public class AccountStorageService : IAccountStorageService
         return videoFiles;
     }
 
+    public async  Task<Result> RemoveMedia(string mediaId)
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.Id);
+
+
+        long decodedId = 0;
+        try
+        {
+            if(!_sqids.TrySafeDecode(mediaId, out decodedId)) return Result.Failure(new ValidationError("DecodeFailure","The media id can't be decoded"));
+        }
+        catch
+        {
+            _logger.LogError("Some error has ocurred trying to decode the mediaId, MediaId={mediaId}", mediaId);
+            return Result.Failure(new ValidationError("DecodeFailure","The media id can't be decoded"));
+        }
+
+        var media = await _context.Media.FirstOrDefaultAsync(x => x.Id == decodedId && x.CreatedBy == _currentUserService.Id && x.Status == MediaStatus.Uploaded);
+
+        if(media is null) return Result.Failure(new NotFoundError("NotFound", "Media not found"));
+
+        _backgroundService.Enqueue(() => _storageService.DeleteAsync(media.FileName));
+
+        _backgroundService.Enqueue(() => _storageService.DeleteAsync(media.ThumbnailFileName));
+
+        _context.Media.Remove(media);
+
+        await _context.SaveChangesAsync(CancellationToken.None);
+
+        _logger.LogInformation("Media removed by user, MediaId={id}", decodedId);
+
+        return Result.Success();
+    }
+
 
     public async Task<GetStorageOverviewResponse> GetStorageOverview()
     {
         var currentUserId = _currentUserService.Id;
-        if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
         var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId && x.Status == MediaStatus.Uploaded).ToListAsync();
-        
+
         var filteredMedias = medias.Where(f => ContentTypeHelper.IsVideo(f.FileName)).ToList();
 
         var videoFiles = filteredMedias.Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id), _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
-        
+
         decimal storageUse = videoFiles.Sum(x => x.Size);
 
         var response = new GetStorageOverviewResponse(storageUse, videoFiles);
 
         return response;
     }
+    
+        public async Task<GetUserFullStorageOverviewResponse> GetUserFullStorageOverview(string accountId)
+        {
+            var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == accountId && x.Status == MediaStatus.Uploaded).ToListAsync();
+
+            var files = medias.Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id), _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
+
+            decimal storageUse = files.Sum(x => x.Size);
+
+            var response = new GetUserFullStorageOverviewResponse(storageUse, files);
+
+            return response;
+        }
     
     
     

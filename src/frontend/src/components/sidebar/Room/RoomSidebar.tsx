@@ -2,13 +2,11 @@ import { useEffect, useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import RoomChat from "./RoomChat";
 import RoomUsersTab from "./RoomUsersTab";
-import { useRoomStore } from "../../../stores/roomStore";
 
 export default function RoomSidebar() {
   const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
   const [activeTab, setActiveTab] = useState<"chat" | "users">("chat");
   const [isOpen, setIsOpen] = useState(isMobile);
-  const roomUsers = useRoomStore((state) => state.roomUsers);
 
   //TO DO: Refactorize the entire responsive functionality in this component
   useEffect(() => {
@@ -27,7 +25,7 @@ export default function RoomSidebar() {
 
   return (
     <div
-      className={`flex-1  h-full md:flex-none md:ml-auto md:h-[calc(100vh-56px)] flex flex-col bg-black border-defaultbordercolor border-l transition-all duration-300 overflow-hidden z-10
+      className={`flex-1 sm:max-w-[30%]  h-full md:flex-none md:ml-auto md:h-[calc(100vh-56px)] flex flex-col bg-black border-defaultbordercolor border-l transition-all duration-300 overflow-hidden z-10
         ${isOpen ? " md:w-70" : "w-0"}`}
     >
       {/* Contenido del sidebar */}
@@ -37,14 +35,14 @@ export default function RoomSidebar() {
             {/* Botón para cerrar al lado de los tabs */}
             <button
               onClick={() => setIsOpen(false)}
-              className="hidden md:block px-2 text-gray-400 hover:text-white"
+              className="hidden cursor-pointer md:block px-2 text-gray-400 hover:text-white"
             >
               <AiOutlineClose size={18} />
             </button>
 
             <button
               onClick={() => setActiveTab("chat")}
-              className={`flex-1 px-4 py-2 text-sm font-medium ${
+              className={`cursor-pointer flex-1 px-4 py-2 text-sm font-medium ${
                 activeTab === "chat"
                   ? "border-b-2 border-neutral-500 text-neutral-50-500"
                   : "text-gray-400 hover:text-gray-200"
@@ -54,13 +52,13 @@ export default function RoomSidebar() {
             </button>
             <button
               onClick={() => setActiveTab("users")}
-              className={`flex-1 px-4 py-2 text-sm font-medium ${
+              className={`cursor-pointer flex-1 px-4 py-2 text-sm font-medium ${
                 activeTab === "users"
                   ? "border-b-2 border-blue-500 text-blue-500"
                   : "text-gray-400 hover:text-gray-200"
               }`}
             >
-              Users ({roomUsers.length})
+              Users
             </button>
           </div>
 
@@ -69,7 +67,9 @@ export default function RoomSidebar() {
               <RoomChat />
             </div>
           )}
-          {activeTab === "users" && <RoomUsersTab></RoomUsersTab>}
+          {activeTab === "users" && (
+            <RoomUsersTab key={Date.now()}></RoomUsersTab>
+          )}
         </>
       )}
 
@@ -77,7 +77,7 @@ export default function RoomSidebar() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed top-15 right-4 z-50 bg-neutral-600 hover:bg-neutral-600 text-white p-2 rounded-md shadow-lg"
+          className="cursor-pointer fixed top-15 right-4 z-50 bg-neutral-600 hover:bg-neutral-600 text-white p-2 rounded-md shadow-lg"
         >
           Open Chat
         </button>

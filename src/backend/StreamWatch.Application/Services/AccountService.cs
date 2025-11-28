@@ -191,6 +191,11 @@ public class AccountService : IAccountService
 
         int count = await _identityService.CountAccountsAsync();
 
+        foreach (var user in users)
+        {
+            user.ProfilePicThumb = user.ProfilePicThumb != null ? _storageService.GetPublicUrl(user.ProfilePicThumb) : null;
+        }
+
         return new PaginatedList<UserSearchResultModel>(users, request.PageNumber, request.PageSize, count);
     }
 }

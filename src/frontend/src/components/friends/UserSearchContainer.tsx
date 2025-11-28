@@ -4,17 +4,14 @@ import {
   searchUsers,
   type SearchPagedUsersResponseItem,
 } from "../../services/accountService";
-import type { GetFriendsResponse } from "../../services/friendshipService";
 import Button from "../buttons/Button";
 import UserFriendItem from "./UserFriendItem";
 
 interface UserSearchContainerProps {
-  friends: GetFriendsResponse[];
   onFriendAction: (userId: string, newStatus: string) => void;
 }
 
 export default function UserSearchContainer({
-  friends,
   onFriendAction,
 }: UserSearchContainerProps) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -42,12 +39,6 @@ export default function UserSearchContainer({
     }
   };
 
-  // 🔹 check si ya es amigo
-  const getFriendStatus = (userId: string) => {
-    const match = friends.find((f) => f.userId === userId);
-    return match ? match.status : null;
-  };
-
   return (
     <div>
       {/* Buscador */}
@@ -71,15 +62,13 @@ export default function UserSearchContainer({
 
       {searchResults && (
         <div>
-          <ul className="flex flex-col flex-wrap md:flex-row">
+          <ul className="flex flex-col flex-wrap md:flex-row gap-1">
             {searchResults.items.map((u) => {
-              const status = getFriendStatus(u.id);
               return (
                 <UserFriendItem
                   userId={u.id}
                   userName={u.userName}
                   profilePic={u.profilePicThumb}
-                  status={status ?? ""}
                   onFriendAction={onFriendAction}
                 ></UserFriendItem>
               );

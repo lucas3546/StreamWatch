@@ -16,7 +16,7 @@ namespace StreamWatch.Application.Services;
 public class FriendshipService : IFriendshipService
 {
     private readonly IApplicationDbContext _context;
-    private readonly ICurrentUserService _currentUserService;
+    private readonly ICurrentUserService _user;
     private readonly IIdentityService _identityService;
     private readonly IStorageService _storageService;
     private readonly IEventBus _eventBus;
@@ -30,7 +30,7 @@ public class FriendshipService : IFriendshipService
     )
     {
         _context = context;
-        _currentUserService = currentUserService;
+        _user = currentUserService;
         _identityService = identityService;
         _storageService = storageService;
         _eventBus = eventBus;
@@ -38,7 +38,7 @@ public class FriendshipService : IFriendshipService
 
     public async Task<Result<GetFriendshipStatusResponse>> GetFriendshipStatusAsync(string userId)
     {
-        var currentUserId = _currentUserService.Id;
+        var currentUserId = _user.Id;
         if (string.IsNullOrEmpty(currentUserId))
             throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
@@ -53,11 +53,11 @@ public class FriendshipService : IFriendshipService
 
     public async Task<Result> SendFriendshipInvitationAsync(string targetUserId)
     {
-        var currentUserId = _currentUserService.Id;
+        var currentUserId = _user.Id;
         if (string.IsNullOrEmpty(currentUserId))
             throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
-        var currentUserName = _currentUserService.Name;
+        var currentUserName = _user.Name;
         if (string.IsNullOrEmpty(currentUserName))
             throw new ArgumentNullException("currentUserName cannot be null or empty!");
 
@@ -94,15 +94,17 @@ public class FriendshipService : IFriendshipService
         await _context.SaveChangesAsync(CancellationToken.None);
 
         await _eventBus.PublishAsync(
-            new FriendshipCreatedEvent(newFriendship.RequesterId, currentUserName, newFriendship.ReceiverId)
+            new FriendshipCreatedEvent(newFriendship.RequesterId, currentUserName, _user.ProfilePicUrl, newFriendship.ReceiverId, newFriendship.RequestDate)
         );
 
         return Result.Success();
     }
 
+
+
     public async Task<Result<IEnumerable<FriendModel>>> GetAllFriendsAsync()
     {
-        var currentUserId = _currentUserService.Id;
+        var currentUserId = _user.Id;
         if (string.IsNullOrEmpty(currentUserId))
             throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
@@ -140,7 +142,7 @@ public class FriendshipService : IFriendshipService
         GetPagedFriendsRequest request
     )
     {
-        var currentUserId = _currentUserService.Id;
+        var currentUserId = _user.Id;
         if (string.IsNullOrEmpty(currentUserId))
             throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
@@ -186,7 +188,7 @@ public class FriendshipService : IFriendshipService
 
     public async Task<Result> AcceptFriendshipInvitationAsync(string requesterId)
     {
-        var currentUserId = _currentUserService.Id; // Addressee
+        var currentUserId = _user.Id; // Addressee
         if (string.IsNullOrEmpty(currentUserId))
             throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
@@ -210,7 +212,7 @@ public class FriendshipService : IFriendshipService
 
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        await _eventBus.PublishAsync(new AcceptFriendshipInvitationEvent(friendship.RequesterId));
+        await _eventBus.PublishAsync(new AcceptFriendshipInvitationEvent(friendship.RequesterId, friendship.RequestDate, friendship.ResponseDate));
 
         return Result.Success();
     }
@@ -218,7 +220,7 @@ public class FriendshipService : IFriendshipService
 
     public async Task<Result> RemoveFriendAsync(string targetUserId)
     {
-        var currentUserId = _currentUserService.Id;
+        var currentUserId = _user.Id;
         if (string.IsNullOrEmpty(currentUserId))
             throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
 
@@ -237,6 +239,9 @@ public class FriendshipService : IFriendshipService
 
         await _context.SaveChangesAsync(CancellationToken.None);
 
+        await _eventBus.PublishAsync(new DeleteFriendshipEvent(friendship.RequesterId, friendship.ReceiverId, friendship.RequestDate, friendship.ResponseDate));
+
         return Result.Success();
     }
+
 }

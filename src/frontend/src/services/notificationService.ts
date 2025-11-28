@@ -25,3 +25,7 @@ export async function getPagedNotifications(req: GetPagedNotificationsRequest) {
 export async function removeNotification(notificationId: string) {
   return await api.delete(`/notification/remove/${notificationId}`);
 }
+
+export async function clearNotifications() {
+  return await api.delete(`/notification/clear`);
+}
