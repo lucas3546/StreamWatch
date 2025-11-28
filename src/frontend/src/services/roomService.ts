@@ -54,6 +54,11 @@ export interface SendMessageRequest {
   replyToMessageId?: string;
 }
 
+export interface InviteToRoomRequest {
+  roomId: string;
+  targetAccountId: string;
+}
+
 export async function getPagedRooms(req: GetPagedRoomsRequest) {
   const response = await api.get<GetPagedRoomsResponse>("/rooms/paged", {
     params: {
@@ -88,6 +93,12 @@ export async function createRoom(
   data: CreateRoomRequest,
 ): Promise<CreateRoomResponse> {
   return api.post("/rooms/create", data).then((res) => res.data);
+}
+
+export async function inviteToRoom(
+  data: InviteToRoomRequest,
+): Promise<CreateRoomResponse> {
+  return api.post("/rooms/invite", data).then((res) => res.data);
 }
 
 export async function addVideoToPlaylist(

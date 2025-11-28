@@ -22,7 +22,7 @@ public class FriendshipCreatedEventHandler : IEventHandler<FriendshipCreatedEven
     {
         var notification = new Notification()
         {
-            ToAccountId = @event.toaccountid,
+            ToAccountId = @event.receiverId,
             FromUserName = @event.requesterName,
             Payload = "",
             Type = NotificationType.FriendInvitation
@@ -32,9 +32,12 @@ public class FriendshipCreatedEventHandler : IEventHandler<FriendshipCreatedEven
 
         await _context.SaveChangesAsync(cancellationToken);
         
-        var model = new NotificationModel(notification.Id, notification.FromUserName, @event.requesterId, notification.Type.ToString(), Payload: null,notification.CreatedAt);
+        var model = new NotificationModel(notification.Id, notification.FromUserName, @event.requesterId, @event.requesterProfilePicUrl, notification.Type.ToString(), Payload: null,notification.CreatedAt);
 
-        await _realtimeMessengerService.SendToUserAsync(@event.toaccountid, "ReceiveNotification", model);
+        await _realtimeMessengerService.SendToUserAsync(@event.receiverId, "ReceiveNotification", model);
+
+        await _realtimeMessengerService.SendToUsersAsync(@event.requesterId, @event.receiverId, "UpdateFriendState", new UpdateFriendshipStatusModel(@event.requesterId, @event.receiverId, FriendInvitationStatus.Pending.ToString(), @event.requestDate, null));
+
         
     }
 }

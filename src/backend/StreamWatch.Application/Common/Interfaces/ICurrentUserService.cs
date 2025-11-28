@@ -5,6 +5,7 @@ public interface ICurrentUserService
     string? Id { get; }
     string? Name { get; }
     string? IpAddress { get; }
+    string? ProfilePicUrl { get; }
     (string? isoCode, string? name) Country { get; }
     string? Role { get; }
 }

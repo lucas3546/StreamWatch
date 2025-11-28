@@ -17,15 +17,18 @@ import {
 import type { ProblemDetails } from "../components/types/ProblemDetails";
 import { useUser } from "../contexts/UserContext";
 import Icon from "../components/icon/Icon";
-import { formatDate, formatShort } from "../utils/dateFormat";
+import { formatDate } from "../utils/dateFormat";
 import { HiUserAdd } from "react-icons/hi";
 import BanUserModal from "../components/modals/BanUserModal";
 import StorageFromUserModal from "../components/modals/StorageFromUserModal";
 import BanHistoryModal from "../components/modals/BanHistoryModal";
+import { useSignalR } from "../hooks/useSignalR";
+import type { UpdateFriendshipStatusModel } from "../components/types/UpdatedFriendshipStatusModel";
 
 export default function ProfilePage() {
   const { accountId } = useParams<{ accountId: string }>();
   const { user } = useUser();
+  const { connection } = useSignalR();
   const [profileData, setProfileData] = useState<GetAccountProfileResponse>();
   const [statusData, setStatusData] =
     useState<GetStatusFromFriendshipResponse>();
@@ -41,6 +44,7 @@ export default function ProfilePage() {
       try {
         const status = await getStatusFromFriendship(accountId);
         setStatusData(status);
+        console.log("initial state", status);
       } catch (error) {
         const e = error as ProblemDetails;
         console.log(e);
@@ -50,15 +54,36 @@ export default function ProfilePage() {
     fetchData();
   }, [accountId]);
 
+  useEffect(() => {
+    if (!connection) return;
+
+    const handler = (state: UpdateFriendshipStatusModel) => {
+      console.log("New friendship state received:", state);
+
+      if (state.friendshipStatus === "Declined") {
+        setStatusData(undefined);
+        return;
+      }
+      const obj: GetStatusFromFriendshipResponse = {
+        requestDate: state.requestedDate,
+        requestResponse: state.responseDate ?? null,
+        requestedByUserId: state.requesterId,
+        status: state.friendshipStatus,
+      };
+      setStatusData(obj);
+      console.log(statusData);
+    };
+
+    connection.on("UpdateFriendState", handler);
+
+    return () => {
+      connection.off("UpdateFriendState", handler);
+    };
+  }, [connection]);
+
   const sendFriendRequest = async () => {
     if (accountId === undefined || user?.nameid == undefined) return;
     await sendFriendshipRequest(accountId);
-    setStatusData((prev) => ({
-      ...prev!,
-      requestDate: new Date().getDate().toString(),
-      requestedByUserId: user.nameid,
-      status: "Pending",
-    }));
   };
 
   const acceptFriendRequest = async () => {
@@ -66,7 +91,7 @@ export default function ProfilePage() {
     await acceptFriendshipRequest(accountId);
     setStatusData((prev) => ({
       ...prev!,
-      requestResponse: new Date().getDate().toString(),
+      requestResponse: new Date().toISOString(),
       status: "Accepted",
     }));
   };
@@ -105,7 +130,9 @@ export default function ProfilePage() {
           {statusData?.status?.toLowerCase() === "pending" && (
             <div className="mt-5 space-y-3 text-sm text-gray-300">
               <p className="text-center">
-                Requested {formatShort(statusData.requestDate)}
+                {statusData.requestDate && (
+                  <>Requested {formatDate(statusData.requestDate)}</>
+                )}
               </p>
               {user?.nameid === statusData.requestedByUserId ? (
                 <button

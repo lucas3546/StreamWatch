@@ -1,4 +1,5 @@
 import {
+  Gesture,
   MediaPlayer,
   MediaPlayerInstance,
   MediaProvider,
@@ -71,6 +72,11 @@ export default function VideoPlayer({
     });
   };
 
+  const hideControls = () => {
+    console.log("hide");
+    player.current?.controls.hide();
+  };
+
   return (
     <MediaPlayer
       key={`${roomState?.videoProvider}-${roomState?.videoUrl}`}
@@ -81,6 +87,7 @@ export default function VideoPlayer({
       onPause={onPause}
       onError={onError}
       onEnded={onEnded}
+      onMouseLeave={hideControls}
       onTextTrackChange={() => console.log(player.current?.state.textTrack)}
       className="h-full w-full object-contain"
     >

@@ -1,6 +1,11 @@
 import ProfilePic from "../../avatar/ProfilePic";
 import type { GetFriendsResponse } from "../../../services/friendshipService";
 import { useState } from "react";
+import {
+  inviteToRoom,
+  type InviteToRoomRequest,
+} from "../../../services/roomService";
+import { useRoomStore } from "../../../stores/roomStore";
 
 interface RoomUserInviteItemProps {
   friend: GetFriendsResponse;
@@ -9,9 +14,18 @@ interface RoomUserInviteItemProps {
 export default function RoomUserInviteItem({
   friend,
 }: RoomUserInviteItemProps) {
+  const roomId = useRoomStore((state) => state.room?.id);
   const [isInvited, setIsInvited] = useState<boolean>(false);
 
   const onInviteButtonClicked = async () => {
+    if (roomId === undefined) return;
+
+    const request: InviteToRoomRequest = {
+      roomId: roomId,
+      targetAccountId: friend.userId,
+    };
+    await inviteToRoom(request);
+
     setIsInvited(true);
   };
 

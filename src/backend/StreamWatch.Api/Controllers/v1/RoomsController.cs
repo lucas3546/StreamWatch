@@ -19,6 +19,7 @@ namespace StreamWatch.Api.Controllers.v1;
 public class RoomsController : ControllerBase
 {
     private readonly IRoomService _roomService;
+    private readonly IRoomInvitationService _roomInvitationService;
     private readonly IAccountStorageService _accountStorageService;
     private readonly IHubContext<StreamWatchHub> _hubContext;
     private readonly ICurrentUserService _currentUserService;
@@ -26,6 +27,7 @@ public class RoomsController : ControllerBase
 
     public RoomsController(
         IRoomService roomService,
+        IRoomInvitationService roomInvitationService,
         IAccountStorageService accountStorageService,
         IHubContext<StreamWatchHub> hubContext,
         ICurrentUserService currentUserService,
@@ -33,6 +35,7 @@ public class RoomsController : ControllerBase
     )
     {
         _roomService = roomService;
+        _roomInvitationService = roomInvitationService;
         _accountStorageService = accountStorageService;
         _hubContext = hubContext;
         _currentUserService = currentUserService;
@@ -135,6 +138,15 @@ public class RoomsController : ControllerBase
         var result = await _roomService.AddVideoToPlaylist(request);
 
         await _hubContext.Clients.Group(request.RoomId).SendAsync("NewPlaylistVideo", result.Data);
+
+        return result.ToActionResult(HttpContext);
+    }
+
+    [HttpPost("invite")]
+    [Authorize]
+    public async Task<ActionResult> InviteFriendToRoom(InviteToRoomRequest request)
+    {
+        var result = await _roomInvitationService.InviteToRoomAsync(request);
 
         return result.ToActionResult(HttpContext);
     }

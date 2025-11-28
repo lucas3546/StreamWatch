@@ -2,9 +2,12 @@ import type { IconType } from "react-icons";
 import { useNavigate } from "react-router";
 import Icon from "../icon/Icon";
 import { useLocation } from "react-router";
+import ProfilePic from "../avatar/ProfilePic";
 
 interface SidebarItemLinkProps {
   icon: IconType;
+  thumbnailUrl?: string;
+  userName?: string;
   label: string;
   iconSize?: number;
   href?: string;
@@ -12,6 +15,8 @@ interface SidebarItemLinkProps {
 
 export default function SidebarItemLink({
   icon,
+  thumbnailUrl,
+  userName,
   label,
   iconSize = 24,
   href,
@@ -37,7 +42,16 @@ export default function SidebarItemLink({
               hover:bg-gray-600
               ${isActive ? "bg-neutral-800" : ""}`}
     >
-      <Icon icon={icon} size={iconSize} />
+      {thumbnailUrl || userName ? (
+        <ProfilePic
+          userName={userName}
+          fileUrl={thumbnailUrl}
+          size={iconSize}
+        ></ProfilePic>
+      ) : (
+        <Icon icon={icon} size={iconSize} />
+      )}
+
       <span className="text-xl">{label}</span>
     </button>
   );

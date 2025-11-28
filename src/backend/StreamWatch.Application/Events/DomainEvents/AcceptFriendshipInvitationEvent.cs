@@ -4,7 +4,7 @@ using StreamWatch.Core.Entities;
 
 namespace StreamWatch.Application.Events.DomainEvents;
 
-public record AcceptFriendshipInvitationEvent(string requesterId) : IEvent
+public record AcceptFriendshipInvitationEvent(string requesterId, DateTime requestDate, DateTime? responseDate) : IEvent
 {
 
 }
