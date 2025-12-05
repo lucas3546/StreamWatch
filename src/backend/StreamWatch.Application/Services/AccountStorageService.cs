@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using HeyRed.Mime;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Sqids;
 using StreamWatch.Application.Common.Helpers;
 using StreamWatch.Application.Common.Interfaces;
@@ -11,6 +12,7 @@ using StreamWatch.Application.Responses;
 using StreamWatch.Core.Entities;
 using StreamWatch.Core.Enums;
 using StreamWatch.Core.Errors;
+using StreamWatch.Core.Options;
 
 namespace StreamWatch.Application.Services;
 
@@ -23,8 +25,9 @@ public class AccountStorageService : IAccountStorageService
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly ILogger<AccountStorageService> _logger;
     private readonly SqidsEncoder<int> _sqids;
+    private readonly IOptions<S3StorageOptions> _options;
 
-    public AccountStorageService(IStorageService storageService,  IApplicationDbContext context, IBackgroundService backgroundService, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, SqidsEncoder<int> squids, ILogger<AccountStorageService> logger)
+    public AccountStorageService(IStorageService storageService,  IApplicationDbContext context, IBackgroundService backgroundService, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, SqidsEncoder<int> squids, ILogger<AccountStorageService> logger, IOptions<S3StorageOptions> options)
     {
         _storageService = storageService;
         _context = context;
@@ -33,6 +36,7 @@ public class AccountStorageService : IAccountStorageService
         _mediaProcessingService = mediaProcessingService;
         _sqids = squids;
         _logger = logger;
+        _options = options;
     }
     
     private static readonly HashSet<string> SupportedImageFormats = new HashSet<string>
@@ -46,8 +50,11 @@ public class AccountStorageService : IAccountStorageService
     };
     public async Task<Result<GetPresignedUrlResponse>> GetPresignedUrl(GetPresignedUrlRequest request)
     {
-        var currentUserId = _currentUserService.Id;
-        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+        if (string.IsNullOrEmpty(_currentUserService.Id)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+
+        var usedStorage = await _context.Media.Where(x => x.CreatedBy == _currentUserService.Id && x.Status == MediaStatus.Uploaded).SumAsync(x => x.Size);
+
+        if(usedStorage > _options.Value.LimitUsagePerUser) return Result<GetPresignedUrlResponse>.Failure(new ValidationError("LimitUserStorageExceeded","You don't have enough storage space."));
 
         var expiration = DateTime.UtcNow.AddMinutes(40);
 
@@ -160,10 +167,12 @@ public class AccountStorageService : IAccountStorageService
         
         await _context.SaveChangesAsync(CancellationToken.None);
         
-        var response = new UploadImageResponse(originalFile?.PublicUrl ?? thumb.PublicUrl, thumb.PublicUrl, media.BucketName, media.Size, _sqids.Encode(media.Id), media.ExpiresAt);
+        var response = new UploadImageResponse(originalFile?.PublicUrl ?? thumb.PublicUrl, thumb.PublicUrl, media.BucketName, media.Size, media.Id, media.ExpiresAt);
         
         return Result<UploadImageResponse>.Success(response);
     }
+
+
     
     public async Task<Result> SetMediaFileUploaded(SetMediaFileUploadedRequest request)
     {
@@ -240,23 +249,11 @@ public class AccountStorageService : IAccountStorageService
         return videoFiles;
     }
 
-    public async  Task<Result> RemoveMedia(string mediaId)
+    public async  Task<Result> RemoveMedia(Guid mediaId)
     {
         ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.Id);
 
-
-        long decodedId = 0;
-        try
-        {
-            if(!_sqids.TrySafeDecode(mediaId, out decodedId)) return Result.Failure(new ValidationError("DecodeFailure","The media id can't be decoded"));
-        }
-        catch
-        {
-            _logger.LogError("Some error has ocurred trying to decode the mediaId, MediaId={mediaId}", mediaId);
-            return Result.Failure(new ValidationError("DecodeFailure","The media id can't be decoded"));
-        }
-
-        var media = await _context.Media.FirstOrDefaultAsync(x => x.Id == decodedId && x.CreatedBy == _currentUserService.Id && x.Status == MediaStatus.Uploaded);
+        var media = await _context.Media.FirstOrDefaultAsync(x => x.Id == mediaId && x.CreatedBy == _currentUserService.Id && x.Status == MediaStatus.Uploaded);
 
         if(media is null) return Result.Failure(new NotFoundError("NotFound", "Media not found"));
 
@@ -268,7 +265,7 @@ public class AccountStorageService : IAccountStorageService
 
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _logger.LogInformation("Media removed by user, MediaId={id}", decodedId);
+        _logger.LogInformation("Media removed by user, MediaId={id}", mediaId);
 
         return Result.Success();
     }
@@ -283,7 +280,7 @@ public class AccountStorageService : IAccountStorageService
 
         var filteredMedias = medias.Where(f => ContentTypeHelper.IsVideo(f.FileName)).ToList();
 
-        var videoFiles = filteredMedias.Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id), _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
+        var videoFiles = filteredMedias.Select(x => new ExtendedMediaModel(x.Id, _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
 
         decimal storageUse = videoFiles.Sum(x => x.Size);
 
@@ -296,7 +293,7 @@ public class AccountStorageService : IAccountStorageService
         {
             var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == accountId && x.Status == MediaStatus.Uploaded).ToListAsync();
 
-            var files = medias.Select(x => new ExtendedMediaModel(_sqids.Encode(x.Id), _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
+            var files = medias.Select(x => new ExtendedMediaModel(x.Id, _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
 
             decimal storageUse = files.Sum(x => x.Size);
 

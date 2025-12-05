@@ -2,6 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using StreamWatch.Api.Infraestructure;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
@@ -65,7 +66,7 @@ public class StreamWatchHub : Hub
         //Get if user has a current session in the room
         var session = await _userSessionService.GetUserSessionInRoomAsync(roomId, userId);
 
-        if (session is not null) throw new HubException("User has another session in the same room"); 
+        if (session is not null) throw new HubException("USER_ALREADY_IN_ROOM");
 
         //Create user session
         var request = new CreateSessionRequest(userName, userId, profilePic, connectionId);

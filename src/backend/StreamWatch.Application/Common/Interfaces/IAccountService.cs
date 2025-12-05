@@ -11,7 +11,7 @@ public interface IAccountService
     Task<Result<GetBasicUserProfileDataResponse>> GetBasicUserProfileDataAsync(string userId);
     Task<Result<RefreshTokenResponse>> RefreshToken(string refreshToken);
     Task<Result> ChangePasswordAsync(ChangePasswordRequest request);
-    Task<Result> SetProfilePictureAsync(string mediaId);
+    Task<Result> SetProfilePictureAsync(Guid mediaId);
     Task<Result> ChangeUsernameAsync(string newUsername);
     Task<PaginatedList<UserSearchResultModel>> SearchUsersPagedAsync(SearchUsersPagedRequest request);
 }

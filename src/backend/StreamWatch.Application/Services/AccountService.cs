@@ -117,29 +117,7 @@ public class AccountService : IAccountService
         return Result<RegisterAccountResponse>.Success(new RegisterAccountResponse(token, refreshToken));
     }
 
-    public async Task<Result> SetProfilePictureAsync(string mediaId)
-    {
-        if (_sqids.Decode(mediaId) is [var decodedId] && mediaId == _sqids.Encode(decodedId))
-        {
-            var currentUserName = _currentUserService.Name;
-            if (string.IsNullOrEmpty(currentUserName)) throw new ArgumentNullException("currentUserName cannot be null or empty!");
 
-            var account = await _identityService.FindUserByUserNameAsync(currentUserName);
-
-            if (account is null) return Result.Failure(new NotFoundError("User not found!"));
-
-            account.ProfilePicId = decodedId;
-
-            await _identityService.UpdateUserAsync(account);
-
-            return Result.Success();
-        }
-        else
-        {
-            return Result.Failure(new ValidationError("MediaId is invalid"));
-        }
-
-    }
 
     public async Task<Result> ChangeUsernameAsync(string newUsername)
     {
@@ -147,11 +125,30 @@ public class AccountService : IAccountService
         
         if (string.IsNullOrEmpty(currentUsername)) throw new ArgumentNullException(nameof(currentUsername), "CurrentUserName cannot be null or empty!");
 
+        if(newUsername.Equals(currentUsername)) return Result.Failure(new ValidationError("You already have that username"));
+
         var result = await _identityService.UpdateUsernameAsync(currentUsername, newUsername);
 
         if (result.errors.Any()) return Result.Failure(new ValidationError(string.Join(",", result.errors)));
 
         return Result.Success();
+    }
+
+    public async Task<Result> SetProfilePictureAsync(Guid mediaId)
+    {
+        var currentUserName = _currentUserService.Name;
+        if (string.IsNullOrEmpty(currentUserName)) throw new ArgumentNullException("currentUserName cannot be null or empty!");
+
+        var account = await _identityService.FindUserByUserNameAsync(currentUserName);
+
+        if (account is null) return Result.Failure(new NotFoundError("User not found!"));
+
+        account.ProfilePicId = mediaId;
+
+        await _identityService.UpdateUserAsync(account);
+
+        return Result.Success();
+
     }
 
     public async Task<Result> ChangePasswordAsync(ChangePasswordRequest request)

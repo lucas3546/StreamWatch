@@ -8,6 +8,7 @@ import * as Menus from "./menus";
 import * as Sliders from "./sliders";
 import { TimeGroup } from "./time-group";
 import { useRoomStore } from "../../stores/roomStore";
+import LiveBadge from "../badge/LiveBadge";
 
 export interface VideoLayoutProps {
   thumbnails?: string;
@@ -28,19 +29,22 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
           data-[visible]:opacity-100"
       >
         <div className="bg-neutral-900 mt-auto">
-          <Controls.Group className="md:hidden w-[95%] items-center px-2">
-            <Sliders.Time thumbnails={thumbnails} />
-          </Controls.Group>
-          <Controls.Group className="-mt-0.5 flex w-full items-center px-2 pb-2 ">
+          {isLeader && (
+            <Controls.Group className="md:hidden w-[95%] items-center px-2">
+              <Sliders.Time thumbnails={thumbnails} />
+            </Controls.Group>
+          )}
+
+          <Controls.Group className="flex w-full items-center px-2 ">
             {(isLeader && <Buttons.Play tooltipPlacement="top start" />) || (
-              <p>Live</p>
+              <LiveBadge />
             )}
 
             <Buttons.Mute tooltipPlacement="top" />
             <Sliders.Volume />
             <TimeGroup />
             {isLeader && (
-              <Controls.Group className="hidden md:flex w-full items-center px-2">
+              <Controls.Group className="hidden md:flex w-full items-center  px-2 ">
                 <Sliders.Time thumbnails={thumbnails} />
               </Controls.Group>
             )}

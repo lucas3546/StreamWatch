@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using StreamWatch.Api.Extensions;
+using StreamWatch.Api.Infraestructure.Extensions;
 using StreamWatch.Api.Hubs;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;

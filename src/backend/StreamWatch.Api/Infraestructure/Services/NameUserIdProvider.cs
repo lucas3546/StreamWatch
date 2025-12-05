@@ -2,7 +2,7 @@ using System;
 using System.Security.Claims;
 using Microsoft.AspNetCore.SignalR;
 
-namespace StreamWatch.Api.Services;
+namespace StreamWatch.Api.Infraestructure.Services;
 
 public class NameUserIdProvider : IUserIdProvider
 {

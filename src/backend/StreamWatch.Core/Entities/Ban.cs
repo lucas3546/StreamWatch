@@ -4,7 +4,7 @@ using StreamWatch.Core.Identity;
 
 namespace StreamWatch.Core.Entities;
 
-public class Ban : BaseAuditableEntity
+public class Ban : BaseAuditableEntity<int>
 {
     public required string AccountId { get; set; }
     public Account? Account { get; set; }

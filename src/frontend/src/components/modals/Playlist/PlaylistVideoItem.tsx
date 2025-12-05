@@ -22,9 +22,13 @@ export default function PlaylistVideoItem({
       title={item.videoTitle}
     >
       {item.videoUrl === currentPlayingVideoUrl ? (
-        <Icon icon={FaPause} size={15}></Icon>
+        <div className="w-4 h-4 flex items-center justify-center shrink-0">
+          <Icon icon={FaPause} size={15} />
+        </div>
       ) : (
-        <Icon icon={FaPlay} size={15}></Icon>
+        <div className="w-4 h-4 flex items-center justify-center shrink-0">
+          <Icon icon={FaPlay} size={15} />
+        </div>
       )}
 
       <img

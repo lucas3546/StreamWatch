@@ -7,6 +7,6 @@ public class AddVideoToPlaylistRequest
 {
     public required string RoomId { get; set; }
     public string? VideoUrl { get; init; }
-    public string? MediaId { get; init; }
+    public Guid? MediaId { get; init; }
     public required RoomVideoProvider Provider { get; init; }
 }

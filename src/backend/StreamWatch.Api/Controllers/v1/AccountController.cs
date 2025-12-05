@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StreamWatch.Api.Extensions;
+using StreamWatch.Api.Infraestructure.Extensions;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
@@ -53,7 +53,7 @@ public class AccountController : ControllerBase
         if(response.IsSuccess)
         {
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            Response.Cookies.Append("X-Refresh-Token", response.Data.refreshToken, new CookieOptions() { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Unspecified, Expires = DateTimeOffset.UtcNow.AddHours(3), Domain = "localhost" });
+            Response.Cookies.Append("X-Refresh-Token", response.Data.refreshToken, new CookieOptions() { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Lax, Expires = DateTimeOffset.UtcNow.AddHours(3) });
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             return response.ToActionResult(HttpContext);
@@ -72,7 +72,7 @@ public class AccountController : ControllerBase
 
         if (response.IsSuccess)
         {
-            Response.Cookies.Append("X-Refresh-Token", response.Data.refreshToken, new CookieOptions() { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Unspecified, Expires = DateTimeOffset.UtcNow.AddHours(3), Domain = "localhost" });
+            Response.Cookies.Append("X-Refresh-Token", response.Data.refreshToken, new CookieOptions() { HttpOnly = true, Secure = false, SameSite = SameSiteMode.Lax, Expires = DateTimeOffset.UtcNow.AddHours(3) });
 
             return response.ToActionResult(HttpContext);
         }
@@ -80,7 +80,7 @@ public class AccountController : ControllerBase
         return response.ToActionResult(HttpContext);
     }
 
-    [HttpPost("set-profile-pic")]
+    [HttpPost("profile/set-picture")]
     public async Task<ActionResult> SetProfilePicture(UpdateProfilePicRequest request)
     {
         string fileName = "profile_pic" + Guid.NewGuid();

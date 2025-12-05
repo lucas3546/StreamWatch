@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Api.Hubs;
 using StreamWatch.Application.Common.Interfaces;
 
-namespace StreamWatch.Api.Services;
+namespace StreamWatch.Api.Infraestructure.Services;
 
 public class RealtimeMessengerService : IRealtimeMessengerService
 {

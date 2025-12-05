@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StreamWatch.Api.Extensions;
+using StreamWatch.Api.Infraestructure.Extensions;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;

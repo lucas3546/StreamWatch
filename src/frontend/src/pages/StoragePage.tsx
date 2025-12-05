@@ -5,6 +5,7 @@ import { getOverview, type StorageResponse } from "../services/storageService";
 import UploadVideoModal from "../components/modals/UploadVideoModal";
 import { IoMdCloudUpload } from "react-icons/io";
 import Icon from "../components/icon/Icon";
+import formatBytes from "../utils/byteFormatter";
 
 export default function StoragePage() {
   const [videos, setVideos] = useState<StorageResponse | null>();
@@ -30,15 +31,20 @@ export default function StoragePage() {
           This is your temporal storage, you can upload videos up to 2gb, and
           will be deleted in 24 hours
         </p>
-        <UploadVideoModal
-          openButtonClassname="bg-neutral-700 hover:bg-neutral-500 m-2 p-2 rounded-sm cursor-pointer"
-          openButtonContent={
-            <span className="flex flex-row items-center gap-1">
-              <Icon icon={IoMdCloudUpload}></Icon>Upload video
-            </span>
-          }
-          onUploaded={onUploadedVideo}
-        ></UploadVideoModal>
+        <div className="flex gap-1 items-center">
+          <UploadVideoModal
+            openButtonClassname="bg-neutral-700 hover:bg-neutral-500 m-2 p-2 rounded-sm cursor-pointer"
+            openButtonContent={
+              <span className="flex flex-row items-center gap-1">
+                <Icon icon={IoMdCloudUpload}></Icon>Upload video
+              </span>
+            }
+            onUploaded={onUploadedVideo}
+          ></UploadVideoModal>
+          <p className="inline-block bg-neutral-800/80 text-neutral-300 px-3 py-1.5 rounded-md text-sm shadow-sm border border-neutral-700">
+            {videos && formatBytes(videos?.storageUse)} / 5GB
+          </p>
+        </div>
       </div>
 
       <div className="grid gap-2 p-2 grid-cols-2 sm:grid-cols-[repeat(auto-fill,minmax(180px,1fr))]">

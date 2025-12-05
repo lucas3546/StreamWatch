@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
-using StreamWatch.Api.Extensions;
+using StreamWatch.Api.Infraestructure.Extensions;
 using StreamWatch.Api.Hubs;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
@@ -62,7 +62,7 @@ public class RoomsController : ControllerBase
 
         if (response.IsSuccess)
         {
-            await _hubContext.Clients.Group(request.Id).SendAsync("RoomUpdated", new RoomUpdatedModel(request.Title, request.Category.ToString(), request.IsPublic));
+            await _hubContext.Clients.Group(request.Id.ToString()).SendAsync("RoomUpdated", new RoomUpdatedModel(request.Title, request.Category.ToString(), request.IsPublic));
 
             return response.ToActionResult(HttpContext);
         }

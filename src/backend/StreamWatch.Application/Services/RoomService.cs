@@ -64,17 +64,15 @@ public class RoomService : IRoomService
         {
             if (string.IsNullOrEmpty(request.MediaId))
             {
-                _logger.LogWarning("MediaId cannon't be null when the selected provider is local");
                 return Result<CreateRoomResponse>.Failure(new ValidationError("MediaId cannon't be null"));
             }
 
             if (_sqids.TrySafeDecode(request.MediaId, out var decodedId))
             {
-                var media = await _context.Media.FindAsync(decodedId);
+                var media = await _context.Media.FindAsync((int)decodedId);
 
                 if (media is null)
                 {
-                    _logger.LogWarning("Media entity not found: MediaId={MediaId}, UserId={UserId}", request.MediaId, _user.Id);
                     return Result<CreateRoomResponse>.Failure(new ValidationError("Media not found"));
                 }
                 room.VideoUrl = _storageService.GetPublicUrl(media.FileName);
@@ -84,7 +82,6 @@ public class RoomService : IRoomService
             }
             else
             {
-                _logger.LogWarning("Invalid MediaId provided: {MediaId}, UserId={UserId}", request.MediaId, _user.Id);
                 return Result<CreateRoomResponse>.Failure(new ValidationError("MediaId is invalid"));
             }
 
@@ -95,14 +92,12 @@ public class RoomService : IRoomService
 
             if (string.IsNullOrEmpty(request.VideoUrl))
             {
-                _logger.LogWarning("Missing VideoUrl for YouTube provider, UserId={UserId}", _user.Id);
                 return Result<CreateRoomResponse>.Failure(new ValidationError("VideoUrl can't be null with the selected provider"));
             }
 
             var platform = VideoUrlHelper.GetPlatform(request.VideoUrl);
             if (platform is null)
             {
-                _logger.LogWarning("Invalid youtube url provided, VideoUrl={VideoUrl}, UserId={UserId}", request.VideoUrl, _user.Id);
                 return Result<CreateRoomResponse>.Failure(new ValidationError("Invalid YoutubeUrl"));
             }
 
@@ -165,9 +160,7 @@ public class RoomService : IRoomService
 
         if (request.Provider == RoomVideoProvider.Local)
         {
-            if (_sqids.Decode(request.MediaId) is [var decodedId] && request.MediaId == _sqids.Encode(decodedId))
-            {
-                var media = await _context.Media.FindAsync(decodedId);
+            var media = await _context.Media.FindAsync(request.MediaId);
 
                 if (media is null) return Result<PlaylistVideoItem>.Failure(new NotFoundError("Media not found!"));
 
@@ -175,11 +168,6 @@ public class RoomService : IRoomService
                 playlistVideoItem.VideoUrl = _storageService.GetPublicUrl(media.FileName);
                 playlistVideoItem.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName);
                 playlistVideoItem.Provider = "Local";
-            }
-            else
-            {
-                return Result<PlaylistVideoItem>.Failure(new ValidationError("MediaId is invalid"));
-            }
         }
         else if (request.Provider == RoomVideoProvider.YouTube)
         {

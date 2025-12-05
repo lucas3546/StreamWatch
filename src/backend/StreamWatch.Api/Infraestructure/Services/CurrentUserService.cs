@@ -2,7 +2,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using StreamWatch.Application.Common.Interfaces;
 
-namespace StreamWatch.Api.Services;
+namespace StreamWatch.Api.Infraestructure.Services;
 
 public class CurrentUserService : ICurrentUserService
 {

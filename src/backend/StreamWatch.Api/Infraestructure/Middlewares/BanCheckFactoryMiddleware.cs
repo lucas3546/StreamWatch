@@ -2,7 +2,7 @@ using System;
 using Microsoft.AspNetCore.Mvc;
 using StreamWatch.Application.Common.Interfaces;
 
-namespace StreamWatch.Api.Middlewares;
+namespace StreamWatch.Api.Infraestructure.Middlewares;
 
 public class BanCheckFactoryMiddleware : IMiddleware
 {

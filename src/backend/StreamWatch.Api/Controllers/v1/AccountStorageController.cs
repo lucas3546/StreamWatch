@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StreamWatch.Api.Extensions;
+using StreamWatch.Api.Infraestructure.Extensions;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
@@ -78,7 +78,7 @@ public class AccountStorageController : ControllerBase
 
     [HttpDelete("remove/{mediaId}")]
     [Authorize]
-    public async Task<ActionResult> RemoveMedia(string mediaId)
+    public async Task<ActionResult> RemoveMedia(Guid mediaId)
     {
         var response = await _accountStorage.RemoveMedia(mediaId);
 

@@ -69,8 +69,16 @@ export default function RoomPage() {
         service.onReconnecting((err) =>
           console.warn("Intentando reconectar...", err),
         );
-      } catch (err: any) {
-        console.error("❌ Error al conectar con el room:", err);
+      } catch (err) {
+        const eObject = err as object;
+        const message = eObject.toString().split(":")[2].trim();
+
+        if (message === "USER_ALREADY_IN_ROOM")
+          alert("You are already in this room");
+        else {
+          alert(eObject);
+        }
+        window.location.href = "/";
       }
     })();
 

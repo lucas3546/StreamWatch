@@ -3,15 +3,19 @@ import PlaylistModal from "../modals/Playlist/PlaylistModal";
 import { useRoomStore } from "../../stores/roomStore";
 import RoomSettingsModal from "../modals/RoomSettingsModal";
 import RoomInviteModal from "../modals/RoomInviteModal";
+import RoomInfoModal from "../modals/RoomInfoModal";
 
 export default function RoomBottomBar() {
   const room = useRoomStore((state) => state.room);
+  const isLeader = useRoomStore((state) => state.isLeader);
+
   return (
     <div className="flex w-full flex-row items-center gap-2 bg-black border-t border-defaultbordercolor h-full p-1 overflow-hidden">
       <div className="flex items-center gap-2 flex-shrink-0">
         <PlaylistModal />
-        <RoomSettingsModal />
+        {isLeader && <RoomSettingsModal />}
         <RoomInviteModal />
+        <RoomInfoModal />
       </div>
 
       <div className="flex-1" />

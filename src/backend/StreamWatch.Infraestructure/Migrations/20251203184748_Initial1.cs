@@ -30,8 +30,7 @@ namespace StreamWatch.Infraestructure.Migrations
                 name: "Media",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
                     FileName = table.Column<string>(type: "text", nullable: false),
                     ThumbnailFileName = table.Column<string>(type: "text", nullable: false),
                     BucketName = table.Column<string>(type: "text", nullable: true),
@@ -41,7 +40,7 @@ namespace StreamWatch.Infraestructure.Migrations
                     ExpiresAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
-                    LastModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -75,7 +74,7 @@ namespace StreamWatch.Infraestructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
-                    ProfilePicId = table.Column<int>(type: "integer", nullable: true),
+                    ProfilePicId = table.Column<Guid>(type: "uuid", nullable: true),
                     IpAddress = table.Column<string>(type: "text", nullable: false),
                     RefreshToken = table.Column<string>(type: "text", nullable: true),
                     UserName = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
@@ -202,7 +201,7 @@ namespace StreamWatch.Infraestructure.Migrations
                     IsExpired = table.Column<bool>(type: "boolean", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
-                    LastModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -257,7 +256,7 @@ namespace StreamWatch.Infraestructure.Migrations
                     ToAccountId = table.Column<string>(type: "text", nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
-                    LastModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     LastModifiedBy = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
