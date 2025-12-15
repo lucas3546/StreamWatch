@@ -13,6 +13,8 @@ public interface IRoomService
     Task<Result<PlaylistVideoItem>> AddVideoToPlaylist(AddVideoToPlaylistRequest request);
     Task<PaginatedList<GetPagedRoomItemResponse>> GetPagedRooms(GetPagedRoomsRequest request);
     Task<Result> ChangeVideoFromPlaylistItemAsync(ChangeVideoFromPlaylistItemRequest request);
-    Task<Result> ChangeRoomLeader(string leaderId, string roomId);
+    Task<RoomCache> ChangeRoomLeader(string userId, RoomCache room);
+    Task<RoomCache> IncrementUserCount(RoomCache room);
+    Task<RoomCache> DecreaseUserCount(RoomCache room);
     Task<RoomCache?> GetRoomByIdAsync(string roomId);
 }

@@ -7,7 +7,6 @@ import RegisterPage from "./pages/RegisterPage.tsx";
 import { UserProvider } from "./contexts/UserContext.tsx";
 import StoragePage from "./pages/StoragePage.tsx";
 import AccountPage from "./pages/Account/AccountPage.tsx";
-import ChangeAvatarPage from "./pages/Account/ChangeAvatarPage.tsx";
 import CreateRoomPage from "./pages/Rooms/CraeteRoomPage.tsx";
 import RoomsPage from "./pages/Rooms/RoomsPage.tsx";
 import RoomPage from "./pages/Rooms/RoomPage.tsx";
@@ -18,6 +17,7 @@ import FriendsPage from "./pages/FriendsPage.tsx";
 import { ToastContainer } from "react-toastify";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import BanPage from "./pages/BanPage.tsx";
+import ProtectedRoutes from "./components/routes/ProtectedRoutes.tsx";
 const router = createBrowserRouter([
   {
     element: (
@@ -30,6 +30,7 @@ const router = createBrowserRouter([
     ),
     children: [
       {
+        //PUBLIC ROUTES
         path: "/",
         element: <RoomsPage key="/" category="All" order="Recent" />,
       },
@@ -45,17 +46,22 @@ const router = createBrowserRouter([
         path: "/categories/:categoryName",
         element: <RoomsPage key={location.pathname} order="Recent" />,
       },
-      { path: "/rooms/create", element: <CreateRoomPage /> },
-      { path: "/settings", element: <SettingsPage /> },
-      { path: "/account/change-avatar", element: <ChangeAvatarPage /> },
-      { path: "/account", element: <AccountPage /> },
-      { path: "/profile/:accountId", element: <ProfilePage /> },
-      { path: "/storage", element: <StoragePage /> },
+
       { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <LoginPage /> },
-
-      { path: "/friends", element: <FriendsPage /> },
-      { path: "/room/:roomId", element: <RoomPage /> },
+      {
+        //PROTECTED ROUTES
+        element: <ProtectedRoutes></ProtectedRoutes>,
+        children: [
+          { path: "/rooms/create", element: <CreateRoomPage /> },
+          { path: "/friends", element: <FriendsPage /> },
+          { path: "/room/:roomId", element: <RoomPage /> },
+          { path: "/account", element: <AccountPage /> },
+          { path: "/settings", element: <SettingsPage /> },
+          { path: "/profile/:accountId", element: <ProfilePage /> },
+          { path: "/storage", element: <StoragePage /> },
+        ],
+      },
     ],
   },
   {

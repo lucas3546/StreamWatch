@@ -9,11 +9,13 @@ public class UserSessionRepository : IUserSessionRepository
 {
     private readonly RedisConnectionProvider _provider;
     private readonly IRedisCollection<UserSessionCache> _sessions;
+    private readonly ICurrentUserService _user;
 
-    public UserSessionRepository(RedisConnectionProvider provider)
+    public UserSessionRepository(RedisConnectionProvider provider, ICurrentUserService user)
     {
         _provider = provider;
         _sessions = (RedisCollection<UserSessionCache>)provider.RedisCollection<UserSessionCache>();
+        _user = user;
     }
 
     public async Task<string> Create(UserSessionCache userSession, CancellationToken ct = default)
@@ -43,11 +45,11 @@ public class UserSessionRepository : IUserSessionRepository
         return await _sessions.FirstOrDefaultAsync(x => x.RoomId == roomId && x.UserId == userId);
     }
 
-    public async Task<UserSessionCache?> GetMostRecentUserSessionFromRoomAsync(string roomId, CancellationToken ct = default)
+    public async Task<UserSessionCache?> GetOldestUserSessionFromRoomAsync(string roomId, CancellationToken ct = default)
     {
         return await _sessions
-            .Where(x => x.RoomId == roomId)
-            .OrderByDescending(x => x.EnteredAt)
+            .Where(x => x.RoomId == roomId && x.UserId != _user.Id)
+            .OrderBy(x => x.EnteredAt)
             .FirstOrDefaultAsync();
     }
 

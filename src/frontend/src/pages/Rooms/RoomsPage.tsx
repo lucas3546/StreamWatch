@@ -9,6 +9,7 @@ import { useParams } from "react-router";
 import { useSignalR } from "../../hooks/useSignalR";
 import { TbReload } from "react-icons/tb";
 import Icon from "../../components/icon/Icon";
+import { MdSignalWifiStatusbarConnectedNoInternet } from "react-icons/md";
 
 interface RoomPageProps {
   category?: string;
@@ -125,17 +126,46 @@ export default function RoomsPage({ category, order }: RoomPageProps) {
   return (
     <div className="w-full h-full flex flex-col overflow-y-auto">
       <RoomGrid>
-        {rooms?.map((room) => (
-          <RoomCard
-            key={room.roomId}
-            roomId={room.roomId}
-            thumbnailUrl={room.thumbnailUrl}
-            title={room.title}
-            category={room.category}
-            provider={room.provider}
-            connectedUsers={room.userCount}
-          />
-        )) || null}
+        {rooms?.length > 0 ? (
+          rooms?.map((room) => (
+            <RoomCard
+              key={room.roomId}
+              roomId={room.roomId}
+              thumbnailUrl={room.thumbnailUrl}
+              title={room.title}
+              category={room.category}
+              provider={room.provider}
+              connectedUsers={room.userCount}
+            />
+          )) || null
+        ) : !loading ? (
+          <div className="col-span-full flex flex-col items-center gap-3 py-16 opacity-80">
+            <div className="p-4 rounded-full bg-neutral-800/40">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-10 h-10"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M8 10h.01M12 10h.01M16 10h.01M9 16h6m2-12H7a2 2 0 00-2 2v12l5-3 5 3V6a2 2 0 00-2-2z"
+                />
+              </svg>
+            </div>
+
+            <h2 className="text-lg font-semibold">
+              There are no rooms here yet.
+            </h2>
+            <p className="text-sm text-neutral-400 text-center max-w-xs">
+              Create the first one!
+            </p>
+          </div>
+        ) : null}
+
         {loading && <p className="col-span-full text-center">Loading...</p>}
       </RoomGrid>
       {pendingRooms.length > 0 && (

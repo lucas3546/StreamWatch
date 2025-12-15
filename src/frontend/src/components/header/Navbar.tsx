@@ -21,11 +21,7 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
   ) => {
     e.preventDefault();
 
-    if (user) {
-      navigate("rooms/create");
-    } else {
-      navigate("login");
-    }
+    navigate("rooms/create");
   };
 
   return (

@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { useSignalR } from "./useSignalR";
 import type {
   MediaErrorDetail,
@@ -25,6 +25,8 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
   const room = useRoomStore((state) => state.room);
   const setRoom = useRoomStore((state) => state.setRoom);
   const isLeader = useRoomStore((state) => state.isLeader);
+  const setLiveButtonAlive = useRoomStore((state) => state.setLiveButton);
+  const liveButtonAlive = useRoomStore((state) => state.liveButtonAlive);
 
   useEffect(() => {
     if (!connection) return;
@@ -49,6 +51,7 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
 
       const now = Date.now();
       const latency = (now - sentAt) / 1000;
+      setLiveButtonAlive("live");
 
       const estimatedTime = isPaused
         ? videoTimestamp
@@ -115,7 +118,16 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
     return () => {
       connection.off("RefreshVideoState", handler);
     };
-  }, [connection, isLeader, sendUpdateVideoState]);
+  }, [connection, isLeader]);
+
+  useEffect(() => {
+    if (!connection || !room?.id) return;
+
+    const service = roomRealtimeService(connection);
+    if (liveButtonAlive === "sync") {
+      service.requestTimestampToOwner(room?.id);
+    }
+  }, [liveButtonAlive]);
 
   async function onSeeked(detail: number, event: MediaSeekedEvent) {
     console.log(event, "[useVideoSync:onSeeked] Seeked to", detail);
@@ -135,6 +147,8 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
     console.log("[useVideoSync:onPause] Paused", nativeEvent);
     if (isLeader) {
       await sendUpdateVideoState();
+    } else {
+      setLiveButtonAlive("offline");
     }
   }
 

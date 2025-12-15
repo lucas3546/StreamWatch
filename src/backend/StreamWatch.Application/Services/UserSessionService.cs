@@ -11,13 +11,15 @@ namespace StreamWatch.Application.Services;
 public class UserSessionService : IUserSessionService
 {
     private readonly IUserSessionRepository _userSessionRepository;
+    private readonly ICurrentUserService _user;
     private readonly IEventBus _eventBus;
 
 
-    public UserSessionService(IUserSessionRepository userSessionRepository, IEventBus eventBus)
+    public UserSessionService(IUserSessionRepository userSessionRepository, IEventBus eventBus, ICurrentUserService user)
     {
         _userSessionRepository = userSessionRepository;
         _eventBus = eventBus;
+        _user = user;
     }
     public async Task<Result<string>> CreateSessionAsync(CreateSessionRequest request)
     {
@@ -26,7 +28,9 @@ public class UserSessionService : IUserSessionService
             UserId = request.UserId,
             UserName = request.UserName,
             ProfilePicName = request.PictureFilename,
+            RoomId = request.RoomId,
             ConnectionId = request.ConnectionId,
+            EnteredAt = DateTime.UtcNow,
         };
 
         var id = await _userSessionRepository.Create(session);
@@ -34,21 +38,21 @@ public class UserSessionService : IUserSessionService
         return Result<string>.Success(id);
     }
 
-    public async Task<Result> EndSessionAsync(string connectionId)
+    public async Task<Result> RemoveSessionAsync(string connectionId)
     {
         var session = await _userSessionRepository.GetUserSessionAsync(connectionId);
 
         if (session == null) return Result.Failure(new ValidationError("Session not found"));
 
         await _userSessionRepository.Remove(session);
-
-        await _eventBus.PublishAsync(new UserLeftRoomEvent(session));
-
+        
         return Result.Success();
     }
 
     public async Task<Result> AddToRoom(string connectionId, string roomId)
     {
+        ArgumentException.ThrowIfNullOrEmpty(_user.Id);
+        
         var session = await _userSessionRepository.GetUserSessionAsync(connectionId);
 
         if (session == null) return Result.Failure(new ValidationError("Session not found"));
@@ -58,7 +62,7 @@ public class UserSessionService : IUserSessionService
 
         await _userSessionRepository.UpdateAsync(session);
 
-        await _eventBus.PublishAsync(new UserJoinedRoomEvent(session));
+        await _eventBus.PublishAsync(new UserJoinedRoomEvent(session, _user.Id));
 
         return Result.Success();
     }
@@ -69,6 +73,7 @@ public class UserSessionService : IUserSessionService
 
         return session;
     }
+
 
     public async Task<UserSessionCache?> GetUserSessionByIdAsync(string userId)
     {
@@ -82,6 +87,11 @@ public class UserSessionService : IUserSessionService
         var sessions = await _userSessionRepository.GetUsersFromRoomAsync(roomId);
 
         return sessions;
+    }
+
+    public async Task<UserSessionCache?> GetOldestUserSessionFromRoomAsync(string roomId)
+    {
+       return await _userSessionRepository.GetOldestUserSessionFromRoomAsync(roomId);
     }
 
     public async Task<UserSessionCache?> GetUserSessionInRoomAsync(string roomId, string userId)

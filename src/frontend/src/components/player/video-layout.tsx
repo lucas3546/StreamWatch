@@ -16,7 +16,6 @@ export interface VideoLayoutProps {
 
 export function VideoLayout({ thumbnails }: VideoLayoutProps) {
   const isLeader = useRoomStore((state) => state.isLeader);
-
   return (
     <>
       <Gestures />

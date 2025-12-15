@@ -66,7 +66,9 @@ export default function LoginPage() {
           type="email"
           name="email"
           placeholder="youremail@email.com"
-          className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
+          className="w-full bg-neutral-800 border border-neutral-700
+                     rounded-xl px-4 py-2 focus:outline-none
+                     focus:ring-2 focus:ring-neutral-500"
         ></input>
         <FieldError errors={fieldErrors} name="email" />
 
@@ -74,7 +76,9 @@ export default function LoginPage() {
         <input
           type="password"
           name="password"
-          className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
+          className="w-full bg-neutral-800 border border-neutral-700
+                     rounded-xl px-4 py-2 focus:outline-none
+                     focus:ring-2 focus:ring-neutral-500"
         ></input>
         <FieldError errors={fieldErrors} name="password" />
         <p>

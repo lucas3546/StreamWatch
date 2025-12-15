@@ -59,6 +59,18 @@ export function generateSuccessToast(message: string) {
   });
 }
 
+export function generateInfoToast(message: string) {
+  toast.info(message, {
+    theme: "dark",
+    position: "bottom-right",
+    autoClose: 4000,
+    style: {
+      whiteSpace: "pre-line",
+      fontSize: 12,
+    },
+  });
+}
+
 export function generateProblemDetailsErrorToast(problem: ProblemDetails) {
   const message = problem.errors
     ? Object.values(problem.errors)

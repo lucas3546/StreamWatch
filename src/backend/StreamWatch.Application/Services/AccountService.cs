@@ -103,12 +103,7 @@ public class AccountService : IAccountService
 
         if (account is null) return Result<RegisterAccountResponse>.Failure(new AccountRegistrationError("Some error has ocurred when trying to register."));
 
-        if (errors.Any(x => x.Equals("DuplicateUserName")))
-        {
-            return Result<RegisterAccountResponse>.Failure(new AccountRegistrationError(nameof(request.Username), "The Username is already in use!"));
-        }
-
-        if (errors.Any()) return Result<RegisterAccountResponse>.Failure(new AccountRegistrationError(string.Join(",", errors)));
+        if (errors.Any()) return Result<RegisterAccountResponse>.Failure(new ValidationError(string.Join(",", errors)));
 
         var claims = _jwtService.GetClaimsForUser(account, null, Roles.User);
 
@@ -184,6 +179,8 @@ public class AccountService : IAccountService
 
     public async Task<PaginatedList<UserSearchResultModel>> SearchUsersPagedAsync(SearchUsersPagedRequest request)
     {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.Id);
+
         var users = await _identityService.SearchUsersPagedAsync(request.UserName, request.PageNumber, request.PageSize);
 
         int count = await _identityService.CountAccountsAsync();
@@ -193,6 +190,8 @@ public class AccountService : IAccountService
             user.ProfilePicThumb = user.ProfilePicThumb != null ? _storageService.GetPublicUrl(user.ProfilePicThumb) : null;
         }
 
-        return new PaginatedList<UserSearchResultModel>(users, request.PageNumber, request.PageSize, count);
+        var filtered = users.Where(u => u.Id != _currentUserService.Id).ToList();
+
+        return new PaginatedList<UserSearchResultModel>(filtered, request.PageNumber, request.PageSize, count);
     }
 }

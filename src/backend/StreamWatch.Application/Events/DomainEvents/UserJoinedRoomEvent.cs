@@ -3,7 +3,7 @@ using StreamWatch.Core.Cache;
 
 namespace StreamWatch.Application.Events.DomainEvents;
 
-public record UserJoinedRoomEvent(UserSessionCache sessionCache) : IEvent
+public record UserJoinedRoomEvent(UserSessionCache sessionCache, string currentUserId) : IEvent
 {
     
 }

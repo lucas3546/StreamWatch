@@ -52,7 +52,7 @@ public class RoomService : IRoomService
             IsPaused = true,
             IsPublic = request.IsPublic,
             LeaderAccountId = _user.Id,
-            CreatedByAccountId = _user.Name,
+            CreatedByAccountId = _user.Id,
             LastLeaderUpdateTime = 0,
             CurrentVideoTime = 0,
             CreatedAt = DateTime.UtcNow,
@@ -194,7 +194,10 @@ public class RoomService : IRoomService
     public async Task<Result> ChangeVideoFromPlaylistItemAsync(ChangeVideoFromPlaylistItemRequest request)
     {
         var room = await _roomRepository.GetByIdAsync(request.RoomId);
+        
         if (room is null) return Result.Failure(new NotFoundError("Room not found!"));
+
+        if(room.LeaderAccountId != _user.Id) return Result.Failure(new ValidationError("You are not the leader of this room"));
 
         var videoItem = room.PlaylistVideoItems.FirstOrDefault(x => x.Id == request.PlaylistItemId);
 
@@ -226,23 +229,39 @@ public class RoomService : IRoomService
         return response;
     }
 
-    public async Task<Result> ChangeRoomLeader(string leaderId, string roomId)
+    public async Task<RoomCache> ChangeRoomLeader(string userId, RoomCache room)
     {
-        var room = await _roomRepository.GetByIdAsync(roomId);
-        
-        if (room is null) return Result.Failure(new NotFoundError("Room not found"));
-
-        room.LeaderAccountId = leaderId;
+        room.LeaderAccountId = userId;
 
         await _roomRepository.UpdateAsync(room);
 
-        return Result.Success();
+        return room;
+    }
+
+    public async Task<RoomCache> IncrementUserCount(RoomCache room)
+    {
+        room.UsersCount++;
+
+        await _roomRepository.UpdateAsync(room);
+        
+        return room;
+    }
+
+        public async Task<RoomCache> DecreaseUserCount(RoomCache room)
+    {
+        room.UsersCount--;
+
+        await _roomRepository.UpdateAsync(room);
+        
+        return room;
     }
 
     public async Task<Result> UpdateVideoStateAsync(UpdateVideoStateRequest request)
     {
         var room = await _roomRepository.GetByIdAsync(request.RoomId);
         if (room is null) return Result.Failure(new NotFoundError("Room not found"));
+
+        if(room.LeaderAccountId != _user.Id) return Result.Failure(new ValidationError("You are not the leader of this room"));
 
         room.CurrentVideoTime = request.CurrentTimestamp;
         room.LastLeaderUpdateTime = request.SentAt;

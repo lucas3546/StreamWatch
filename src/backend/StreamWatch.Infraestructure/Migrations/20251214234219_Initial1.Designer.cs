@@ -12,7 +12,7 @@ using StreamWatch.Infraestructure.Persistence;
 namespace StreamWatch.Infraestructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251203184748_Initial1")]
+    [Migration("20251214234219_Initial1")]
     partial class Initial1
     {
         /// <inheritdoc />

@@ -27,7 +27,7 @@ builder.Services.AddApiServices(builder.Configuration);
 var app = builder.Build();
 
 await app.InitialiseDatabaseAsync();
-
+Directory.CreateDirectory("wwwroot/temp");
 app.UseSerilogRequestLogging();
 app.UseRouting();
 
