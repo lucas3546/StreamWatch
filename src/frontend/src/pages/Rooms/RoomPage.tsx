@@ -27,14 +27,10 @@ export default function RoomPage() {
   const player = useRef<MediaPlayerInstance>(null);
   const { onSeeked, onPlay, onPause, onError, onEnded } = useVideoSync(player);
 
-  useConfirmNavigation(
-    true,
-    "Estas seguro que deseas salir de la sala?",
-    () => {
-      if (connection) reloadConnection();
-      resetRoomValues();
-    },
-  );
+  useConfirmNavigation(true, "Are you sure you want to leave the room?", () => {
+    if (connection) reloadConnection();
+    resetRoomValues();
+  });
 
   useEffect(() => {
     if (!connection || !roomId || !user) return;
@@ -91,10 +87,10 @@ export default function RoomPage() {
   }, [connection, roomId, user]);
   return (
     <>
-      <div className="flex w-full flex-col sm:flex-row md:flex-row h-[calc(100vh-56px)] min-h-0  overflow-hidden">
-        <div className="flex-1 flex flex-col ">
-          <div className="flex-1 min-h-0  overflow-hidden flex justify-center ">
-            <div className="aspect-video w-full max-h-full ">
+      <div className="flex flex-col sm:flex-row w-full h-[calc(100vh-56px)] overflow-hidden">
+        <div className="flex-1 min-w-0 flex flex-col">
+          <div className="flex-1 min-h-0 overflow-hidden flex justify-center">
+            <div className="aspect-video w-full max-h-full min-w-0">
               {room && (
                 <VideoPlayer
                   roomState={room}
@@ -108,15 +104,10 @@ export default function RoomPage() {
               )}
             </div>
           </div>
-          {room ? (
-            <div className="h-auto w-full  md:h-16 mt-auto">
-              <RoomBottomBar />
-            </div>
-          ) : (
-            <div className="h-auto md:h-16 flex items-center justify-center">
-              <p>Loading room...</p>
-            </div>
-          )}
+
+          <div className="w-full h-auto md:h-16 shrink-0">
+            <RoomBottomBar />
+          </div>
         </div>
 
         {roomId && <RoomSidebar />}

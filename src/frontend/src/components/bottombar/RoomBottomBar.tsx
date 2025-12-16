@@ -10,7 +10,7 @@ export default function RoomBottomBar() {
   const isLeader = useRoomStore((state) => state.isLeader);
 
   return (
-    <div className="flex w-full flex-row items-center gap-2 bg-black border-t border-defaultbordercolor h-full p-1 overflow-hidden">
+    <div className="flex w-full flex-row items-center gap-2 bg-black border-t border-defaultbordercolor h-full p-1 overflow-hidden overflow-x-auto">
       <div className="flex items-center gap-2 flex-shrink-0">
         <PlaylistModal />
         {isLeader && <RoomSettingsModal />}

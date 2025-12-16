@@ -9,7 +9,7 @@ import LogoutModal from "../../components/modals/LogoutModal";
 export default function AccountPage() {
   const { user } = useUser();
   return (
-    <FormContainer className="sm:max-w-[35%]">
+    <FormContainer className="">
       <div className="flex flex-col mx-auto p-3 gap-4 w-full">
         <div className="flex items-center gap-3 p-4 bg-neutral-900 border border-neutral-700 rounded-xl w-full">
           <ProfilePic userName={user?.name} fileUrl={user?.picture} size={55} />
