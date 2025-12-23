@@ -40,24 +40,26 @@ export default function RoomUsertabItem({ userRoom }: RoomUsertabItemProps) {
 
   return (
     <li className="flex flex-row p-2 text-xl gap-3 bg-neutral-800 items-center">
-      <div
-        className={
-          userRoom.userId === room?.leaderAccountId
-            ? "rounded-xl border-2 border-yellow-300"
-            : ""
-        }
-      >
-        <ProfilePic
-          userName={userRoom.userName}
-          fileUrl={userRoom.profilePic}
-        />
+      <div className="relative inline-block">
+        {userRoom.userId === room?.leaderAccountId && (
+          <div>
+            <div className="absolute -inset-1 bg-yellow-400 rounded-full blur opacity-30 animate-pulse"></div>
+            <div className="absolute -inset-1 border border-yellow-300 rounded-full"></div>
+          </div>
+        )}
+        <div className="relative">
+          <ProfilePic
+            userName={userRoom.userName}
+            fileUrl={userRoom.profilePic}
+          />
+        </div>
       </div>
       <p title={userRoom.userName} className="truncate">
         {userRoom.userName}
       </p>
 
       {userRoom.userId === user?.nameid ? (
-        <></>
+        <p className="ml-auto text-xs mr-2">You</p>
       ) : (
         <>
           {result === undefined ? (

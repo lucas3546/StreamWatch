@@ -21,7 +21,6 @@ public class RoomService : IRoomService
     private readonly IRoomRepository _roomRepository;
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly IStorageService _storageService;
-    private readonly SqidsEncoder<int> _sqids;
     private readonly ILogger<RoomService> _logger;
     private readonly IEventBus _eventBus;
 
@@ -30,7 +29,6 @@ public class RoomService : IRoomService
         _context = context;
         _user = currentUserService;
         _roomRepository = roomRepository;
-        _sqids = squids;
         _mediaProcessingService = processingService;
         _storageService = storageService;
         _logger = logger;
@@ -62,28 +60,22 @@ public class RoomService : IRoomService
         string videoTitle = "";
         if (request.Provider == RoomVideoProvider.Local)
         {
-            if (string.IsNullOrEmpty(request.MediaId))
+            
+            if (request.MediaId is null)
             {
                 return Result<CreateRoomResponse>.Failure(new ValidationError("MediaId cannon't be null"));
             }
 
-            if (_sqids.TrySafeDecode(request.MediaId, out var decodedId))
-            {
-                var media = await _context.Media.FindAsync((int)decodedId);
+            var media = await _context.Media.FindAsync(request.MediaId);
 
-                if (media is null)
-                {
-                    return Result<CreateRoomResponse>.Failure(new ValidationError("Media not found"));
-                }
-                room.VideoUrl = _storageService.GetPublicUrl(media.FileName);
-                room.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName); ;
-                room.VideoProvider = "Local";
-                videoTitle = media.FileName;
-            }
-            else
+            if (media is null)
             {
-                return Result<CreateRoomResponse>.Failure(new ValidationError("MediaId is invalid"));
+                return Result<CreateRoomResponse>.Failure(new ValidationError("Media not found"));
             }
+            room.VideoUrl = _storageService.GetPublicUrl(media.FileName);
+            room.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName); ;
+            room.VideoProvider = "Local";
+            videoTitle = media.FileName;
 
 
         }
@@ -162,12 +154,12 @@ public class RoomService : IRoomService
         {
             var media = await _context.Media.FindAsync(request.MediaId);
 
-                if (media is null) return Result<PlaylistVideoItem>.Failure(new NotFoundError("Media not found!"));
+            if (media is null) return Result<PlaylistVideoItem>.Failure(new NotFoundError("Media not found!"));
 
-                playlistVideoItem.VideoTitle = media.FileName;
-                playlistVideoItem.VideoUrl = _storageService.GetPublicUrl(media.FileName);
-                playlistVideoItem.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName);
-                playlistVideoItem.Provider = "Local";
+            playlistVideoItem.VideoTitle = media.FileName;
+            playlistVideoItem.VideoUrl = _storageService.GetPublicUrl(media.FileName);
+            playlistVideoItem.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName);
+            playlistVideoItem.Provider = "Local";
         }
         else if (request.Provider == RoomVideoProvider.YouTube)
         {
@@ -228,6 +220,8 @@ public class RoomService : IRoomService
 
         return response;
     }
+
+
 
     public async Task<RoomCache> ChangeRoomLeader(string userId, RoomCache room)
     {

@@ -48,7 +48,9 @@ export function VideoLayout({ thumbnails }: VideoLayoutProps) {
               </Controls.Group>
             )}
             <div className="flex-1"></div>
+            {/*
             <Buttons.Caption tooltipPlacement="top" />
+             */}
             <Menus.Settings placement="top end" tooltipPlacement="top" />
             {/* <Buttons.PIP tooltipPlacement="top" /> */}
 

@@ -59,8 +59,6 @@ export default function UploadVideoModal({
         setFieldErrors(problem.errors);
         return;
       }
-    } finally {
-      setIsLoading(false);
     }
 
     try {
@@ -93,6 +91,8 @@ export default function UploadVideoModal({
       setGeneralError(
         "Some error has ocurred with the storage provider when trying to upload the file",
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 

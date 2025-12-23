@@ -79,10 +79,13 @@ public class RoomsController : ControllerBase
         return Ok(response);
     }
 
+
     [HttpPost("send-message")]
     [Authorize]
     public async Task<ActionResult> SendMessageAsync([FromForm] SendMessageRequest request)
     {
+        _logger.LogInformation("Sending a message to the room Room={@RoomId} from UserId={@UserId}", request.RoomId, _currentUserService.Id);
+
         var userName = _currentUserService.Name;
 
         var role = _currentUserService.Role;
@@ -113,6 +116,18 @@ public class RoomsController : ControllerBase
             uploadedFileName = uploadedFile.Data?.thumbPublicUrl;
         }
 
+        string countryName = "Unknown";
+        string countryIso = "Unknown";
+        try
+        {
+            countryName = _currentUserService.Country.name ?? "Unknown";
+            countryIso = _currentUserService.Country.isoCode ?? "Unknown";
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unable to get country and iso name for UserId={@UserId}", _currentUserService.Id);
+        }
+
         await _hubContext
             .Clients.Group(request.RoomId)
             .SendAsync(
@@ -121,10 +136,11 @@ public class RoomsController : ControllerBase
                 {
                     Id = Guid.NewGuid().ToString(),
                     UserName = userName,
-                    CountryCode = "ar",
-                    CountryName = "Argentina",
+                    CountryCode = countryIso,
+                    CountryName = countryName,
                     Text = request.Message,
                     Image = uploadedFileName,
+                    UserId = _currentUserService.Id,
                     ReplyToMessageId = request.ReplyToMessageId,
                 }
             );
@@ -150,4 +166,6 @@ public class RoomsController : ControllerBase
 
         return result.ToActionResult(HttpContext);
     }
+
+    
 }

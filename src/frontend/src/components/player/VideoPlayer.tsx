@@ -1,10 +1,7 @@
 import {
-  Gesture,
   MediaPlayer,
   MediaPlayerInstance,
   MediaProvider,
-  TextTrack,
-  Track,
   type MediaErrorDetail,
   type MediaPauseEvent,
   type MediaSeekedEvent,
@@ -61,6 +58,8 @@ export default function VideoPlayer({
     }
   }, [player, roomState.videoUrl]);
 
+  {
+    /*
   const putTrack = () => {
     player.current?.textTracks.add({
       src: "https://pub-3d64bc11ad674a4e92d65803df99fd7e.r2.dev/alteredstatesubtitles.vtt",
@@ -71,9 +70,9 @@ export default function VideoPlayer({
       default: true,
     });
   };
-
+  */
+  }
   const hideControls = () => {
-    console.log("hide");
     player.current?.controls.hide();
   };
 
@@ -106,6 +105,7 @@ export default function VideoPlayer({
           </div>
           </div>*/}
       </MediaProvider>
+      {/*
       <Track
         src="https://pub-3d64bc11ad674a4e92d65803df99fd7e.r2.dev/alteredstatesubtitles.srt"
         kind="subtitles"
@@ -114,6 +114,7 @@ export default function VideoPlayer({
         type="srt"
         default
       />
+      */}
       <DefaultAudioLayout icons={defaultLayoutIcons} />
       <VideoLayout></VideoLayout>
     </MediaPlayer>

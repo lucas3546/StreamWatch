@@ -52,6 +52,8 @@ export default function RoomPage() {
       try {
         const roomData = await service.connectToRoom(roomId);
 
+        console.log(roomData);
+
         const users = await service.getUsersFromRoom(roomId);
         setRoomUsers(users);
 
@@ -61,7 +63,13 @@ export default function RoomPage() {
 
         setRoom(roomData);
 
-        service.onReconnected((id) => console.log("Reconectado con id:", id));
+        service.onReconnected((id) => {
+          console.log("Reconectado con id:", id);
+          if (!room?.id) return;
+
+          service.requestTimestampToOwner(room?.id);
+        });
+
         service.onReconnecting((err) =>
           console.warn("Intentando reconectar...", err),
         );
