@@ -86,7 +86,12 @@ public class StreamWatchHub : Hub
         room = await _roomService.IncrementUserCount(room);
 
         //Request to leader to send the actual video state.
-        await Clients.User(room.LeaderAccountId).SendAsync("RefreshVideoState");
+        var leaderSession = await _userSessionService.GetUserSessionInRoomAsync(room.LeaderAccountId, room.Id.ToString());
+
+        if(leaderSession != null)
+        {
+            await Clients.User(leaderSession.ConnectionId).SendAsync("RefreshVideoState");
+        }
 
         //Return the current room state
         return room;

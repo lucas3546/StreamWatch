@@ -9,4 +9,5 @@ export interface RoomChatMessageType {
   isNotification: boolean;
   image?: string | null;
   replyToMessageId?: string | null;
+  isWhisper: boolean;
 }

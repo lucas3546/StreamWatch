@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Sqids;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
@@ -20,10 +21,11 @@ public class AccountService : IAccountService
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly IBackgroundService _backgroundService;
-    private readonly SqidsEncoder<int> _sqids;
+    private readonly IGeoIpService _geo;
 
 
-    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService, SqidsEncoder<int> squids)
+
+    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService, IGeoIpService geoIpService)
     {
         _identityService = identityService;
         _jwtService = jwtService;
@@ -32,11 +34,13 @@ public class AccountService : IAccountService
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
         _backgroundService = backgroundService;
-        _sqids = squids;
+        _geo = geoIpService;
     }
 
     public async Task<Result<AuthenticateAccountResponse>> AuthenticateAsync(LoginAccountRequest request)
     {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.IpAddress);
+
         var user = await _identityService.FindUserByEmailAsync(request.Email);
         if (user is null) return Result<AuthenticateAccountResponse>.Failure(new NotFoundError(nameof(request.Email), "No registered user has been found with that email address."));
 
@@ -56,7 +60,9 @@ public class AccountService : IAccountService
             profilePicThumbnailUrl = _storageService.GetPublicUrl(user.ProfilePic.ThumbnailFileName);
         }
 
-        var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role);
+        var (countryCode, countryName) = _geo.GetCountry(_currentUserService.IpAddress);
+
+        var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role, countryName, countryCode);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
 
@@ -65,6 +71,8 @@ public class AccountService : IAccountService
 
     public async Task<Result<RefreshTokenResponse>> RefreshToken(string refreshToken)
     {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.IpAddress);
+
         var currentUserId = _currentUserService.Id;
 
         if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "currentUserId cannot be null or empty!");
@@ -87,7 +95,9 @@ public class AccountService : IAccountService
             profilePicThumbnailUrl = _storageService.GetPublicUrl(user.ProfilePic.ThumbnailFileName);
         }
 
-        var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role);
+        var (countryCode, countryName) = _geo.GetCountry(_currentUserService.IpAddress);
+
+        var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role, countryName, countryCode);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
 
@@ -96,6 +106,7 @@ public class AccountService : IAccountService
 
     public async Task<Result<RegisterAccountResponse>> RegisterAsync(RegisterAccountRequest request)
     {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.IpAddress);
 
         string refreshToken = Guid.NewGuid().ToString();
 
@@ -105,7 +116,9 @@ public class AccountService : IAccountService
 
         if (errors.Any()) return Result<RegisterAccountResponse>.Failure(new ValidationError(string.Join(",", errors)));
 
-        var claims = _jwtService.GetClaimsForUser(account, null, Roles.User);
+        var (countryCode, countryName) = _geo.GetCountry(_currentUserService.IpAddress);
+
+        var claims = _jwtService.GetClaimsForUser(account, null, Roles.User, countryName, countryCode);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
 

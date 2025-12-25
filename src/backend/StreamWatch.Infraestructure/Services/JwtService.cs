@@ -32,13 +32,15 @@ public class JwtService : IJwtService
         return tokenHandler.WriteToken(token);
     }
 
-    public List<Claim> GetClaimsForUser(Account account, string? profilePicName, string roleName)
+    public List<Claim> GetClaimsForUser(Account account, string? profilePicName, string roleName, string countryCode, string countryName)
     {
         var claims = new List<Claim>
         {
             new Claim(ClaimTypes.NameIdentifier, account.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Name, account.UserName),
             new Claim(JwtRegisteredClaimNames.Email, account.Email),
+            new Claim("countryCode", countryCode),
+            new Claim("countryName", countryName),
             new Claim("role", roleName)
         };
 

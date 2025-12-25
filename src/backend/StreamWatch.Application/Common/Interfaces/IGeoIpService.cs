@@ -7,6 +7,6 @@ namespace StreamWatch.Application.Common.Interfaces
 {
     public interface IGeoIpService
     {
-        public (string? isoCode, string? name) GetCountry(string ipAddress);
+        public (string isoCode, string name) GetCountry(string ipAddress);
     }
 }

@@ -23,8 +23,9 @@ public class RoomService : IRoomService
     private readonly IStorageService _storageService;
     private readonly ILogger<RoomService> _logger;
     private readonly IEventBus _eventBus;
+    private readonly IRealtimeMessengerService _realtimeMessengerService;
 
-    public RoomService(IApplicationDbContext context, ICurrentUserService currentUserService, IRoomRepository roomRepository, SqidsEncoder<int> squids, IMediaProcessingService processingService, IStorageService storageService, ILogger<RoomService> logger, IEventBus eventBus)
+    public RoomService(IApplicationDbContext context, ICurrentUserService currentUserService, IRoomRepository roomRepository, SqidsEncoder<int> squids, IMediaProcessingService processingService, IStorageService storageService, ILogger<RoomService> logger, IEventBus eventBus, IRealtimeMessengerService realtimeMessengerService)
     {
         _context = context;
         _user = currentUserService;
@@ -33,6 +34,7 @@ public class RoomService : IRoomService
         _storageService = storageService;
         _logger = logger;
         _eventBus = eventBus;
+        _realtimeMessengerService = realtimeMessengerService;
     }
 
     public async Task<Result<CreateRoomResponse>> CreateRoomAsync(CreateRoomRequest request)
@@ -265,7 +267,44 @@ public class RoomService : IRoomService
 
         return Result.Success();
     }
-    
-    
-    
+
+    public async Task SendMessageToChatAsync(SendMessageRequest request, string? imageUrl)
+    {
+        var (countryCode, countryName) = _user.Country;
+        
+        var messageModel = new RoomMessageModel(
+            isNotification: false, 
+            text: request.Message, 
+            userName: _user.Name, 
+            countryCode: countryCode, 
+            countryName: countryName, 
+            image: imageUrl, 
+            userId: _user.Id,
+            replyToMessageId: request.ReplyToMessageId,
+            isWhisper: false
+        );
+
+        await _realtimeMessengerService.SendToGroupAsync(request.RoomId, "ReceiveMessage", messageModel);
+    }
+
+    public async Task SendWhisperToChatAsync(SendMessageRequest request, string? imageUrl, string targetConnectionId)
+    {
+        var (countryCode, countryName) = _user.Country;
+        
+        var messageModel = new RoomMessageModel(
+            isNotification: false, 
+            text: request.Message, 
+            userName: _user.Name, 
+            countryCode: countryCode, 
+            countryName: countryName, 
+            image: imageUrl, 
+            userId: _user.Id,
+            replyToMessageId: request.ReplyToMessageId,
+            isWhisper: true
+        );
+
+        await _realtimeMessengerService.SendToClientAsync(targetConnectionId, "ReceiveMessage", messageModel);
+    }
+
+
 }

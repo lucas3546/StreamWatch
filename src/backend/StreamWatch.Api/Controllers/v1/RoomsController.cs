@@ -11,6 +11,8 @@ using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
 using StreamWatch.Core.Cache;
 using StreamWatch.Core.Constants;
+using StreamWatch.Api.Infraestructure.Models;
+using StreamWatch.Application.Services;
 
 namespace StreamWatch.Api.Controllers.v1;
 
@@ -24,6 +26,7 @@ public class RoomsController : ControllerBase
     private readonly IHubContext<StreamWatchHub> _hubContext;
     private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<RoomsController> _logger;
+    private readonly IUserSessionService _userSessionService;
 
     public RoomsController(
         IRoomService roomService,
@@ -31,7 +34,8 @@ public class RoomsController : ControllerBase
         IAccountStorageService accountStorageService,
         IHubContext<StreamWatchHub> hubContext,
         ICurrentUserService currentUserService,
-        ILogger<RoomsController> logger
+        ILogger<RoomsController> logger,
+        IUserSessionService userSessionService
     )
     {
         _roomService = roomService;
@@ -40,6 +44,7 @@ public class RoomsController : ControllerBase
         _hubContext = hubContext;
         _currentUserService = currentUserService;
         _logger = logger;
+        _userSessionService = userSessionService;
     }
 
     [HttpPost("create")]
@@ -86,28 +91,25 @@ public class RoomsController : ControllerBase
     {
         _logger.LogInformation("Sending a message to the room Room={@RoomId} from UserId={@UserId}", request.RoomId, _currentUserService.Id);
 
-        var userName = _currentUserService.Name;
-
-        var role = _currentUserService.Role;
+        ArgumentException.ThrowIfNullOrEmpty(_currentUserService.Name);
 
         var room = await _roomService.GetRoomByIdAsync(request.RoomId);
 
-        if (room is null)
-            return NotFound();
+        if (room is null) return NotFound();
+
 
         string? uploadedFileName = null;
 
         if (request.Image != null)
         {
-            var uploadImageRequest = new UploadImageRequest(
+            var uploadedFile = await _accountStorageService.UploadImageAsync(new UploadImageRequest(
                 request.Image.FileName,
                 request.Image.ContentType,
                 request.Image.OpenReadStream(),
                 UploadOnlyThumbnail: true,
                 DateTime.UtcNow.AddMinutes(10)
-            );
+            ));
 
-            var uploadedFile = await _accountStorageService.UploadImageAsync(uploadImageRequest);
             if (!uploadedFile.IsSuccess)
             {
                 return BadRequest(uploadedFile.Error);
@@ -115,35 +117,31 @@ public class RoomsController : ControllerBase
 
             uploadedFileName = uploadedFile.Data?.thumbPublicUrl;
         }
+        
 
-        string countryName = "Unknown";
-        string countryIso = "Unknown";
-        try
+        
+        if (request.Message.StartsWith("/wh "))
         {
-            countryName = _currentUserService.Country.name ?? "Unknown";
-            countryIso = _currentUserService.Country.isoCode ?? "Unknown";
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Unable to get country and iso name for UserId={@UserId}", _currentUserService.Id);
-        }
 
-        await _hubContext
-            .Clients.Group(request.RoomId)
-            .SendAsync(
-                "ReceiveMessage",
-                new
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    UserName = userName,
-                    CountryCode = countryIso,
-                    CountryName = countryName,
-                    Text = request.Message,
-                    Image = uploadedFileName,
-                    UserId = _currentUserService.Id,
-                    ReplyToMessageId = request.ReplyToMessageId,
-                }
-            );
+            var parts = request.Message.Substring(4).Split(' ', 2);
+
+            if (parts.Length == 2)
+            {
+                var targetUser = await _userSessionService.GetUserSessionByNameInRoomAsync(request.RoomId, parts[0]);
+
+                if(targetUser == null) return BadRequest("User not found to whisper!");
+                
+                request.Message = parts[1];
+
+                await _roomService.SendWhisperToChatAsync(request, uploadedFileName, targetUser.ConnectionId);
+                
+            }
+
+        }
+        else
+        {
+            await _roomService.SendMessageToChatAsync(request, uploadedFileName);
+        }
 
         return Ok();
     }

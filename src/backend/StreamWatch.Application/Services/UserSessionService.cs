@@ -99,6 +99,11 @@ public class UserSessionService : IUserSessionService
         return await _userSessionRepository.FindUserSessionInRoomAsync(roomId, userId);
     }
 
+    public async Task<UserSessionCache?> GetUserSessionByNameInRoomAsync(string roomId, string userName)
+    {
+        return await _userSessionRepository.GetUserSessionByUserNameInRoomAsync(roomId, userName);
+    }
+
     public async Task<bool> UserHasOtherSessionsInRoomAsync(string userId, string roomId)
     {
         var sessions = await _userSessionRepository.FindUserSessionsInRoomAsync(roomId, userId);

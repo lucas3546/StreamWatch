@@ -33,8 +33,13 @@ public class RealtimeMessengerService : IRealtimeMessengerService
         await _hubContext.Clients.Users(userId, userId2).SendAsync(method, obj);
     }
 
-        public async Task SendToUserAsync(string userId, string method, object obj)
+    public async Task SendToUserAsync(string userId, string method, object obj)
     {
         await _hubContext.Clients.User(userId).SendAsync(method, obj);
+    }
+
+    public async Task SendToClientAsync(string connectionId, string method, object obj)
+    {
+        await _hubContext.Clients.Client(connectionId).SendAsync(method, obj);
     }
 }

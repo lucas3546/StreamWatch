@@ -22,14 +22,14 @@ public class CurrentUserService : ICurrentUserService
     public string? Role => _httpContextAccessor.HttpContext?.User?.FindFirstValue("role");
     public string? IpAddress => _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
     public string? ProfilePicUrl => _httpContextAccessor.HttpContext?.User?.FindFirstValue(JwtRegisteredClaimNames.Picture);
-    public (string? isoCode, string? name) Country 
+    public (string isoCode, string name) Country 
     {
         get
         {
             var ip = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 
             if (string.IsNullOrWhiteSpace(ip) || ip == "127.0.0.1" || ip == "::1")
-                return (null, null);
+                return ("Unknown", "Unknown");
 
             return _geo.GetCountry(ip);
         }

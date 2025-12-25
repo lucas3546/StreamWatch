@@ -11,6 +11,7 @@ public interface IRealtimeMessengerService
     Task SendToUserAsync(string userId, string method, object obj);
 
     Task BroadcastAsync(string method, params object[] args);
+    Task SendToClientAsync(string connectionId, string method, object obj);
 
     
 }

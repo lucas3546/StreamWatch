@@ -66,7 +66,9 @@ export default function RoomChatMessage({
             className={`max-w-[80%] px-3 py-1 text-sm rounded-lg break-words whitespace-pre-wrap overflow-hidden ${
               msg.fromMe
                 ? "bg-zinc-700 text-white"
-                : "bg-neutral-800 text-white"
+                : msg.isWhisper
+                  ? "bg-neutral-800 text-white border-1 border-yellow-400 "
+                  : "bg-neutral-800 text-white"
             }`}
           >
             {msg.replyToMessageId && (
@@ -93,21 +95,31 @@ export default function RoomChatMessage({
             )}
 
             <div className="flex items-center gap-2 min-w-0">
-              <p
-                className={`${getUsernameColor(msg.userName)} truncate max-w-[120px] ${!msg.fromMe && "cursor-pointer hover:underline"}`}
-                title={msg.userName}
-                onClick={() =>
-                  !msg.fromMe && navigate(`/profile/${msg.userId}`)
-                }
-              >
-                {msg.userName}
-              </p>
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1">
+                  <p
+                    className={`${getUsernameColor(msg.userName)} truncate max-w-[120px] ${!msg.fromMe && "cursor-pointer hover:underline"}`}
+                    title={msg.userName}
+                    onClick={() =>
+                      !msg.fromMe && navigate(`/profile/${msg.userId}`)
+                    }
+                  >
+                    {msg.userName}
+                  </p>
 
-              <img
-                src={`/flags2/${msg.countryCode.toUpperCase()}.svg`}
-                title={msg.countryName}
-                className="flex-shrink-0 w-4 h-3 object-cover"
-              />
+                  {msg.countryCode && (
+                    <img
+                      src={`/flags2/${msg.countryCode.toUpperCase()}.svg`}
+                      title={msg.countryName}
+                      className="flex-shrink-0 w-4 h-3 object-cover"
+                    />
+                  )}
+                </div>
+
+                {msg.isWhisper && (
+                  <p className="text-[10px] text-gray-400">whisper to you</p>
+                )}
+              </div>
             </div>
 
             {msg.image && (
