@@ -41,7 +41,7 @@ public class JwtService : IJwtService
             new Claim(JwtRegisteredClaimNames.Email, account.Email),
             new Claim("countryCode", countryCode),
             new Claim("countryName", countryName),
-            new Claim("role", roleName)
+            new Claim(ClaimTypes.Role, roleName)
         };
 
         if (!string.IsNullOrWhiteSpace(profilePicName))

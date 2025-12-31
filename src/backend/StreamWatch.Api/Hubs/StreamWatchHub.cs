@@ -9,24 +9,33 @@ using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
 using StreamWatch.Core.Cache;
+using StreamWatch.Core.Constants;
 using StreamWatch.Core.Enums;
 
 namespace StreamWatch.Api.Hubs;
 
 public class StreamWatchHub : Hub
 {
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUserSessionService _userSessionService;
     private readonly IRoomService _roomService;
     
 
-    public StreamWatchHub(IUserSessionService userSessionService, IRoomService roomService)
+    public StreamWatchHub(IUserSessionService userSessionService, IRoomService roomService, ICurrentUserService currentUserService)
     {
         _userSessionService = userSessionService;
         _roomService = roomService;
+        _currentUserService = currentUserService;
     }
 
     public override Task OnConnectedAsync()
     {
+        var role = _currentUserService.Role;
+        if(role == Roles.Mod || role == Roles.Admin)
+        {
+            Groups.AddToGroupAsync(Context.ConnectionId, "Moderation");
+        }
+
         return base.OnConnectedAsync();
     }
         
@@ -213,6 +222,11 @@ public class StreamWatchHub : Hub
     private string? GetUsername()
     {
         return Context.User?.FindFirst(JwtRegisteredClaimNames.Name)?.Value;
+    }
+
+    private string? GetRole()
+    {
+        return Context?.User?.FindFirst(ClaimTypes.Role)?.Value;
     }
 
     private string? GetProfilePic()

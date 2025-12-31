@@ -10,5 +10,6 @@ public interface IApplicationDbContext
     DbSet<Media> Media { get; }
     DbSet<Notification> Notifications { get; }
     DbSet<Ban> Bans { get; }
+    DbSet<Report> Reports {get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

@@ -7,6 +7,7 @@ import { Link } from "react-router";
 import { useNavigate } from "react-router";
 import NotificationMenu from "./notifications/NotificationMenu";
 import { useUser } from "../../contexts/UserContext";
+import ReportsMenu from "./notifications/ReportsMenu";
 
 interface NavbarProps {
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
@@ -50,6 +51,7 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
 
       {/* Derecha: notificaciones y crear room */}
       <div className="flex items-center gap-3">
+        {(user?.role === "Admin" || user?.role === "Mod") && <ReportsMenu />}
         {user && <NotificationMenu />}
 
         <button

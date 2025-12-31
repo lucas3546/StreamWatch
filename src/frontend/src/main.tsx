@@ -18,6 +18,8 @@ import { ToastContainer } from "react-toastify";
 import ProfilePage from "./pages/ProfilePage.tsx";
 import BanPage from "./pages/BanPage.tsx";
 import ProtectedRoutes from "./components/routes/ProtectedRoutes.tsx";
+import ReportPage from "./pages/ReportPage.tsx";
+import ReportsPage from "./pages/ReportsPage.tsx";
 const router = createBrowserRouter([
   {
     element: (
@@ -56,6 +58,8 @@ const router = createBrowserRouter([
           { path: "/rooms/create", element: <CreateRoomPage /> },
           { path: "/friends", element: <FriendsPage /> },
           { path: "/room/:roomId", element: <RoomPage /> },
+          { path: "/report/:reportId", element: <ReportPage /> },
+          { path: "/reports/", element: <ReportsPage /> },
           { path: "/account", element: <AccountPage /> },
           { path: "/settings", element: <SettingsPage /> },
           { path: "/profile/:accountId", element: <ProfilePage /> },

@@ -12,7 +12,7 @@ export interface User {
   nameid: string;
   name: string;
   email: string;
-  role: string;
+  role: "Admin" | "Mod" | "User";
   picture?: string;
 }
 

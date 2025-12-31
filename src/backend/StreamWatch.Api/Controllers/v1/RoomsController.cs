@@ -118,24 +118,20 @@ public class RoomsController : ControllerBase
             uploadedFileName = uploadedFile.Data?.thumbPublicUrl;
         }
         
-
-        
         if (request.Message.StartsWith("/wh "))
         {
 
             var parts = request.Message.Substring(4).Split(' ', 2);
 
-            if (parts.Length == 2)
-            {
-                var targetUser = await _userSessionService.GetUserSessionByNameInRoomAsync(request.RoomId, parts[0]);
+            if(parts.Length != 2 ) return BadRequest();
 
-                if(targetUser == null) return BadRequest("User not found to whisper!");
-                
-                request.Message = parts[1];
+            var targetUser = await _userSessionService.GetUserSessionByNameInRoomAsync(request.RoomId, parts[0]);
 
-                await _roomService.SendWhisperToChatAsync(request, uploadedFileName, targetUser.ConnectionId);
-                
-            }
+            if(targetUser == null) return BadRequest("User not found to whisper!");
+
+            request.Message = parts[1];
+
+            await _roomService.SendWhisperToChatAsync(request, uploadedFileName, targetUser.ConnectionId);
 
         }
         else
