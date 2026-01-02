@@ -1,8 +1,8 @@
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import ProfilePic from "../components/avatar/ProfilePic";
 import { useEffect, useState } from "react";
 import { BiSolidUserCheck, BiSolidUserX } from "react-icons/bi";
-
+import { IoIosFlag } from "react-icons/io";
 import {
   acceptFriendshipRequest,
   getStatusFromFriendship,
@@ -25,15 +25,26 @@ import BanHistoryModal from "../components/modals/BanHistoryModal";
 import { useSignalR } from "../hooks/useSignalR";
 import type { UpdateFriendshipStatusModel } from "../components/types/UpdatedFriendshipStatusModel";
 import { generateProblemDetailsErrorToast } from "../utils/toastGenerator";
+import ReportModal from "../components/modals/ReportModal";
 
 export default function ProfilePage() {
   const { accountId } = useParams<{ accountId: string }>();
   const { user } = useUser();
   const { connection } = useSignalR();
+  const navigate = useNavigate();
   const [profileData, setProfileData] = useState<GetAccountProfileResponse>();
   const [statusData, setStatusData] =
     useState<GetStatusFromFriendshipResponse>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    if (user?.nameid === accountId) {
+      alert(
+        "You can't access the profile page for your own account; you wouldn't be able to do anything anyway",
+      );
+      navigate("/");
+    }
+  }, [user, accountId]);
 
   useEffect(() => {
     if (accountId === undefined) return;
@@ -213,6 +224,24 @@ export default function ProfilePage() {
                 </button>
               </div>
             )}
+            <button
+              onClick={acceptFriendRequest}
+              className="cursor-pointer w-full flex items-center justify-center gap-2 py-2 border border-green-700 text-green-400 rounded-lg hover:bg-green-800/20 transition"
+            >
+              <Icon icon={BiSolidUserCheck} />
+              Accept Friend Request
+            </button>
+            <ReportModal
+              reportType="User"
+              reportTargetId={profileData?.userId ?? ""}
+              openButtonClassname="cursor-pointer w-full flex items-center justify-center gap-2 py-2 border border-red-700 text-red-400 rounded-lg hover:bg-red-800/20 transition"
+              openButtonContent={
+                <>
+                  <Icon icon={IoIosFlag}></Icon>
+                  Report this user
+                </>
+              }
+            ></ReportModal>
             {user?.role === "Admin" && profileData && (
               <>
                 <BanUserModal

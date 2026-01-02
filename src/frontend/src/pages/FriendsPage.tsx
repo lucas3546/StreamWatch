@@ -16,7 +16,6 @@ export default function FriendsPage() {
   const [activeTab, setActiveTab] = useState<"friends" | "search">("friends");
   const [loadingFriends, setLoadingFriends] = useState(true);
 
-  // 🔹 cargar amigos al montar
   useEffect(() => {
     const loadFriends = async () => {
       try {

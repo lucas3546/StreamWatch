@@ -30,11 +30,10 @@ public class UserLeftRoomEventHandler : IEventHandler<UserLeftRoomEvent>
         
         if (@event.sessionCache.UserId == room.LeaderAccountId)
         {   
-            Console.WriteLine("ENTERINFG");
             var latestRoomUser = await _userSessionRepository.GetOldestUserSessionFromRoomAsync(@event.sessionCache.RoomId);
            
             if (latestRoomUser is null || latestRoomUser.UserId == null) return;
-            Console.WriteLine("LEAVING");
+            
             room.LeaderAccountId = latestRoomUser.UserId;
             
             await _realtimeMessengerService.SendToGroupAsync(room.Id.ToString(), "ReceiveMessage", new { Id = Guid.NewGuid().ToString(), IsNotification = true, Text = $"{latestRoomUser.UserName} is the new leader", });

@@ -84,6 +84,7 @@ public class StreamWatchHub : Hub
 
         await Clients.Group(roomId).SendAsync("ReceiveMessage", new RoomMessageModel(isNotification: true, $"{currentUser.UserName} has join to the room"));
 
+        await Clients.Group(roomId).SendAsync("NewUserJoined", new BasicUserRoomModel(currentUser.Id, currentUser.UserName, currentUser.ProfilePic));
         //Make current user leader 
         if(room.CreatedByAccountId == currentUser.Id || room.UsersCount == 0)
         {

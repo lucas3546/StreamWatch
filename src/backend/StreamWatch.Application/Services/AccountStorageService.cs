@@ -39,18 +39,9 @@ public class AccountStorageService : IAccountStorageService
         _options = options;
     }
     
-    private static readonly HashSet<string> SupportedImageFormats = new HashSet<string>
-    {
-        "image/jpg",
-        "image/avif",
-        "image/jpeg",
-        "image/png",
-        "image/webp",
-        "image/gif"
-    };
     public async Task<Result<GetPresignedUrlResponse>> GetPresignedUrl(GetPresignedUrlRequest request)
     {
-        if (string.IsNullOrEmpty(_currentUserService.Id)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+        ArgumentException.ThrowIfNullOrEmpty(_currentUserService.Id);
 
         var usedStorage = await _context.Media.Where(x => x.CreatedBy == _currentUserService.Id && x.Status == MediaStatus.Uploaded).SumAsync(x => x.Size);
 
@@ -94,7 +85,6 @@ public class AccountStorageService : IAccountStorageService
     {
         var tempVideoPath = Path.Combine("wwwroot", "temp", $"{request.fileName}");
         
-        //TO DO: Add catch.
         try
         {
             using (var outputFileStream = new FileStream(tempVideoPath, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -105,10 +95,16 @@ public class AccountStorageService : IAccountStorageService
             //Validate video
             var mimetype = MimeGuesser.GuessMimeType(tempVideoPath);
             
-            if (!SupportedImageFormats.Contains(mimetype))
+            if (!SupportedImageFormats.Values.Contains(mimetype))
             {
                 return Result<UploadImageResponse>.Failure(new ValidationError("File format is not supported!"));
             }
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Some error has ocurred when processing image");
+
+            return Result<UploadImageResponse>.Failure(new UnexpectedError("Some error has ocurred when processing image"));
         }
         finally
         {
@@ -176,48 +172,63 @@ public class AccountStorageService : IAccountStorageService
     
     public async Task<Result> SetMediaFileUploaded(SetMediaFileUploadedRequest request)
     {
-        var currentUserId = _currentUserService.Id;
-        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "CurrentUserId cannot be null or empty!");
-        
-        var media = await _context.Media.FirstOrDefaultAsync(x => x.Id == request.MediaId);
-        
-        if (media is null) return Result.Failure(new NotFoundError("Media not found"));
+        ArgumentException.ThrowIfNullOrEmpty(_currentUserService.Id);
 
-        var objectMetadata = await _storageService.GetFileMetadataAsync(media.FileName);
+        var media = await _context.Media.FirstOrDefaultAsync(x => x.Id == request.MediaId);
+
+        if (media is null) return Result.Failure(new NotFoundError("Media not found"));
         
+        //Validate metadata
+        var objectMetadata = await _storageService.GetFileMetadataAsync(media.FileName);
+
         if (media.Size != objectMetadata.Size)
-        {
             return Result.Failure(new ValidationError("File size does not match"));
-        }
 
         if (media.ContentType != objectMetadata.ContentType)
-        {
             return Result.Failure(new ValidationError("File content type does not match"));
-        }
-        
-        
-        var uploadedVideo = await _storageService.GetPartialVideoAsync(media.FileName, 0, 2_000_000); //2MB
-        
-        var tempVideoPath = Path.Combine("wwwroot", "temp", $"{media.FileName}");
-        
+
+        var tempVideoPath = Path.Combine("wwwroot", "temp", media.FileName);
+
+        UploadedFile? uploadedVideo;
+
         try
         {
-            using (var outputFileStream = new FileStream(tempVideoPath, FileMode.Create, FileAccess.Write, FileShare.None))
-            {
-                await uploadedVideo.Stream.CopyToAsync(outputFileStream);
-            }
-            
-            //Validate video
-            var mimetype = MimeGuesser.GuessMimeType(tempVideoPath);
-            if (mimetype != media.ContentType) return Result.Failure(new ValidationError("File type does not match"));
-
-
-            using var thumbStream = await _mediaProcessingService.GenerateThumbnailFromVideoUrlAsync(uploadedVideo.PublicUrl);
+            // Download partial file
+            uploadedVideo = await _storageService.GetPartialVideoAsync(media.FileName, 0,  2_000_000); //2mb
                 
-            
-            var thumbName = Guid.NewGuid() + ".webp";
-            var uploadedThumbnail = await _storageService.UploadAsync(thumbStream, thumbName, "image/webp");
+                
+            if (uploadedVideo is null || uploadedVideo?.Stream is null)
+                return Result.Failure(new NotFoundError("The video has not been found"));
 
+            // Save temp file
+            await using (var fs = new FileStream(
+                tempVideoPath,
+                FileMode.Create,
+                FileAccess.Write,
+                FileShare.None))
+            {
+                await uploadedVideo.Stream.CopyToAsync(fs);
+            }
+
+            // Validate mimetype
+            var mimeType = MimeGuesser.GuessMimeType(tempVideoPath);
+            if (mimeType != media.ContentType)
+            {
+                await _storageService.DeleteAsync(media.FileName);
+                return Result.Failure(new ValidationError("File type does not match"));
+            }
+
+            // Generate thumbnail
+            await using var thumbStream =
+                await _mediaProcessingService.GenerateThumbnailFromVideoUrlAsync(
+                    uploadedVideo.PublicUrl);
+
+            var thumbName = $"{Guid.NewGuid()}.webp";
+
+            var uploadedThumbnail = await _storageService.UploadAsync(thumbStream, thumbName, "image/webp");
+                
+
+            // Update media
             media.Status = MediaStatus.Uploaded;
             media.ThumbnailFileName = uploadedThumbnail.FileName;
             media.BucketName = uploadedVideo.BucketName;
@@ -226,22 +237,27 @@ public class AccountStorageService : IAccountStorageService
             _context.Media.Update(media);
 
             await _context.SaveChangesAsync(CancellationToken.None);
-            
+
             return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error while processing uploaded media");
+            return Result.Failure(new UnexpectedError("Error processing media file"));
         }
         finally
         {
-            if (File.Exists(tempVideoPath)) File.Delete(tempVideoPath);
-                
+            if (File.Exists(tempVideoPath))
+                File.Delete(tempVideoPath);
         }
     }
+
     
     public async Task<IEnumerable<MediaModel>> GetAllMediaFiles()
     {
-        var currentUserId = _currentUserService.Id;
-        if(string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+        ArgumentException.ThrowIfNullOrEmpty(_currentUserService.Id);
 
-        var files = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId)
+        var files = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == _currentUserService.Id)
             .Select(o => new MediaModel(o.FileName, o.ThumbnailFileName)).ToListAsync();
 
         var videoFiles = files.Where(f => ContentTypeHelper.IsVideo(f.FileName)).ToList();
@@ -273,10 +289,9 @@ public class AccountStorageService : IAccountStorageService
 
     public async Task<GetStorageOverviewResponse> GetStorageOverview()
     {
-        var currentUserId = _currentUserService.Id;
-        if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException("CurrentUserId cannot be null or empty!");
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.Id);
 
-        var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == currentUserId && x.Status == MediaStatus.Uploaded).ToListAsync();
+        var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == _currentUserService.Id && x.Status == MediaStatus.Uploaded).ToListAsync();
 
         var filteredMedias = medias.Where(f => ContentTypeHelper.IsVideo(f.FileName)).ToList();
 
@@ -289,18 +304,18 @@ public class AccountStorageService : IAccountStorageService
         return response;
     }
     
-        public async Task<GetUserFullStorageOverviewResponse> GetUserFullStorageOverview(string accountId)
-        {
-            var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == accountId && x.Status == MediaStatus.Uploaded).ToListAsync();
+    public async Task<GetUserFullStorageOverviewResponse> GetUserFullStorageOverview(string accountId)
+    {
+        var medias = await _context.Media.AsNoTracking().Where(x => x.CreatedBy == accountId && x.Status == MediaStatus.Uploaded).ToListAsync();
 
-            var files = medias.Select(x => new ExtendedMediaModel(x.Id, _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
+        var files = medias.Select(x => new ExtendedMediaModel(x.Id, _storageService.GetPublicUrl(x.FileName), _storageService.GetPublicUrl(x.ThumbnailFileName), x.Size, x.ExpiresAt));
 
-            decimal storageUse = files.Sum(x => x.Size);
+        decimal storageUse = files.Sum(x => x.Size);
 
-            var response = new GetUserFullStorageOverviewResponse(storageUse, files);
+        var response = new GetUserFullStorageOverviewResponse(storageUse, files);
 
-            return response;
-        }
+        return response;
+    }
     
     
     

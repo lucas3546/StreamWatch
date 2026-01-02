@@ -27,6 +27,8 @@ public class UserJoinedRoomEventHandler : IEventHandler<UserJoinedRoomEvent>
         room.UsersCount++;
 
         await _roomRepository.UpdateAsync(room, cancellationToken);
+
+
     }
 }
 

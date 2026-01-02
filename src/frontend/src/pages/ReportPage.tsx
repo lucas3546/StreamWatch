@@ -112,10 +112,7 @@ export default function ReportPage() {
     user?: GetAccountProfileResponse;
   }) {
     return (
-      <div
-        className="flex items-center gap-2 p-2 rounded-md bg-neutral-900 border border-neutral-800"
-        onClick={() => navigate("/profile/" + user?.userId)}
-      >
+      <div className="flex items-center gap-2 p-2 rounded-md bg-neutral-900 border border-neutral-800">
         <span className="text-[11px] opacity-60 min-w-[80px]">{label}</span>
         {user ? (
           <div className="flex items-center gap-2 min-w-0">
@@ -123,9 +120,14 @@ export default function ReportPage() {
               userName={user.userName}
               fileUrl={user.profilePicThumbnailUrl}
             />
-            <span className="text-sm font-medium truncate">
+            <a
+              href={`/profile/${user.userId}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm font-medium truncate"
+            >
               {user.userName}
-            </span>
+            </a>
           </div>
         ) : (
           <span className="text-sm opacity-70">-</span>

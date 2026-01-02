@@ -3,6 +3,7 @@ import type { PlaylistVideoItemModel } from "../../types/PlaylistVideoItemModel"
 import { FaPlay } from "react-icons/fa";
 import Icon from "../../icon/Icon";
 import { FaPause } from "react-icons/fa";
+import { useRoomStore } from "../../../stores/roomStore";
 interface PlaylistVideoItemProps {
   item: PlaylistVideoItemModel;
   currentPlayingVideoUrl: string;
@@ -14,6 +15,7 @@ export default function PlaylistVideoItem({
   currentPlayingVideoUrl,
   onClick,
 }: PlaylistVideoItemProps) {
+  const isLeader = useRoomStore((state) => state.isLeader);
   return (
     <div
       className={`flex items-center gap-2 px-3 py-2 cursor-pointer border-defaultbordercolor border-1 rounded-sm
@@ -26,9 +28,13 @@ export default function PlaylistVideoItem({
           <Icon icon={FaPause} size={15} />
         </div>
       ) : (
-        <div className="w-4 h-4 flex items-center justify-center shrink-0">
-          <Icon icon={FaPlay} size={15} />
-        </div>
+        <>
+          {isLeader && (
+            <div className="w-4 h-4 flex items-center justify-center shrink-0">
+              <Icon icon={FaPlay} size={15} />
+            </div>
+          )}
+        </>
       )}
 
       <img

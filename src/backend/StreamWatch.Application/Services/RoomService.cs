@@ -103,7 +103,7 @@ public class RoomService : IRoomService
         }
         else
         {
-            
+            throw new Exception();
         }
 
         var playlistItem = new PlaylistVideoItem(room.VideoUrl, videoTitle, room.ThumbnailUrl, room.VideoProvider.ToString(), _user.Id, _user.Name);

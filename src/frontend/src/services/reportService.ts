@@ -53,13 +53,24 @@ export async function getReport(reportId: number) {
     .then((res) => res.data);
 }
 
-export interface UpdateReportState {
+export interface UpdateReportStateRequest {
   id: number;
   state: ReportStateType;
 }
 
-export async function updateReportState(request: UpdateReportState) {
+export async function updateReportState(request: UpdateReportStateRequest) {
   return await api
     .put(`/reports/update-state/`, request)
     .then((res) => res.data);
+}
+
+export interface CreateReportRequest {
+  details: string | undefined;
+  targetId: string;
+  targetType: ReportTargetType;
+  category: ReportCategoryType;
+}
+
+export async function createReport(request: CreateReportRequest) {
+  return await api.post(`/reports/create/`, request).then((res) => res.data);
 }

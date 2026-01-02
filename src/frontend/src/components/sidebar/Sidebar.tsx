@@ -8,6 +8,7 @@ import { FaUserFriends } from "react-icons/fa";
 import { BiSolidVideos } from "react-icons/bi";
 import { RxAvatar } from "react-icons/rx";
 import { VscBlank } from "react-icons/vsc";
+import { IoIosFlag } from "react-icons/io";
 import { useUser } from "../../contexts/UserContext";
 import { useNavigate } from "react-router";
 
@@ -75,6 +76,13 @@ export default function Sidebar({
               href="/storage"
             ></SidebarItemLink>
           </>
+        )}
+        {(user?.role == "Admin" || user?.role == "Mod") && (
+          <SidebarItemLink
+            icon={IoIosFlag}
+            label="Reports"
+            href="/reports"
+          ></SidebarItemLink>
         )}
         <div className="mt-auto w-full border-t-1 border-t-defaultbordercolor">
           {user ? (

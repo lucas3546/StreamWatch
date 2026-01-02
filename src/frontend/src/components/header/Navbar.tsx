@@ -33,19 +33,19 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
           onClick={() => setSidebarOpen((prev) => !prev)}
           className="p-2 rounded-md hover:bg-neutral-700/50 transition-colors cursor-pointer"
         >
-          <Icon icon={GiHamburgerMenu} size={24} />
+          <Icon icon={GiHamburgerMenu} size={20} />
         </button>
 
         <Link
           to="/home"
-          className="text-2xl font-semibold text-white hover:text-gray-200 transition-colors"
+          className="text-xl md:text-2xl font-semibold text-white hover:text-gray-200 transition-colors"
         >
           StreamWatch
         </Link>
       </div>
 
       {/* Centro: barra de búsqueda */}
-      <div className="w-2/3">
+      <div className="hidden md:flex md:w-2/3 md:px-3">
         <SearchBar />
       </div>
 
@@ -58,8 +58,8 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
           onClick={createRoomButtonClicked}
           className="flex items-center gap-2 p-2 rounded-xl bg-neutral-800 hover:bg-neutral-700 transition-shadow shadow-sm hover:shadow-md cursor-pointer text-white font-medium"
         >
-          <Icon icon={IoIosRadio} size={22} />
-          Create
+          <Icon icon={IoIosRadio} size={20} />
+          <span className="text-sm">Create</span>
         </button>
       </div>
     </div>

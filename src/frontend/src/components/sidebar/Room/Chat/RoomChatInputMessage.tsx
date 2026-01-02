@@ -3,7 +3,7 @@ import {
   sendMessage,
   type SendMessageRequest,
 } from "../../../../services/roomService";
-import { useState, type Dispatch, type SetStateAction } from "react";
+import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { useRoomStore } from "../../../../stores/roomStore";
 import { FaRegImage } from "react-icons/fa6";
 import { IoIosCloseCircle } from "react-icons/io";
@@ -13,6 +13,10 @@ import { CgSpinnerTwo } from "react-icons/cg";
 import type { SelectedMessageType } from "../../../types/SelectedMessageType";
 import { LiaReplySolid } from "react-icons/lia";
 import { sendRoomMessageSchema } from "../../../schemas/sendRoomMessageSchema";
+import ProfilePic from "../../../avatar/ProfilePic";
+import type { BasicUserRoomModel } from "../../../types/BasicUserRoomModel";
+import { useUser } from "../../../../contexts/UserContext";
+import type { RoomChatMessageType } from "../../../types/RoomMessageType";
 
 interface RoomChatInputMessageProps {
   selectedMessage: SelectedMessageType | undefined;
@@ -24,10 +28,17 @@ export default function RoomChatInputMessage({
   setSelectedMessage,
 }: RoomChatInputMessageProps) {
   const room = useRoomStore((state) => state.room);
+  const { user } = useUser();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [file, setFile] = useState<File | null>(null);
   const [inputMessage, setInputMessage] = useState("");
   const [errors, setErrors] = useState<string | undefined>();
+  const connectedUsers = useRoomStore((state) => state.roomUsers);
+  const addChatMessage = useRoomStore((state) => state.addChatMessage);
+  const [whisperSuggestions, setWhisperSuggestions] = useState<
+    BasicUserRoomModel[]
+  >([]);
+
   const onSendMessageClicked = async () => {
     setIsLoading(true);
     setErrors(undefined);
@@ -56,6 +67,23 @@ export default function RoomChatInputMessage({
 
     try {
       await sendMessage(request);
+
+      if (inputMessage.startsWith("/wh")) {
+        const parts = inputMessage.split(" ");
+
+        const message: RoomChatMessageType = {
+          id: Date.now().toString(),
+          userName: user?.name ?? "",
+          userId: user?.nameid ?? "",
+          text: parts[2],
+          fromMe: true,
+          isWhisper: true,
+          countryCode: "",
+          countryName: "",
+          isNotification: false,
+        };
+        addChatMessage(message);
+      }
     } catch (e) {
       console.log(e);
       setErrors(
@@ -79,6 +107,43 @@ export default function RoomChatInputMessage({
       e.preventDefault();
       onSendMessageClicked();
     }
+  };
+
+  useEffect(() => {
+    if (!inputMessage.startsWith("/wh ")) {
+      setWhisperSuggestions([]);
+      return;
+    }
+
+    const query = inputMessage.replace("/wh ", "").split(" ")[0].toLowerCase();
+
+    const filtered = connectedUsers.filter((u) => {
+      if (u.userName === user?.name) return false;
+
+      if (!query) return true;
+
+      return u.userName.toLowerCase().startsWith(query);
+    });
+
+    setWhisperSuggestions(filtered.slice(0, 5));
+  }, [inputMessage, connectedUsers, user?.name]);
+
+  const onWhisperUserSelected = (userName: string) => {
+    setInputMessage((prev) => {
+      if (!prev.startsWith("/wh ")) return prev;
+
+      const parts = prev.split(" ");
+
+      if (parts.length === 1) {
+        return `/wh ${userName} `;
+      }
+
+      const rest = parts.slice(2).join(" ");
+
+      return rest ? `/wh ${userName} ${rest}` : `/wh ${userName} `;
+    });
+
+    setWhisperSuggestions([]);
   };
 
   const clearPreview = () => setFile(null);
@@ -146,16 +211,37 @@ export default function RoomChatInputMessage({
           </div>
         </div>
       )}
-      <div className="flex items-center gap-1 mt-2 py-2 px-1">
-        <input
-          className="flex-1 rounded bg-neutral-800 text-white px-2 py-1 max-w-[65%]"
-          minLength={1}
-          maxLength={500}
-          placeholder="Send a message.."
-          onKeyDown={handleKeyEnter}
-          value={inputMessage}
-          onChange={(e) => setInputMessage(e.target.value)}
-        />
+      <div className="flex items-center gap-1 mt-2 py-2 px-1 relative">
+        <div className="relative flex-1 max-w-[65%]">
+          {whisperSuggestions.length > 0 && (
+            <div className="absolute bottom-full mb-1 w-full bg-neutral-900 border border-neutral-700 rounded-md shadow-lg z-50">
+              {whisperSuggestions.map((usr) => (
+                <div
+                  key={usr.userId}
+                  onClick={() => onWhisperUserSelected(usr.userName)}
+                  className="px-2 py-1 text-sm text-white hover:bg-neutral-700 cursor-pointer flex items-center gap-2"
+                >
+                  <ProfilePic
+                    userName={usr.userName}
+                    fileUrl={usr.profilePic}
+                  ></ProfilePic>
+                  <span className="truncate">{usr.userName}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <input
+            className="w-full rounded bg-neutral-800 text-white px-2 py-1"
+            minLength={1}
+            maxLength={500}
+            placeholder="Send a message.."
+            onKeyDown={handleKeyEnter}
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+          />
+        </div>
+
         <label className="w-3/12 h-8 flex items-center justify-center rounded bg-neutral-700 hover:bg-neutral-600 cursor-pointer">
           <Icon icon={FaRegImage} size={18} />
           <input

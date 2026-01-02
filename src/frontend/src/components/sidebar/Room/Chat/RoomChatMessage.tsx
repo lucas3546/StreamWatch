@@ -14,7 +14,6 @@ export default function RoomChatMessage({
   onSelectedMessage,
 }: RoomChatMessageProps) {
   const navigate = useNavigate();
-
   const replyEl = msg.replyToMessageId
     ? document.getElementById(`msg-${msg.replyToMessageId}`)
     : null;
@@ -116,8 +115,14 @@ export default function RoomChatMessage({
                   )}
                 </div>
 
-                {msg.isWhisper && (
+                {msg.isWhisper && !msg.fromMe && (
                   <p className="text-[10px] text-gray-400">whisper to you</p>
+                )}
+
+                {msg.isWhisper && msg.fromMe && (
+                  <p className="text-[10px] text-gray-400">
+                    you whispered this to another user
+                  </p>
                 )}
               </div>
             </div>

@@ -11,6 +11,7 @@ import {
 } from "../../../services/reportService";
 import ReportMenuItem from "./ReportMenuItem";
 import { useNavigate } from "react-router";
+import { playSound } from "../../../utils/playSound";
 
 export default function ReportsMenu() {
   const [open, setOpen] = useState(false);
@@ -77,6 +78,8 @@ export default function ReportsMenu() {
     connection.on("ReceiveReport", (rep: GetPagedReportItemResponse) => {
       console.log("Received report", rep);
       setReports((prev) => [rep, ...prev]);
+      setTotalItems(totalItems + 1);
+      playSound("/sounds/notificationsound.mp3");
     });
 
     return () => {

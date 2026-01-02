@@ -30,6 +30,11 @@ export default function RoomChat() {
           ))}
         </div>
       </div>
+      <p className="text-[10px] text-gray-400 text-center">
+        Type{" "}
+        <span className="font-mono">/wh &lt;username&gt; &lt;message&gt;</span>{" "}
+        to send a whisper
+      </p>
       <RoomChatInputMessage
         selectedMessage={selectedMessage}
         setSelectedMessage={setSelectedMessage}
