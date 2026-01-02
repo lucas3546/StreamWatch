@@ -21,20 +21,20 @@ public class RoomService : IRoomService
     private readonly IRoomRepository _roomRepository;
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly IStorageService _storageService;
-    private readonly SqidsEncoder<int> _sqids;
     private readonly ILogger<RoomService> _logger;
     private readonly IEventBus _eventBus;
+    private readonly IRealtimeMessengerService _realtimeMessengerService;
 
-    public RoomService(IApplicationDbContext context, ICurrentUserService currentUserService, IRoomRepository roomRepository, SqidsEncoder<int> squids, IMediaProcessingService processingService, IStorageService storageService, ILogger<RoomService> logger, IEventBus eventBus)
+    public RoomService(IApplicationDbContext context, ICurrentUserService currentUserService, IRoomRepository roomRepository, SqidsEncoder<int> squids, IMediaProcessingService processingService, IStorageService storageService, ILogger<RoomService> logger, IEventBus eventBus, IRealtimeMessengerService realtimeMessengerService)
     {
         _context = context;
         _user = currentUserService;
         _roomRepository = roomRepository;
-        _sqids = squids;
         _mediaProcessingService = processingService;
         _storageService = storageService;
         _logger = logger;
         _eventBus = eventBus;
+        _realtimeMessengerService = realtimeMessengerService;
     }
 
     public async Task<Result<CreateRoomResponse>> CreateRoomAsync(CreateRoomRequest request)
@@ -52,7 +52,7 @@ public class RoomService : IRoomService
             IsPaused = true,
             IsPublic = request.IsPublic,
             LeaderAccountId = _user.Id,
-            CreatedByAccountId = _user.Name,
+            CreatedByAccountId = _user.Id,
             LastLeaderUpdateTime = 0,
             CurrentVideoTime = 0,
             CreatedAt = DateTime.UtcNow,
@@ -62,31 +62,22 @@ public class RoomService : IRoomService
         string videoTitle = "";
         if (request.Provider == RoomVideoProvider.Local)
         {
-            if (string.IsNullOrEmpty(request.MediaId))
+            
+            if (request.MediaId is null)
             {
-                _logger.LogWarning("MediaId cannon't be null when the selected provider is local");
                 return Result<CreateRoomResponse>.Failure(new ValidationError("MediaId cannon't be null"));
             }
 
-            if (_sqids.TrySafeDecode(request.MediaId, out var decodedId))
-            {
-                var media = await _context.Media.FindAsync(decodedId);
+            var media = await _context.Media.FindAsync(request.MediaId);
 
-                if (media is null)
-                {
-                    _logger.LogWarning("Media entity not found: MediaId={MediaId}, UserId={UserId}", request.MediaId, _user.Id);
-                    return Result<CreateRoomResponse>.Failure(new ValidationError("Media not found"));
-                }
-                room.VideoUrl = _storageService.GetPublicUrl(media.FileName);
-                room.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName); ;
-                room.VideoProvider = "Local";
-                videoTitle = media.FileName;
-            }
-            else
+            if (media is null)
             {
-                _logger.LogWarning("Invalid MediaId provided: {MediaId}, UserId={UserId}", request.MediaId, _user.Id);
-                return Result<CreateRoomResponse>.Failure(new ValidationError("MediaId is invalid"));
+                return Result<CreateRoomResponse>.Failure(new ValidationError("Media not found"));
             }
+            room.VideoUrl = _storageService.GetPublicUrl(media.FileName);
+            room.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName); ;
+            room.VideoProvider = "Local";
+            videoTitle = media.FileName;
 
 
         }
@@ -95,14 +86,12 @@ public class RoomService : IRoomService
 
             if (string.IsNullOrEmpty(request.VideoUrl))
             {
-                _logger.LogWarning("Missing VideoUrl for YouTube provider, UserId={UserId}", _user.Id);
                 return Result<CreateRoomResponse>.Failure(new ValidationError("VideoUrl can't be null with the selected provider"));
             }
 
             var platform = VideoUrlHelper.GetPlatform(request.VideoUrl);
             if (platform is null)
             {
-                _logger.LogWarning("Invalid youtube url provided, VideoUrl={VideoUrl}, UserId={UserId}", request.VideoUrl, _user.Id);
                 return Result<CreateRoomResponse>.Failure(new ValidationError("Invalid YoutubeUrl"));
             }
 
@@ -114,7 +103,7 @@ public class RoomService : IRoomService
         }
         else
         {
-            
+            throw new Exception();
         }
 
         var playlistItem = new PlaylistVideoItem(room.VideoUrl, videoTitle, room.ThumbnailUrl, room.VideoProvider.ToString(), _user.Id, _user.Name);
@@ -165,21 +154,14 @@ public class RoomService : IRoomService
 
         if (request.Provider == RoomVideoProvider.Local)
         {
-            if (_sqids.Decode(request.MediaId) is [var decodedId] && request.MediaId == _sqids.Encode(decodedId))
-            {
-                var media = await _context.Media.FindAsync(decodedId);
+            var media = await _context.Media.FindAsync(request.MediaId);
 
-                if (media is null) return Result<PlaylistVideoItem>.Failure(new NotFoundError("Media not found!"));
+            if (media is null) return Result<PlaylistVideoItem>.Failure(new NotFoundError("Media not found!"));
 
-                playlistVideoItem.VideoTitle = media.FileName;
-                playlistVideoItem.VideoUrl = _storageService.GetPublicUrl(media.FileName);
-                playlistVideoItem.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName);
-                playlistVideoItem.Provider = "Local";
-            }
-            else
-            {
-                return Result<PlaylistVideoItem>.Failure(new ValidationError("MediaId is invalid"));
-            }
+            playlistVideoItem.VideoTitle = media.FileName;
+            playlistVideoItem.VideoUrl = _storageService.GetPublicUrl(media.FileName);
+            playlistVideoItem.ThumbnailUrl = _storageService.GetPublicUrl(media.ThumbnailFileName);
+            playlistVideoItem.Provider = "Local";
         }
         else if (request.Provider == RoomVideoProvider.YouTube)
         {
@@ -206,7 +188,10 @@ public class RoomService : IRoomService
     public async Task<Result> ChangeVideoFromPlaylistItemAsync(ChangeVideoFromPlaylistItemRequest request)
     {
         var room = await _roomRepository.GetByIdAsync(request.RoomId);
+        
         if (room is null) return Result.Failure(new NotFoundError("Room not found!"));
+
+        if(room.LeaderAccountId != _user.Id) return Result.Failure(new ValidationError("You are not the leader of this room"));
 
         var videoItem = room.PlaylistVideoItems.FirstOrDefault(x => x.Id == request.PlaylistItemId);
 
@@ -238,23 +223,41 @@ public class RoomService : IRoomService
         return response;
     }
 
-    public async Task<Result> ChangeRoomLeader(string leaderId, string roomId)
-    {
-        var room = await _roomRepository.GetByIdAsync(roomId);
-        
-        if (room is null) return Result.Failure(new NotFoundError("Room not found"));
 
-        room.LeaderAccountId = leaderId;
+
+    public async Task<RoomCache> ChangeRoomLeader(string userId, RoomCache room)
+    {
+        room.LeaderAccountId = userId;
 
         await _roomRepository.UpdateAsync(room);
 
-        return Result.Success();
+        return room;
+    }
+
+    public async Task<RoomCache> IncrementUserCount(RoomCache room)
+    {
+        room.UsersCount++;
+
+        await _roomRepository.UpdateAsync(room);
+        
+        return room;
+    }
+
+        public async Task<RoomCache> DecreaseUserCount(RoomCache room)
+    {
+        room.UsersCount--;
+
+        await _roomRepository.UpdateAsync(room);
+        
+        return room;
     }
 
     public async Task<Result> UpdateVideoStateAsync(UpdateVideoStateRequest request)
     {
         var room = await _roomRepository.GetByIdAsync(request.RoomId);
         if (room is null) return Result.Failure(new NotFoundError("Room not found"));
+
+        if(room.LeaderAccountId != _user.Id) return Result.Failure(new ValidationError("You are not the leader of this room"));
 
         room.CurrentVideoTime = request.CurrentTimestamp;
         room.LastLeaderUpdateTime = request.SentAt;
@@ -264,7 +267,44 @@ public class RoomService : IRoomService
 
         return Result.Success();
     }
-    
-    
-    
+
+    public async Task SendMessageToChatAsync(SendMessageRequest request, string? imageUrl)
+    {
+        var (countryCode, countryName) = _user.Country;
+        
+        var messageModel = new RoomMessageModel(
+            isNotification: false, 
+            text: request.Message, 
+            userName: _user.Name, 
+            countryCode: countryCode, 
+            countryName: countryName, 
+            image: imageUrl, 
+            userId: _user.Id,
+            replyToMessageId: request.ReplyToMessageId,
+            isWhisper: false
+        );
+
+        await _realtimeMessengerService.SendToGroupAsync(request.RoomId, "ReceiveMessage", messageModel);
+    }
+
+    public async Task SendWhisperToChatAsync(SendMessageRequest request, string? imageUrl, string targetConnectionId)
+    {
+        var (countryCode, countryName) = _user.Country;
+        
+        var messageModel = new RoomMessageModel(
+            isNotification: false, 
+            text: request.Message, 
+            userName: _user.Name, 
+            countryCode: countryCode, 
+            countryName: countryName, 
+            image: imageUrl, 
+            userId: _user.Id,
+            replyToMessageId: request.ReplyToMessageId,
+            isWhisper: true
+        );
+
+        await _realtimeMessengerService.SendToClientAsync(targetConnectionId, "ReceiveMessage", messageModel);
+    }
+
+
 }

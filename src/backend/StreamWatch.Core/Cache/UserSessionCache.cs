@@ -11,13 +11,13 @@ public class UserSessionCache
     public Ulid Id { get; set; }
     
     [Indexed]
-    public string? UserId  { get; set; }
+    public required string UserId  { get; set; }
     [Indexed]
-    public string? UserName  { get; set; }
+    public string UserName  { get; set; }
     [Indexed]
     public required string ConnectionId  { get; set; }
     [Indexed]
-    public string? RoomId  { get; set; }
+    public required string RoomId  { get; set; }
     [Indexed]
     public string? ProfilePicName { get; set; }
     [Indexed(Sortable = true)]

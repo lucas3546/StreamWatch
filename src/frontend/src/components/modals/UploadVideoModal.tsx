@@ -9,9 +9,9 @@ import {
 import axios from "axios";
 import Icon from "../icon/Icon";
 import { CgSpinnerTwo } from "react-icons/cg";
-import { FieldError } from "../errors/FieldError";
 import type { ProblemDetails } from "../types/ProblemDetails";
 import BaseModal from "./BaseModal";
+import { FieldErrorList } from "../errors/FieldErrorList";
 
 interface UploadVideoModalProps {
   onUploaded?: () => void; // callback opcional
@@ -57,8 +57,8 @@ export default function UploadVideoModal({
       const problem = err as ProblemDetails;
       if (problem.errors) {
         setFieldErrors(problem.errors);
+        return;
       }
-      setIsLoading(false);
     }
 
     try {
@@ -91,6 +91,8 @@ export default function UploadVideoModal({
       setGeneralError(
         "Some error has ocurred with the storage provider when trying to upload the file",
       );
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -149,7 +151,7 @@ export default function UploadVideoModal({
               : "Finalizing upload..."}
           </p>
         )}
-        <FieldError errors={fieldErrors} name="filename"></FieldError>
+        <FieldErrorList errors={fieldErrors}></FieldErrorList>
         {generalError && (
           <p className="text-red-600 text-center mb-2">{generalError}</p>
         )}

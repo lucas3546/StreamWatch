@@ -1,16 +1,14 @@
 import { useUser } from "../../contexts/UserContext";
-import { useNavigate } from "react-router";
 import BaseModal from "./BaseModal";
 import { useState } from "react";
 
 export default function LogoutModal() {
-  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const { logout } = useUser();
   const onClickLogout = () => {
     logout();
-    navigate("/home");
+    window.location.href = "/";
   };
 
   const footerButtons = (

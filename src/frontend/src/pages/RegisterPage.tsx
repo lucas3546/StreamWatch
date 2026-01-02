@@ -5,6 +5,8 @@ import { register, type RegisterRequest } from "../services/accountService";
 import type { ProblemDetails } from "../components/types/ProblemDetails";
 import { FieldError } from "../components/errors/FieldError";
 import { useUser } from "../contexts/UserContext";
+import { registerUserSchema } from "../components/schemas/registerUserSchema";
+import { mapZodErrors } from "../utils/zodExtensions";
 
 export default function RegisterPage() {
   const [fieldErrors, setFieldErrors] = useState<Record<
@@ -25,7 +27,13 @@ export default function RegisterPage() {
     const username = formData.get("username") as string;
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
-    //const confirmpassword = formData.get("confirmpassword") as string;
+    const confirmpassword = formData.get("confirmpassword") as string;
+
+    if (password !== confirmpassword) {
+      setGeneralError("The passwords entered do not match");
+      setIsLoading(false);
+      return;
+    }
 
     const data: RegisterRequest = {
       username: username,
@@ -33,12 +41,26 @@ export default function RegisterPage() {
       password: password,
     };
 
+    const result = registerUserSchema.safeParse({
+      username,
+      email,
+      password,
+    });
+
+    if (!result.success) {
+      console.log(result.error.issues);
+      setFieldErrors(mapZodErrors(result.error));
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const response = await register(data);
       setJwt(response.token);
       window.location.href = "/";
     } catch (err) {
       const problem = err as ProblemDetails;
+
       if (problem.errors) {
         setFieldErrors(problem.errors);
         return;
@@ -59,7 +81,7 @@ export default function RegisterPage() {
     <FormContainer>
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col w-full text-left gap-2 mx-auto overflow-y-auto"
+        className="flex flex-col w-full text-left gap-1 p-1 overflow-y-auto"
       >
         <h2 className="text-3xl text-center">Register</h2>
 
@@ -68,7 +90,9 @@ export default function RegisterPage() {
           type="text"
           name="username"
           placeholder="E.g JohnDoe322"
-          className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
+          className="w-full bg-neutral-800 border border-neutral-700
+                     rounded-xl px-4 py-2 focus:outline-none
+                     focus:ring-2 focus:ring-neutral-500"
         ></input>
         <FieldError errors={fieldErrors} name="username" />
 
@@ -77,7 +101,9 @@ export default function RegisterPage() {
           type="email"
           name="email"
           placeholder="example@email.com"
-          className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
+          className="w-full bg-neutral-800 border border-neutral-700
+                     rounded-xl px-4 py-2 focus:outline-none
+                     focus:ring-2 focus:ring-neutral-500"
         ></input>
         <FieldError errors={fieldErrors} name="email" />
 
@@ -86,7 +112,9 @@ export default function RegisterPage() {
           type="password"
           name="password"
           placeholder="Enter your password"
-          className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
+          className="w-full bg-neutral-800 border border-neutral-700
+                     rounded-xl px-4 py-2 focus:outline-none
+                     focus:ring-2 focus:ring-neutral-500"
         ></input>
         <FieldError errors={fieldErrors} name="password" />
 
@@ -95,7 +123,9 @@ export default function RegisterPage() {
           type="password"
           name="confirmpassword"
           placeholder="Enter your password"
-          className="border border-white rounded-md w-full px-3 py-2 bg-neutral-700"
+          className="w-full bg-neutral-800 border border-neutral-700
+                     rounded-xl px-4 py-2 focus:outline-none
+                     focus:ring-2 focus:ring-neutral-500"
         ></input>
 
         <div className="flex items-start gap-2 mt-1">

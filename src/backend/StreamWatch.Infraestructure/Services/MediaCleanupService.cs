@@ -39,7 +39,7 @@ public class MediaCleanupService
     }
     
     [AutomaticRetry(Attempts = 5, DelaysInSeconds = new[] { 10, 30, 60, 60, 60 })]
-    public async Task DeleteMedia(int mediaId)
+    public async Task DeleteMedia(Guid mediaId)
     {
         var media = await _context.Media.FindAsync(mediaId);
         if (media == null) return;

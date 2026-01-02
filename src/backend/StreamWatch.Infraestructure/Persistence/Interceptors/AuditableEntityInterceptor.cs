@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Core.Common;
+using StreamWatch.Core.Interfaces;
 
 namespace StreamWatch.Infraestructure.Persistence.Interceptors;
 
@@ -37,22 +38,31 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
     {
         if (context == null) return;
 
-        foreach (var entry in context.ChangeTracker.Entries<BaseAuditableEntity>())
+
+        var entries = context.ChangeTracker.Entries()
+            .Where(e => e.Entity is IAuditableEntity &&
+                        (e.State == EntityState.Added 
+                        || e.State == EntityState.Modified 
+                        || e.HasChangedOwnedEntities()));
+
+        foreach (var entry in entries)
         {
-            if (entry.State is EntityState.Added or EntityState.Modified || entry.HasChangedOwnedEntities())
+            var entity = (IAuditableEntity)entry.Entity;
+            var utcNow = _dateTime.GetUtcNow();
+
+            if (entry.State == EntityState.Added)
             {
-                
-                var utcNow = _dateTime.GetUtcNow();
-                if (entry.State == EntityState.Added)
-                {
-                    if(!string.IsNullOrEmpty(_user.Id)) entry.Entity.CreatedBy = _user.Id;
-                    
-                    entry.Entity.CreatedAt = utcNow;
-                } 
-                if(!string.IsNullOrEmpty(_user.Id)) entry.Entity.LastModifiedBy = _user.Id;
-                entry.Entity.LastModifiedAt = utcNow;
+                if (!string.IsNullOrEmpty(_user.Id))
+                    entity.CreatedBy = _user.Id;
+
+                entity.CreatedAt = utcNow;
             }
-        }
+
+            if (!string.IsNullOrEmpty(_user.Id))
+                entity.LastModifiedBy = _user.Id;
+
+            entity.LastModifiedAt = utcNow;
+        }   
     }
 }
 

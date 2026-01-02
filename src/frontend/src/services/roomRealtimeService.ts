@@ -42,6 +42,10 @@ export const roomRealtimeService = (connection: HubConnection) => {
     return await connection.invoke("ChangeVideoRoomFromPlaylistItem", data);
   };
 
+  const requestTimestampToOwner = async (roomId: string): Promise<void> => {
+    return await connection.invoke("RequestCurrentTimestampToOwner", roomId);
+  };
+
   /*
   const onVideoSourceChanged = (handler: (src: string) => void) => {
     connection.on("VideoSourceChanged", handler);
@@ -84,6 +88,7 @@ export const roomRealtimeService = (connection: HubConnection) => {
     onReceiveNewVideoToPlaylist,
     changeVideoFromPlaylist,
     onReceiveNewUserJoined,
+    requestTimestampToOwner,
     /*
     onVideoSourceChanged,
     onVideoAddedToPlaylist,

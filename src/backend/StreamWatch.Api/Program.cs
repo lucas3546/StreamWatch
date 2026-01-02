@@ -4,7 +4,7 @@ using Microsoft.Extensions.FileProviders;
 using Serilog;
 using StreamWatch.Api;
 using StreamWatch.Api.Hubs;
-using StreamWatch.Api.Middlewares;
+using StreamWatch.Api.Infraestructure.Middlewares;
 using StreamWatch.Application;
 using StreamWatch.Core.Options;
 using StreamWatch.Infraestructure;
@@ -27,7 +27,7 @@ builder.Services.AddApiServices(builder.Configuration);
 var app = builder.Build();
 
 await app.InitialiseDatabaseAsync();
-
+Directory.CreateDirectory("wwwroot/temp");
 app.UseSerilogRequestLogging();
 app.UseRouting();
 

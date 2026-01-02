@@ -1,5 +1,5 @@
 import type { HubConnection } from "@microsoft/signalr";
-import type { User } from "../contexts/UserContext";
+import { type User } from "../contexts/UserContext";
 import { useRoomStore } from "../stores/roomStore";
 import type { RoomUpdatedModel } from "../components/types/RoomUpdatedModel";
 
@@ -28,8 +28,32 @@ export class RoomHubGeneralHandlers {
     });
   };
 
+  private onNewLeader = (userId: string) => {
+    const { room } = useRoomStore.getState();
+    console.log("New leader received", userId);
+    console.log(room);
+    if (!room) return;
+
+    useRoomStore.setState({
+      room: {
+        ...room,
+        leaderAccountId: userId,
+      },
+    });
+    if (this.currentUser?.nameid === userId) {
+      useRoomStore.setState({
+        isLeader: true,
+      });
+    } else {
+      useRoomStore.setState({
+        isLeader: false,
+      });
+    }
+  };
+
   public registerAll() {
     this.connection.on("RoomUpdated", this.onRoomUpdated);
+    this.connection.on("NewLeader", this.onNewLeader);
   }
 
   public unregisterAll() {

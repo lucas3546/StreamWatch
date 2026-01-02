@@ -4,7 +4,6 @@ import {
   searchUsers,
   type SearchPagedUsersResponseItem,
 } from "../../services/accountService";
-import Button from "../buttons/Button";
 import UserFriendItem from "./UserFriendItem";
 
 interface UserSearchContainerProps {
@@ -21,10 +20,7 @@ export default function UserSearchContainer({
   const [searchLoading, setSearchLoading] = useState(false);
 
   const handleSearch = async (page = 1) => {
-    if (!searchQuery.trim()) {
-      setSearchResults(null);
-      return;
-    }
+    setSearchResults(null);
     setSearchLoading(true);
     try {
       const res = await searchUsers({
@@ -76,23 +72,48 @@ export default function UserSearchContainer({
           </ul>
 
           {/* Paginación */}
-          <div className="flex gap-2 mt-4">
-            <button
-              disabled={searchPage <= 1}
-              onClick={() => handleSearch(searchPage - 1)}
-            >
-              Anterior
-            </button>
-            <span>
-              Página {searchResults.page} de {searchResults.totalPages}
-            </span>
-            <Button
-              disabled={searchPage >= searchResults.totalPages}
-              onClick={() => handleSearch(searchPage + 1)}
-            >
-              Siguiente
-            </Button>
-          </div>
+          {searchResults && searchResults.totalPages > 0 && (
+            <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+              <button
+                disabled={searchPage <= 1}
+                onClick={() => handleSearch(searchPage - 1)}
+                className="
+                  flex items-center gap-1 rounded-md border border-neutral-700
+                  bg-neutral-900 px-3 py-1.5 text-neutral-200
+                  hover:bg-neutral-800 hover:text-white
+                  disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-neutral-900
+                  transition
+                "
+              >
+                ← Previous
+              </button>
+
+              <span className="px-3 py-1 text-neutral-400">
+                Page
+                <span className="mx-1 font-medium text-neutral-200">
+                  {searchResults.page}
+                </span>
+                of
+                <span className="ml-1 font-medium text-neutral-200">
+                  {searchResults.totalPages}
+                </span>
+              </span>
+
+              <button
+                disabled={searchPage >= searchResults.totalPages}
+                onClick={() => handleSearch(searchPage + 1)}
+                className="
+                  flex items-center gap-1 rounded-md border border-neutral-700
+                  bg-neutral-900 px-3 py-1.5 text-neutral-200
+                  hover:bg-neutral-800 hover:text-white
+                  disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-neutral-900
+                  transition
+                "
+              >
+                Next →
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

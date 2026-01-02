@@ -3,7 +3,7 @@ using StreamWatch.Core.Enums;
 
 namespace StreamWatch.Core.Entities;
 
-public class Media : BaseAuditableEntity
+public class Media : BaseAuditableEntity<Guid>
 {
     public string FileName { get; set; }
     

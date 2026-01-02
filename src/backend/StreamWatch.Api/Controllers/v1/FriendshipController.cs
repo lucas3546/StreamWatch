@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using StreamWatch.Api.Extensions;
+using StreamWatch.Api.Infraestructure.Extensions;
 using StreamWatch.Api.Hubs;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
 using Swashbuckle.AspNetCore.Annotations;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace StreamWatch.Api.Controllers.v1;
 
@@ -51,6 +52,9 @@ public class FriendshipController  : ControllerBase
 
     [HttpGet("status/{userId}")]
     [Authorize]
+    [ProducesResponseType(typeof(GetFriendshipStatusResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<GetFriendshipStatusResponse>> GetFriendshipStatus(string userId)
     {
         var response = await _friendshipService.GetFriendshipStatusAsync(userId);

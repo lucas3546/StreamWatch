@@ -47,7 +47,9 @@ export interface GetAccountProfileResponse {
 }
 
 export async function login(data: LoginRequest): Promise<LoginResponse> {
-  return api.post("/account/login", data).then((res) => res.data);
+  return api
+    .post("/account/login", data, { withCredentials: true })
+    .then((res) => res.data);
 }
 
 export async function register(
@@ -78,6 +80,19 @@ export async function changePassword(
   data: ChangePasswordRequest,
 ): Promise<void> {
   return api.put("/account/change-password", data).then((res) => res.data);
+}
+
+export async function setProfilePicture(file: File): Promise<void> {
+  const formData = new FormData();
+  formData.append("Picture", file);
+
+  return api
+    .post("/account/profile/set-picture", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    })
+    .then((res) => res.data);
 }
 
 export interface SearchPagedUsersResponseItem {

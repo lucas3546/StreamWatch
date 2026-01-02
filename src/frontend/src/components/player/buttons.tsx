@@ -33,16 +33,19 @@ export const buttonClass =
 export const tooltipClass =
   "animate-out fade-out slide-out-to-bottom-2 data-[visible]:animate-in data-[visible]:fade-in data-[visible]:slide-in-from-bottom-4 z-10 rounded-sm bg-black/90 px-2 py-0.5 text-sm font-medium text-white parent-data-[open]:hidden";
 
+export const buttonsSizeClass = "w-6 h-6";
+
 export function Play({ tooltipPlacement }: MediaButtonProps) {
   const isPaused = useMediaState("paused");
+
   return (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>
-        <PlayButton className={buttonClass}>
+        <PlayButton className={buttonsSizeClass}>
           {isPaused ? (
-            <PlayIcon className="w-8 h-8" />
+            <PlayIcon className={buttonsSizeClass} />
           ) : (
-            <PauseIcon className="w-8 h-8" />
+            <PauseIcon className={buttonsSizeClass} />
           )}
         </PlayButton>
       </Tooltip.Trigger>
@@ -61,11 +64,11 @@ export function Mute({ tooltipPlacement }: MediaButtonProps) {
       <Tooltip.Trigger asChild>
         <MuteButton className={buttonClass}>
           {isMuted || volume == 0 ? (
-            <MuteIcon className="w-8 h-8" />
+            <MuteIcon className={buttonsSizeClass} />
           ) : volume < 0.5 ? (
-            <VolumeLowIcon className="w-8 h-8" />
+            <VolumeLowIcon className={buttonsSizeClass} />
           ) : (
-            <VolumeHighIcon className="w-8 h-8" />
+            <VolumeHighIcon className={buttonsSizeClass} />
           )}
         </MuteButton>
       </Tooltip.Trigger>
@@ -82,11 +85,11 @@ export function Caption({ tooltipPlacement }: MediaButtonProps) {
   return (
     <Tooltip.Root>
       <Tooltip.Trigger asChild>
-        <CaptionButton className={buttonClass}>
+        <CaptionButton className={buttonsSizeClass}>
           {isOn ? (
-            <ClosedCaptionsOnIcon className="w-8 h-8" />
+            <ClosedCaptionsOnIcon className={buttonsSizeClass} />
           ) : (
-            <ClosedCaptionsIcon className="w-8 h-8" />
+            <ClosedCaptionsIcon className={buttonsSizeClass} />
           )}
         </CaptionButton>
       </Tooltip.Trigger>
@@ -104,9 +107,9 @@ export function PIP({ tooltipPlacement }: MediaButtonProps) {
       <Tooltip.Trigger asChild>
         <PIPButton className={buttonClass}>
           {isActive ? (
-            <PictureInPictureExitIcon className="w-8 h-8" />
+            <PictureInPictureExitIcon className={buttonsSizeClass} />
           ) : (
-            <PictureInPictureIcon className="w-8 h-8" />
+            <PictureInPictureIcon className={buttonsSizeClass} />
           )}
         </PIPButton>
       </Tooltip.Trigger>
@@ -124,9 +127,9 @@ export function Fullscreen({ tooltipPlacement }: MediaButtonProps) {
       <Tooltip.Trigger asChild>
         <FullscreenButton className={buttonClass}>
           {isActive ? (
-            <FullscreenExitIcon className="w-8 h-8" />
+            <FullscreenExitIcon className={buttonsSizeClass} />
           ) : (
-            <FullscreenIcon className="w-8 h-8" />
+            <FullscreenIcon className={buttonsSizeClass} />
           )}
         </FullscreenButton>
       </Tooltip.Trigger>

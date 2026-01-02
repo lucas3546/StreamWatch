@@ -1,3 +1,3 @@
 namespace StreamWatch.Application.Requests;
 
-public record SetMediaFileUploadedRequest(int MediaId);
+public record SetMediaFileUploadedRequest(Guid MediaId);

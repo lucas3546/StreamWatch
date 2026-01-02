@@ -70,7 +70,10 @@ export default function RoomInviteModal() {
       setIsOpen={setIsOpen}
       isOpen={isOpen}
     >
-      <>
+      <div
+        className="bg-neutral-800/60 backdrop-blur-sm
+                          rounded-xl p-4 shadow-lg space-y-4"
+      >
         <h3>Share this link</h3>
         <div className="flex items-center gap-2 text-sm bg-neutral-800 p-2 rounded-xl border border-neutral-700">
           <span className="truncate text-neutral-300">{location.href}</span>
@@ -96,7 +99,7 @@ export default function RoomInviteModal() {
             </>
           )}
         </div>
-      </>
+      </div>
     </BaseModal>
   );
 }

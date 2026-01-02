@@ -11,7 +11,9 @@ public interface IUserSessionService
     Task<UserSessionCache?> GetUserSessionAsync(string connectionId);
     Task<UserSessionCache?> GetUserSessionByIdAsync(string userId);
     Task<UserSessionCache?> GetUserSessionInRoomAsync(string roomId, string userId);
+    Task<UserSessionCache?> GetUserSessionByNameInRoomAsync(string roomId, string userName);
+    Task<UserSessionCache?> GetOldestUserSessionFromRoomAsync(string roomId);
     Task<IEnumerable<UserSessionCache>> GetUsersFromRoomAsync(string roomId);
     Task<Result> AddToRoom(string connectionId, string roomId);
-    Task<Result> EndSessionAsync(string connectionId);
+    Task<Result> RemoveSessionAsync(string connectionId);
 }

@@ -23,6 +23,7 @@ public class ApplicationDbContext : IdentityDbContext<Account>, IApplicationDbCo
     public DbSet<Friendship> Friendships => Set<Friendship>();
     public DbSet<Media> Media => Set<Media>();
     public DbSet<Ban> Bans => Set<Ban>();
+    public DbSet<Report> Reports => Set<Report>();
     public DbSet<Notification> Notifications => Set<Notification>();
     
 }

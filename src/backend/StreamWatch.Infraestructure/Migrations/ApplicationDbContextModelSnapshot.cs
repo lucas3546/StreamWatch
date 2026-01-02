@@ -182,7 +182,7 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.Property<bool>("IsExpired")
                         .HasColumnType("boolean");
 
-                    b.Property<DateTimeOffset>("LastModifiedAt")
+                    b.Property<DateTimeOffset?>("LastModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastModifiedBy")
@@ -238,11 +238,9 @@ namespace StreamWatch.Infraestructure.Migrations
 
             modelBuilder.Entity("StreamWatch.Core.Entities.Media", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                        .HasColumnType("uuid");
 
                     b.Property<string>("BucketName")
                         .HasColumnType("text");
@@ -264,7 +262,7 @@ namespace StreamWatch.Infraestructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset>("LastModifiedAt")
+                    b.Property<DateTimeOffset?>("LastModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastModifiedBy")
@@ -303,7 +301,7 @@ namespace StreamWatch.Infraestructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset>("LastModifiedAt")
+                    b.Property<DateTimeOffset?>("LastModifiedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("LastModifiedBy")
@@ -325,6 +323,51 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.HasIndex("ToAccountId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("StreamWatch.Core.Entities.Report", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Details")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IpAddress")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("LastModifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastModifiedBy")
+                        .HasColumnType("text");
+
+                    b.Property<int>("State")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TargetId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("TargetType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Reports");
                 });
 
             modelBuilder.Entity("StreamWatch.Core.Identity.Account", b =>
@@ -373,8 +416,8 @@ namespace StreamWatch.Infraestructure.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<int?>("ProfilePicId")
-                        .HasColumnType("integer");
+                    b.Property<Guid?>("ProfilePicId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("RefreshToken")
                         .HasColumnType("text");

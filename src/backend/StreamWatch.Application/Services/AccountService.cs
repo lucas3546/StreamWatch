@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Sqids;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
@@ -20,10 +21,11 @@ public class AccountService : IAccountService
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly IBackgroundService _backgroundService;
-    private readonly SqidsEncoder<int> _sqids;
+    private readonly IGeoIpService _geo;
 
 
-    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService, SqidsEncoder<int> squids)
+
+    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService, IGeoIpService geoIpService)
     {
         _identityService = identityService;
         _jwtService = jwtService;
@@ -32,11 +34,13 @@ public class AccountService : IAccountService
         _currentUserService = currentUserService;
         _mediaProcessingService = mediaProcessingService;
         _backgroundService = backgroundService;
-        _sqids = squids;
+        _geo = geoIpService;
     }
 
     public async Task<Result<AuthenticateAccountResponse>> AuthenticateAsync(LoginAccountRequest request)
     {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.IpAddress);
+
         var user = await _identityService.FindUserByEmailAsync(request.Email);
         if (user is null) return Result<AuthenticateAccountResponse>.Failure(new NotFoundError(nameof(request.Email), "No registered user has been found with that email address."));
 
@@ -56,7 +60,9 @@ public class AccountService : IAccountService
             profilePicThumbnailUrl = _storageService.GetPublicUrl(user.ProfilePic.ThumbnailFileName);
         }
 
-        var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role);
+        var (countryCode, countryName) = _geo.GetCountry(_currentUserService.IpAddress);
+
+        var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role, countryName, countryCode);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
 
@@ -65,6 +71,8 @@ public class AccountService : IAccountService
 
     public async Task<Result<RefreshTokenResponse>> RefreshToken(string refreshToken)
     {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.IpAddress);
+
         var currentUserId = _currentUserService.Id;
 
         if (string.IsNullOrEmpty(currentUserId)) throw new ArgumentNullException(nameof(currentUserId), "currentUserId cannot be null or empty!");
@@ -87,7 +95,9 @@ public class AccountService : IAccountService
             profilePicThumbnailUrl = _storageService.GetPublicUrl(user.ProfilePic.ThumbnailFileName);
         }
 
-        var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role);
+        var (countryCode, countryName) = _geo.GetCountry(_currentUserService.IpAddress);
+
+        var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role, countryName, countryCode);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
 
@@ -96,6 +106,7 @@ public class AccountService : IAccountService
 
     public async Task<Result<RegisterAccountResponse>> RegisterAsync(RegisterAccountRequest request)
     {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.IpAddress);
 
         string refreshToken = Guid.NewGuid().ToString();
 
@@ -103,43 +114,18 @@ public class AccountService : IAccountService
 
         if (account is null) return Result<RegisterAccountResponse>.Failure(new AccountRegistrationError("Some error has ocurred when trying to register."));
 
-        if (errors.Any(x => x.Equals("DuplicateUserName")))
-        {
-            return Result<RegisterAccountResponse>.Failure(new AccountRegistrationError(nameof(request.Username), "The Username is already in use!"));
-        }
+        if (errors.Any()) return Result<RegisterAccountResponse>.Failure(new ValidationError(string.Join(",", errors)));
 
-        if (errors.Any()) return Result<RegisterAccountResponse>.Failure(new AccountRegistrationError(string.Join(",", errors)));
+        var (countryCode, countryName) = _geo.GetCountry(_currentUserService.IpAddress);
 
-        var claims = _jwtService.GetClaimsForUser(account, null, Roles.User);
+        var claims = _jwtService.GetClaimsForUser(account, null, Roles.User, countryName, countryCode);
 
         var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
 
         return Result<RegisterAccountResponse>.Success(new RegisterAccountResponse(token, refreshToken));
     }
 
-    public async Task<Result> SetProfilePictureAsync(string mediaId)
-    {
-        if (_sqids.Decode(mediaId) is [var decodedId] && mediaId == _sqids.Encode(decodedId))
-        {
-            var currentUserName = _currentUserService.Name;
-            if (string.IsNullOrEmpty(currentUserName)) throw new ArgumentNullException("currentUserName cannot be null or empty!");
 
-            var account = await _identityService.FindUserByUserNameAsync(currentUserName);
-
-            if (account is null) return Result.Failure(new NotFoundError("User not found!"));
-
-            account.ProfilePicId = decodedId;
-
-            await _identityService.UpdateUserAsync(account);
-
-            return Result.Success();
-        }
-        else
-        {
-            return Result.Failure(new ValidationError("MediaId is invalid"));
-        }
-
-    }
 
     public async Task<Result> ChangeUsernameAsync(string newUsername)
     {
@@ -147,11 +133,30 @@ public class AccountService : IAccountService
         
         if (string.IsNullOrEmpty(currentUsername)) throw new ArgumentNullException(nameof(currentUsername), "CurrentUserName cannot be null or empty!");
 
+        if(newUsername.Equals(currentUsername)) return Result.Failure(new ValidationError("You already have that username"));
+
         var result = await _identityService.UpdateUsernameAsync(currentUsername, newUsername);
 
         if (result.errors.Any()) return Result.Failure(new ValidationError(string.Join(",", result.errors)));
 
         return Result.Success();
+    }
+
+    public async Task<Result> SetProfilePictureAsync(Guid mediaId)
+    {
+        var currentUserName = _currentUserService.Name;
+        if (string.IsNullOrEmpty(currentUserName)) throw new ArgumentNullException("currentUserName cannot be null or empty!");
+
+        var account = await _identityService.FindUserByUserNameAsync(currentUserName);
+
+        if (account is null) return Result.Failure(new NotFoundError("User not found!"));
+
+        account.ProfilePicId = mediaId;
+
+        await _identityService.UpdateUserAsync(account);
+
+        return Result.Success();
+
     }
 
     public async Task<Result> ChangePasswordAsync(ChangePasswordRequest request)
@@ -187,6 +192,8 @@ public class AccountService : IAccountService
 
     public async Task<PaginatedList<UserSearchResultModel>> SearchUsersPagedAsync(SearchUsersPagedRequest request)
     {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.Id);
+
         var users = await _identityService.SearchUsersPagedAsync(request.UserName, request.PageNumber, request.PageSize);
 
         int count = await _identityService.CountAccountsAsync();
@@ -196,6 +203,8 @@ public class AccountService : IAccountService
             user.ProfilePicThumb = user.ProfilePicThumb != null ? _storageService.GetPublicUrl(user.ProfilePicThumb) : null;
         }
 
-        return new PaginatedList<UserSearchResultModel>(users, request.PageNumber, request.PageSize, count);
+        var filtered = users.Where(u => u.Id != _currentUserService.Id).ToList();
+
+        return new PaginatedList<UserSearchResultModel>(filtered, request.PageNumber, request.PageSize, count);
     }
 }

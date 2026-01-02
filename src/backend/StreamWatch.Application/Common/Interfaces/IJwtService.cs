@@ -6,5 +6,5 @@ namespace StreamWatch.Application.Common.Interfaces;
 public interface IJwtService
 {
     string GenerateToken(List<Claim> claimsForToken, DateTime ExpirationTime);
-    List<Claim> GetClaimsForUser(Account account, string? profilePicName, string roleName);
+    List<Claim> GetClaimsForUser(Account account, string? profilePicName, string roleName, string countryName, string countryCode);
 }

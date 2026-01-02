@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using StreamWatch.Api.Hubs;
 using StreamWatch.Application.Common.Interfaces;
 
-namespace StreamWatch.Api.Services;
+namespace StreamWatch.Api.Infraestructure.Services;
 
 public class RealtimeMessengerService : IRealtimeMessengerService
 {
@@ -33,8 +33,13 @@ public class RealtimeMessengerService : IRealtimeMessengerService
         await _hubContext.Clients.Users(userId, userId2).SendAsync(method, obj);
     }
 
-        public async Task SendToUserAsync(string userId, string method, object obj)
+    public async Task SendToUserAsync(string userId, string method, object obj)
     {
         await _hubContext.Clients.User(userId).SendAsync(method, obj);
+    }
+
+    public async Task SendToClientAsync(string connectionId, string method, object obj)
+    {
+        await _hubContext.Clients.Client(connectionId).SendAsync(method, obj);
     }
 }

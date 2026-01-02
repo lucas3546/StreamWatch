@@ -6,6 +6,12 @@ import { CgSpinnerTwo } from "react-icons/cg";
 import { FaSave } from "react-icons/fa";
 import { updateRoom, type UpdateRoomRequest } from "../../services/roomService";
 import { useRoomStore } from "../../stores/roomStore";
+import { categories } from "../types/CategoryType";
+import { updateRoomSchema } from "../schemas/updateRoomSchema";
+import { FieldError } from "../errors/FieldError";
+import { mapZodErrors } from "../../utils/zodExtensions";
+import type { ProblemDetails } from "../types/ProblemDetails";
+import { generateSuccessToast } from "../../utils/toastGenerator";
 
 export default function RoomSettingsModal() {
   const room = useRoomStore((state) => state.room);
@@ -14,6 +20,11 @@ export default function RoomSettingsModal() {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("Movies");
   const [isPublic, setIsPublic] = useState(true);
+  const [fieldErrors, setFieldErrors] = useState<Record<
+    string,
+    string[]
+  > | null>(null);
+  const [generalError, setGeneralError] = useState<string | null>(null);
 
   useEffect(() => {
     if (room) {
@@ -25,8 +36,28 @@ export default function RoomSettingsModal() {
   }, [room]);
 
   const handleSave = async () => {
+    console.log("asdasd");
     if (!room?.id) return;
+    const id = room.id;
     setIsLoading(true);
+    setGeneralError(null);
+    setFieldErrors(null);
+
+    const result = updateRoomSchema.safeParse({
+      id,
+      title,
+      category,
+      isPublic,
+    });
+
+    console.log(result);
+
+    if (!result.success) {
+      console.log(result.error.issues);
+      setFieldErrors(mapZodErrors(result.error));
+      setIsLoading(false);
+      return;
+    }
 
     try {
       const request: UpdateRoomRequest = {
@@ -37,8 +68,21 @@ export default function RoomSettingsModal() {
       };
 
       await updateRoom(request);
+      generateSuccessToast("Successful modification!");
+      setIsOpen(false);
     } catch (err) {
       console.error("An error has occurred:", err);
+      const problem = err as ProblemDetails;
+      if (problem.errors) {
+        setFieldErrors(null);
+        setFieldErrors(problem.errors);
+        return;
+      }
+
+      if (problem.detail) {
+        setGeneralError(problem.detail);
+        return;
+      }
     } finally {
       setIsLoading(false);
     }
@@ -91,6 +135,7 @@ export default function RoomSettingsModal() {
           onChange={(e) => setTitle(e.target.value)}
           className="bg-neutral-800 text-gray-200 hover:text-white rounded-lg px-2 py-1 transition-colors outline-none focus:ring-1 focus:ring-neutral-500"
         />
+        <FieldError errors={fieldErrors} name="title" />
 
         <label className="text-gray-300 text-sm">Category:</label>
         <select
@@ -98,13 +143,13 @@ export default function RoomSettingsModal() {
           onChange={(e) => setCategory(e.target.value)}
           className="bg-neutral-800 text-gray-200 hover:text-white rounded-lg px-2 py-1 transition-colors outline-none focus:ring-1 focus:ring-neutral-500"
         >
-          <option value="Movies">Movies</option>
-          <option value="Series">Series</option>
-          <option value="Music">Music</option>
-          <option value="Anime">Anime</option>
-          <option value="Sports">Sports</option>
-          <option value="Nsfw">Nsfw</option>
+          {categories.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat}
+            </option>
+          ))}
         </select>
+        <FieldError errors={fieldErrors} name="category" />
 
         <div className="flex flex-row gap-4 justify-center mt-2">
           <label className="flex items-center gap-1">
@@ -128,6 +173,7 @@ export default function RoomSettingsModal() {
             />
             Private
           </label>
+          <FieldError errors={fieldErrors} name="isPublic" />
         </div>
       </div>
     </BaseModal>

@@ -4,7 +4,7 @@ using StreamWatch.Core.Identity;
 
 namespace StreamWatch.Core.Entities;
 
-public class Friendship : BaseEntity
+public class Friendship : BaseEntity<int>
 {
     public string RequesterId { get; set; }
     public Account? Requester { get; set; }

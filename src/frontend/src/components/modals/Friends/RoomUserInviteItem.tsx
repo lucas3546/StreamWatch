@@ -35,10 +35,7 @@ export default function RoomUserInviteItem({
       className="flex items-center gap-3 p-2 rounded-xl border border-neutral-700 bg-neutral-900/50 hover:bg-neutral-800 transition-all shadow-sm w-full"
     >
       <div className="flex items-center gap-2 min-w-0 flex-1">
-        <ProfilePic
-          userName={friend.userName}
-          fileUrl={friend.profileThumbnail}
-        />
+        <ProfilePic userName={friend.userName} fileUrl={friend.thumbnailUrl} />
         <p
           className="truncate text-sm text-neutral-200"
           title={friend.userName}

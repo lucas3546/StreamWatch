@@ -8,8 +8,29 @@ import {
   changePassword,
   type ChangePasswordRequest,
 } from "../../services/accountService";
-import { toast } from "react-toastify";
-import type { ProblemDetails } from "../types/ProblemDetails";
+
+import z from "zod";
+import {
+  generatePromiseToast,
+  generateZodErrorsToast,
+} from "../../utils/toastGenerator";
+
+export const PasswordChangeSchema = z
+  .object({
+    password: z
+      .string()
+      .min(6, "Current password must be at least 6 characters")
+      .max(40, "Current password is very long, max 40 characters "),
+    newPassword: z
+      .string()
+      .min(6, "New password must be at least 6 characters")
+      .max(40, "New password is very long, max 40 characters "),
+  })
+  .refine((data) => data.password !== data.newPassword, {
+    message: "New password must be different from the current password",
+    path: ["newPassword"],
+  });
+
 export default function ChangePasswordForm() {
   const [password, setPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -34,49 +55,33 @@ export default function ChangePasswordForm() {
 
   const handleSave = async () => {
     setIsLoading(true);
-    const request: ChangePasswordRequest = {
-      currentPassword: password,
-      newPassword: newPassword,
-    };
 
     try {
-      await toast.promise(
-        changePasswordAndRefreshUser(request),
-        {
-          pending: "Loading",
-          success: "Password changed!",
-          error: {
-            render({ data }) {
-              const problem = data as ProblemDetails;
-              const formatted = problem.detail
-                .split(",")
-                .map((err) => `- ${err.trim()}`)
-                .join("\n");
-              return formatted;
-            },
-          },
-        },
-        {
-          theme: "dark",
-          position: "bottom-right",
-          className: "whitespace-pre-line text-sm",
-          style: {
-            background: "rgb(26, 26, 31)",
-            color: "white",
-            borderRadius: "0px",
-          },
-        },
+      const result = PasswordChangeSchema.safeParse({
+        password,
+        newPassword,
+      });
+
+      if (!result.success) {
+        generateZodErrorsToast(result.error);
+        return;
+      }
+
+      const request: ChangePasswordRequest = {
+        currentPassword: password,
+        newPassword: newPassword,
+      };
+
+      await generatePromiseToast(
+        changePassword(request),
+        "Success, password changed.",
       );
+    } catch (ex) {
+      console.log(ex);
     } finally {
       setIsLoading(false);
       handleReset();
     }
-  };
-
-  const changePasswordAndRefreshUser = async (
-    request: ChangePasswordRequest,
-  ) => {
-    await changePassword(request);
   };
 
   const handleEdit = () => {
@@ -85,28 +90,38 @@ export default function ChangePasswordForm() {
 
   return (
     <div className="flex flex-col gap-2">
-      <label>Change Password</label>
+      <label className="text-neutral-300">Change Password</label>
 
       <div className="w-full flex flex-row items-start gap-2">
         {/* Inputs en columna */}
         <div className="flex flex-col gap-2 flex-1">
           <input
-            type="text"
+            type="password"
             placeholder="Current password"
             value={password}
             onChange={handlePasswordChange}
-            className={`bg-defaultbordercolor ${
-              !showButtons ? "opacity-20" : ""
-            } border-1 rounded-sm p-1`}
             disabled={!showButtons}
+            className={`
+              bg-neutral-800 text-neutral-100
+              border border-neutral-700
+              rounded-xl px-3 py-2 transition
+              focus:ring-2 focus:ring-neutral-500 focus:outline-none
+              ${!showButtons ? "opacity-30 cursor-default" : ""}
+            `}
           />
+
           {showButtons && (
             <input
-              type="text"
+              type="password"
               placeholder="New password"
               value={newPassword}
               onChange={handleNewPasswordChange}
-              className="bg-defaultbordercolor border-1 rounded-sm p-1"
+              className="
+                bg-neutral-800 text-neutral-100
+                border border-neutral-700
+                rounded-xl px-3 py-2 transition
+                focus:ring-2 focus:ring-neutral-500 focus:outline-none
+              "
             />
           )}
         </div>
@@ -115,16 +130,29 @@ export default function ChangePasswordForm() {
         <div className="flex flex-col gap-2">
           {showButtons ? (
             <>
+              {/* RESET */}
               <button
                 onClick={handleReset}
-                className="cursor-pointer bg-semibackground border-defaultbordercolor hover:bg-neutral-700 border-1 p-1 rounded-sm"
+                className="
+                  w-10 h-10 flex items-center justify-center
+                  bg-neutral-800 border border-neutral-700
+                  rounded-xl hover:bg-neutral-700 transition
+                  text-neutral-200
+                  cursor-pointer
+                "
               >
                 <Icon icon={IoMdClose} />
               </button>
+
+              {/* SAVE / LOADING */}
               {isLoading ? (
                 <button
                   disabled
-                  className="cursor-pointer bg-semibackground border-defaultbordercolor hover:bg-neutral-700 border-1 p-1 rounded-sm"
+                  className="
+                    w-10 h-10 flex items-center justify-center
+                    bg-neutral-800 border border-neutral-700
+                    rounded-xl opacity-70
+                  "
                 >
                   <div className="animate-spin">
                     <Icon icon={CgSpinnerTwo} />
@@ -133,7 +161,13 @@ export default function ChangePasswordForm() {
               ) : (
                 <button
                   onClick={handleSave}
-                  className="cursor-pointer bg-semibackground border-defaultbordercolor hover:bg-neutral-700 border-1 p-1 rounded-sm"
+                  className="
+                    w-10 h-10 flex items-center justify-center
+                    bg-neutral-800 border border-neutral-700
+                    rounded-xl hover:bg-neutral-700 transition
+                    text-neutral-200
+                    cursor-pointer
+                  "
                 >
                   <Icon icon={FaSave} />
                 </button>
@@ -142,7 +176,13 @@ export default function ChangePasswordForm() {
           ) : (
             <button
               onClick={handleEdit}
-              className="cursor-pointer bg-semibackground border-defaultbordercolor hover:bg-neutral-700 border-1 p-1 rounded-sm"
+              className="
+                w-10 h-10 flex items-center justify-center
+                bg-neutral-800 border border-neutral-700
+                rounded-xl hover:bg-neutral-700 transition
+                text-neutral-200
+                cursor-pointer
+              "
             >
               <Icon icon={MdEdit} />
             </button>

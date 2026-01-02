@@ -3,6 +3,7 @@ import type { RoomChatMessage } from "../components/sidebar/Room/RoomChat";
 import type { BasicUserRoomModel } from "../components/types/BasicUserRoomModel";
 import type { PlaylistVideoItemModel } from "../components/types/PlaylistVideoItemModel";
 import type { RoomState } from "../components/types/RoomState";
+import type { LiveStatusType } from "../components/types/LiveStatusType";
 
 interface RoomStore {
   room: RoomState | null;
@@ -10,6 +11,7 @@ interface RoomStore {
   chatMessages: RoomChatMessage[];
   roomUsers: BasicUserRoomModel[];
   isLeader: boolean;
+  liveButtonAlive: LiveStatusType;
 
   //setters
   setRoom: (room: RoomState) => void;
@@ -19,6 +21,7 @@ interface RoomStore {
   setRoomUsers: (users: BasicUserRoomModel[]) => void;
   removeUserRoom: (userId: string) => void;
   setIsLeader: (isleader: boolean) => void;
+  setLiveButton: (type: LiveStatusType) => void;
   reset: () => void;
 }
 
@@ -28,6 +31,7 @@ const initialState = {
   chatMessages: [],
   roomUsers: [],
   isLeader: false,
+  liveButtonAlive: "offline" as LiveStatusType,
 };
 
 export const useRoomStore = create<RoomStore>((set) => ({
@@ -62,6 +66,8 @@ export const useRoomStore = create<RoomStore>((set) => ({
     })),
 
   setIsLeader: (isleader) => set({ isLeader: isleader }),
+
+  setLiveButton: (livebutton) => set({ liveButtonAlive: livebutton }),
 
   reset: () => set(initialState),
 }));

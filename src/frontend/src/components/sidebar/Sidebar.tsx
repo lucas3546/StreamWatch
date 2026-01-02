@@ -8,7 +8,9 @@ import { FaUserFriends } from "react-icons/fa";
 import { BiSolidVideos } from "react-icons/bi";
 import { RxAvatar } from "react-icons/rx";
 import { VscBlank } from "react-icons/vsc";
+import { IoIosFlag } from "react-icons/io";
 import { useUser } from "../../contexts/UserContext";
+import { useNavigate } from "react-router";
 
 interface SidebarProps {
   sidebarIsOpen: boolean;
@@ -20,7 +22,7 @@ export default function Sidebar({
   setSidebarOpen,
 }: SidebarProps) {
   const { user } = useUser();
-
+  const navigate = useNavigate();
   return (
     <>
       {sidebarIsOpen && (
@@ -36,7 +38,12 @@ export default function Sidebar({
               ${sidebarIsOpen ? "w-56" : "w-0"}
             `}
       >
-        <h1 className="text-3xl md:hidden m-4">StreamWatch</h1>
+        <h1
+          className="text-3xl md:hidden m-4 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
+          StreamWatch
+        </h1>
         <div className="w-full">
           <SidebarItemLink
             icon={BiSolidHome}
@@ -69,6 +76,13 @@ export default function Sidebar({
               href="/storage"
             ></SidebarItemLink>
           </>
+        )}
+        {(user?.role == "Admin" || user?.role == "Mod") && (
+          <SidebarItemLink
+            icon={IoIosFlag}
+            label="Reports"
+            href="/reports"
+          ></SidebarItemLink>
         )}
         <div className="mt-auto w-full border-t-1 border-t-defaultbordercolor">
           {user ? (

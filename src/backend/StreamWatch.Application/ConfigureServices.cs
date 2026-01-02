@@ -21,6 +21,7 @@ public static class ConfigureServices
         services.AddScoped<IUserSessionService, UserSessionService>();
         services.AddScoped<IRoomService, RoomService>();
         services.AddScoped<IRoomInvitationService, RoomInvitationService>();
+        services.AddScoped<IReportService, ReportService>();
         services.AddScoped<IBanService, BanService>();
         services.AddSingleton(new SqidsEncoder<int>(new()
         {
@@ -30,10 +31,11 @@ public static class ConfigureServices
         #region EventsRegion
 
         services.AddSingleton<IEventBus, InMemoryEventBus>();
-        services.AddScoped<IEventHandler<AcceptFriendshipInvitationEvent>, AcceptFriendshipInvitationEventHandler>();
         services.AddScoped<IEventHandler<RoomCreatedEvent>, RoomCreatedEventHandler>();
+        services.AddScoped<IEventHandler<CreateReportEvent>, CreateReportEventHandler>();
         services.AddScoped<IEventHandler<DeleteFriendshipEvent>, DeleteFriendshipEventHandler>();
         services.AddScoped<IEventHandler<FriendshipCreatedEvent>, FriendshipCreatedEventHandler>();
+        services.AddScoped<IEventHandler<AcceptFriendshipInvitationEvent>, AcceptFriendshipInvitationEventHandler>();
         services.AddScoped<IEventHandler<UserJoinedRoomEvent>, UserJoinedRoomEventHandler>();
         services.AddScoped<IEventHandler<UserLeftRoomEvent>, UserLeftRoomEventHandler>();
 

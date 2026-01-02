@@ -24,7 +24,7 @@ public class BanUpdateJob
 
         var bans = (await _context.Bans
             .AsNoTracking()
-            .Where(x => x.IsExpired)
+            .Where(x => x.IsExpired == false)
             .Select(x => new { x.AccountId, x.IpAddress })
             .ToListAsync())
             .Select(x => (x.AccountId, x.IpAddress));

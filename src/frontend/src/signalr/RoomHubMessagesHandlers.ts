@@ -1,7 +1,7 @@
 import type { HubConnection } from "@microsoft/signalr";
 import { useRoomStore } from "../stores/roomStore";
-import type { RoomChatMessage } from "../components/sidebar/Room/RoomChat";
 import { type User } from "../contexts/UserContext";
+import type { RoomChatMessageType } from "../components/types/RoomMessageType";
 
 export class RoomHubChatHandlers {
   private connection: HubConnection;
@@ -12,7 +12,7 @@ export class RoomHubChatHandlers {
     this.currentUser = user;
   }
 
-  private onReceiveMessage = (chatMessage: RoomChatMessage) => {
+  private onReceiveMessage = (chatMessage: RoomChatMessageType) => {
     console.log("Received chat message:", chatMessage);
     if (this.currentUser?.name === chatMessage.userName) {
       chatMessage.fromMe = true;

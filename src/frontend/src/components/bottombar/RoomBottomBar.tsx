@@ -3,15 +3,33 @@ import PlaylistModal from "../modals/Playlist/PlaylistModal";
 import { useRoomStore } from "../../stores/roomStore";
 import RoomSettingsModal from "../modals/RoomSettingsModal";
 import RoomInviteModal from "../modals/RoomInviteModal";
+import RoomInfoModal from "../modals/RoomInfoModal";
+import ReportModal from "../modals/ReportModal";
+import Icon from "../icon/Icon";
+import { IoFlagOutline } from "react-icons/io5";
 
 export default function RoomBottomBar() {
   const room = useRoomStore((state) => state.room);
+  const isLeader = useRoomStore((state) => state.isLeader);
+
   return (
-    <div className="flex w-full flex-row items-center gap-2 bg-black border-t border-defaultbordercolor h-full p-1 overflow-hidden">
+    <div className="flex w-full flex-row items-center gap-2 bg-black border-t border-defaultbordercolor h-full p-1 overflow-hidden overflow-x-auto">
       <div className="flex items-center gap-2 flex-shrink-0">
         <PlaylistModal />
-        <RoomSettingsModal />
+        {isLeader && <RoomSettingsModal />}
         <RoomInviteModal />
+        <RoomInfoModal />
+        <ReportModal
+          reportType="Room"
+          reportTargetId={room?.id ?? ""}
+          openButtonClassname="bg-neutral-700 text-sm py-1 px-3 gap-1 rounded-2xl flex items-center cursor-pointer hover:bg-neutral-600 transition-colors"
+          openButtonContent={
+            <>
+              <Icon icon={IoFlagOutline}></Icon>
+              Report
+            </>
+          }
+        />
       </div>
 
       <div className="flex-1" />

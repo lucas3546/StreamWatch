@@ -12,7 +12,7 @@ export interface User {
   nameid: string;
   name: string;
   email: string;
-  role: string;
+  role: "Admin" | "Mod" | "User";
   picture?: string;
 }
 
@@ -25,6 +25,7 @@ interface UserContextType {
   setAccountUser: (token: string) => void;
   setJwt: (token: string) => void;
   refreshUser: (token: string) => void;
+  loading: boolean;
   logout: () => void;
 }
 
@@ -32,9 +33,10 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
-
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     const storedToken = localStorage.getItem("jwt");
+    setLoading(true);
     if (storedToken) {
       try {
         const decoded = jwtDecode<DecodedToken>(storedToken);
@@ -56,6 +58,7 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem("jwt");
       }
     }
+    setLoading(false);
   }, []);
 
   const setAccountUser = (token: string) => {
@@ -95,13 +98,12 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const logout = () => {
-    setUser(null);
     localStorage.removeItem("jwt");
   };
 
   return (
     <UserContext.Provider
-      value={{ user, setAccountUser, refreshUser, setJwt, logout }}
+      value={{ user, setAccountUser, refreshUser, loading, setJwt, logout }}
     >
       {children}
     </UserContext.Provider>

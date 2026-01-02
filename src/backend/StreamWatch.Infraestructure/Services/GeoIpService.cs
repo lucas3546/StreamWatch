@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Amazon.Runtime.Internal.Util;
 using MaxMind.GeoIP2;
 using StreamWatch.Application.Common.Interfaces;
 
@@ -16,10 +17,19 @@ namespace StreamWatch.Infraestructure.Services
             _reader = reader;
         }
 
-        public (string? isoCode, string? name) GetCountry(string ipAddress)
+        public (string isoCode, string name) GetCountry(string ipAddress)
         {
-            var country = _reader.Country(ipAddress);
-            return (country?.Country?.IsoCode, country?.Country?.Name);
+            try
+            {
+                var country = _reader.Country(ipAddress);
+
+                return (country.Country?.IsoCode ?? "Unknown", country.Country?.Name ?? "Unknown");
+            }
+            catch
+            {
+                return ("Unknown", "Unknown");
+            }
+            
         }
     }
 

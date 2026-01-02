@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Core.Errors;
 
-namespace StreamWatch.Api.Extensions;
+namespace StreamWatch.Api.Infraestructure.Extensions;
 
 public static class ResultExtensions
 {
