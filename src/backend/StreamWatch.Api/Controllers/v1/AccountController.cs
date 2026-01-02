@@ -24,7 +24,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("register")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(RegisterAccountResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [SwaggerOperation(Summary = "Register a new user account and return a JWT")]
     public async Task<ActionResult<RegisterAccountResponse>> Register(RegisterAccountRequest request)
@@ -42,7 +42,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("login")]
-    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(AuthenticateAccountResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [SwaggerOperation(Summary = "Authenticate user and return a JWT")]
@@ -63,6 +63,9 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("refresh")]
+    [ProducesResponseType(typeof(RefreshTokenResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [Authorize]
     public async Task<ActionResult<RefreshTokenResponse>> Refresh()
     {
@@ -81,6 +84,10 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("profile/set-picture")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> SetProfilePicture(UpdateProfilePicRequest request)
     {
         string fileName = "profile_pic" + Guid.NewGuid();
@@ -96,6 +103,10 @@ public class AccountController : ControllerBase
     }
 
     [HttpPut("change-password")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> ChangePassword(ChangePasswordRequest request)
     {
         var response = await _accountService.ChangePasswordAsync(request);
@@ -104,6 +115,10 @@ public class AccountController : ControllerBase
     }
 
     [HttpPut("change-username")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> ChangeUsername(ChangeUsernameRequest request)
     {
         var result = await _accountService.ChangeUsernameAsync(request.newUsername);
@@ -112,6 +127,10 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet("profile/{userId}")]
+    [Authorize]
+    [ProducesResponseType(typeof(GetBasicUserProfileDataResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<GetBasicUserProfileDataResponse>> GetBasicUserDataProfile(string userId)
     {
         var response = await _accountService.GetBasicUserProfileDataAsync(userId);
@@ -122,6 +141,8 @@ public class AccountController : ControllerBase
 
     [HttpGet("search/paged")]
     [Authorize]
+    [ProducesResponseType(typeof(PaginatedList<UserSearchResultModel>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PaginatedList<UserSearchResultModel>>> SearchUsers([FromQuery] SearchUsersPagedRequest request)
     {
         var response = await _accountService.SearchUsersPagedAsync(request);

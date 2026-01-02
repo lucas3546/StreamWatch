@@ -64,9 +64,9 @@ public static class ConfigureServices
                  options.SaveToken = true;
                  options.RequireHttpsMetadata = false;
                  options.TokenValidationParameters = new TokenValidationParameters()
-                 { //Change this  in production
-                     ValidateIssuer = false,
-                     ValidateAudience = false,
+                 { //Change this  in production to true
+                     ValidateIssuer = true,
+                     ValidateAudience = true,
                      ValidAudience = configuration["JWT:Audience"],
                      ValidIssuer = configuration["JWT:Issuer"],
                      IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
@@ -78,7 +78,7 @@ public static class ConfigureServices
                      {
                          var accessToken = context.Request.Query["access_token"];
 
-                         // If the request is for our hub...
+                         // If the request is for the hub
                          var path = context.HttpContext.Request.Path;
                          if (!string.IsNullOrEmpty(accessToken) &&
                              (path.StartsWithSegments("/hubs/streamwatch")))
@@ -91,6 +91,13 @@ public static class ConfigureServices
                      }
                  };
              });
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("Moderation", policy =>
+                policy.RequireRole("Admin", "Mod")
+            );
+        });    
          
          services.AddRouting(options =>
          {
@@ -151,6 +158,28 @@ public static class ConfigureServices
             );
 
             options.AddPolicy("OnceEvery5Minutes", context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "default",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 1,             
+                        Window = TimeSpan.FromMinutes(5), 
+                        QueueLimit = 0,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                    }));
+            
+            options.AddPolicy("OnceEvery30Seconds", context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "default",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 1,             
+                        Window = TimeSpan.FromSeconds(30), 
+                        QueueLimit = 0,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                    }));
+            
+            options.AddPolicy("OnceEvery10Seconds", context =>
                 RateLimitPartition.GetFixedWindowLimiter(
                     partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "default",
                     factory: _ => new FixedWindowRateLimiterOptions

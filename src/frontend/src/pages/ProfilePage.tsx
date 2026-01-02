@@ -224,13 +224,7 @@ export default function ProfilePage() {
                 </button>
               </div>
             )}
-            <button
-              onClick={acceptFriendRequest}
-              className="cursor-pointer w-full flex items-center justify-center gap-2 py-2 border border-green-700 text-green-400 rounded-lg hover:bg-green-800/20 transition"
-            >
-              <Icon icon={BiSolidUserCheck} />
-              Accept Friend Request
-            </button>
+
             <ReportModal
               reportType="User"
               reportTargetId={profileData?.userId ?? ""}

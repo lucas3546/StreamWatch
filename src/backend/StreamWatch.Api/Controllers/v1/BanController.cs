@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using StreamWatch.Api.Infraestructure.Extensions;
@@ -10,6 +11,7 @@ namespace StreamWatch.Api.Controllers.v1;
 
 [Route("v1/[controller]")]
 [ApiController]
+[Authorize(Policy = "Moderation")]
 public class BanController : ControllerBase
 {
     private readonly IBanService _banService;
@@ -18,6 +20,9 @@ public class BanController : ControllerBase
         _banService = banService;
     }
     [HttpPost("ban-account")]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<string>> Ban(BanAccountRequest request)
     {
         var response = await _banService.BanAsync(request);
@@ -26,6 +31,10 @@ public class BanController : ControllerBase
     }
 
     [HttpGet("get-current-ban")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(GetActiveBanForCurrentUserResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<GetActiveBanForCurrentUserResponse>> GetBanDetails()
     {
         var response = await _banService.GetActiveBanForCurrentUser();
@@ -34,6 +43,9 @@ public class BanController : ControllerBase
     }
 
     [HttpGet("history/{accountId}")]
+    [ProducesResponseType(typeof(IEnumerable<GetBansHistoryFromUserItemResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<IEnumerable<GetBansHistoryFromUserItemResponse>>> GetBansHistoryFromUser(string accountId)
     {
         var response = await _banService.GetBansHistoryFromUser(accountId);
@@ -42,6 +54,9 @@ public class BanController : ControllerBase
     }
 
     [HttpDelete("unban/{accountId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> Unban(string accountId)
     {
         var response = await _banService.UnbanAsync(accountId);

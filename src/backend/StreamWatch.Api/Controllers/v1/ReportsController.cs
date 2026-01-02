@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using StreamWatch.Api.Infraestructure.Extensions;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
@@ -16,6 +17,7 @@ namespace StreamWatch.Api.Controllers.v1;
 
 [ApiController]
 [Route("v1/[controller]")]
+[Authorize(Policy = "Moderation")]
 public class ReportsController : ControllerBase
 {
     private readonly IReportService _reportService;
@@ -27,7 +29,11 @@ public class ReportsController : ControllerBase
 
 
     [HttpPost("create")]
+    [EnableRateLimiting("OnceEvery30Seconds")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<int>> Create(CreateReportRequest request)
     {
         var response = await _reportService.CreateAsync(request);
@@ -37,6 +43,9 @@ public class ReportsController : ControllerBase
 
     [HttpGet("get/{id}")]
     [Authorize]
+    [ProducesResponseType(typeof(GetReportResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<GetReportResponse>> GetById(int id)
     {
         var response = await _reportService.GetReportByIdAsync(id);
@@ -46,6 +55,9 @@ public class ReportsController : ControllerBase
 
     [HttpGet("paged")]
     [Authorize]
+    [ProducesResponseType(typeof(PaginatedList<GetReportPagedItemResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PaginatedList<GetReportPagedItemResponse>>> GetPaged([FromQuery] GetPagedReportsRequest request)
     {
         var response = await _reportService.GetPagedReportsAsync(request);
@@ -55,6 +67,9 @@ public class ReportsController : ControllerBase
 
     [HttpPut("update-state")]
     [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> UpdateReportState(UpdateReportStateRequest request)
     {
         var response = await _reportService.UpdateReportStateAsync(request);

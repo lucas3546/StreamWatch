@@ -21,7 +21,8 @@ public class AccountStorageController : ControllerBase
 
     [HttpPost("prepare-upload")]
     [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetPresignedUrlResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [SwaggerOperation(
         Summary = "Genereate a presigned url",
@@ -37,6 +38,10 @@ public class AccountStorageController : ControllerBase
     }
 
     [HttpPost("set-uploaded")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> SetFileUploaded(SetMediaFileUploadedRequest request)
     {
         var response = await _accountStorage.SetMediaFileUploaded(request);
@@ -46,7 +51,8 @@ public class AccountStorageController : ControllerBase
 
     [HttpGet("overview")]
     [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetStorageOverviewResponse),StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [SwaggerOperation(
         Summary = "List all uploaded media files",
@@ -60,8 +66,9 @@ public class AccountStorageController : ControllerBase
     }
 
     [HttpGet("full-overview/{accountId}")]
-    [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [Authorize(Policy = "Moderation")]
+    [ProducesResponseType(typeof(GetUserFullStorageOverviewResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
     [SwaggerOperation(
         Summary = "List all uploaded media files from a user",
@@ -78,6 +85,9 @@ public class AccountStorageController : ControllerBase
 
     [HttpDelete("remove/{mediaId}")]
     [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> RemoveMedia(Guid mediaId)
     {
         var response = await _accountStorage.RemoveMedia(mediaId);

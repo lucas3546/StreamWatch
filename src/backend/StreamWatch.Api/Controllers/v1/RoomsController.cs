@@ -49,7 +49,10 @@ public class RoomsController : ControllerBase
 
     [HttpPost("create")]
     [Authorize]
-    //[EnableRateLimiting("OnceEvery5Minutes")]
+    [EnableRateLimiting("OnceEvery5Minutes")]
+    [ProducesResponseType(typeof(PaginatedList<CreateRoomResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<CreateRoomResponse>> Create(CreateRoomRequest request)
     {
         _logger.LogInformation("Creating a room {@Request}", request);
@@ -61,6 +64,9 @@ public class RoomsController : ControllerBase
 
     [HttpPut("update")]
     [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> Update(UpdateRoomRequest request)
     {
         var response = await _roomService.UpdateRoomAsync(request);
@@ -76,6 +82,8 @@ public class RoomsController : ControllerBase
     }
 
     [HttpGet("paged")]
+    [ProducesResponseType(typeof(PaginatedList<GetPagedRoomItemResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PaginatedList<GetPagedRoomItemResponse>>> GetPaged([FromQuery] GetPagedRoomsRequest request)
     {
         _logger.LogInformation("Fetching paged rooms with filter: {@Request}", request);
@@ -87,6 +95,10 @@ public class RoomsController : ControllerBase
 
     [HttpPost("send-message")]
     [Authorize]
+    [EnableRateLimiting("OnceEvery10Seconds")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> SendMessageAsync([FromForm] SendMessageRequest request)
     {
         _logger.LogInformation("Sending a message to the room Room={@RoomId} from UserId={@UserId}", request.RoomId, _currentUserService.Id);
@@ -143,6 +155,9 @@ public class RoomsController : ControllerBase
     }
 
     [HttpPost("playlist/add")]
+    [ProducesResponseType(typeof(PlaylistVideoItem), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<PlaylistVideoItem>> AddVideoToPlaylist(AddVideoToPlaylistRequest request)
     {
         var result = await _roomService.AddVideoToPlaylist(request);
@@ -154,6 +169,9 @@ public class RoomsController : ControllerBase
 
     [HttpPost("invite")]
     [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> InviteFriendToRoom(InviteToRoomRequest request)
     {
         var result = await _roomInvitationService.InviteToRoomAsync(request);
