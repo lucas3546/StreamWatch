@@ -8,3 +8,4 @@ seq-data/
 .idea/
 .vscode/
 /src/frontend/build
+.env
