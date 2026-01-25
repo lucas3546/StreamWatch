@@ -13,5 +13,6 @@ public interface IAccountService
     Task<Result> ChangePasswordAsync(ChangePasswordRequest request);
     Task<Result> SetProfilePictureAsync(Guid mediaId);
     Task<Result> ChangeUsernameAsync(string newUsername);
+    Task<Result> DeleteCurrentAccountAsync();
     Task<PaginatedList<UserSearchResultModel>> SearchUsersPagedAsync(SearchUsersPagedRequest request);
 }

@@ -8,6 +8,7 @@ using StreamWatch.Api.Infraestructure.Middlewares;
 using StreamWatch.Application;
 using StreamWatch.Core.Options;
 using StreamWatch.Infraestructure;
+using StreamWatch.Infraestructure.Jobs;
 using StreamWatch.Infraestructure.Persistence;
 using StreamWatch.Infraestructure.Services;
 
@@ -41,7 +42,6 @@ app.UseStatusCodePages();
 app.MapOpenApi();
 app.UseSwagger();
 app.UseSwaggerUI();
-
 app.MapControllers();
 
 app.MapHealthChecks("/health");
@@ -56,8 +56,8 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 });
 
 
-RecurringJob.AddOrUpdate<MediaCleanupService>(
-    "cleanup",
+RecurringJob.AddOrUpdate<MediaCleanupJob>(
+    "mediacleanup",
     svc => svc.CleanExpiredFiles(),
     Cron.Hourly
 );
@@ -65,6 +65,12 @@ RecurringJob.AddOrUpdate<MediaCleanupService>(
 RecurringJob.AddOrUpdate<BanUpdateJob>(
     "updatebans",
     svc => svc.UpdateBans(),
+    Cron.Minutely
+);
+
+RecurringJob.AddOrUpdate<RoomsCleanupJob>(
+    "roomscleanup",
+    svc => svc.RemoveEmptyRooms(),
     Cron.Minutely
 );
 

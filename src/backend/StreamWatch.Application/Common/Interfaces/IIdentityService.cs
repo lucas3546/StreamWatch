@@ -16,4 +16,5 @@ public interface IIdentityService
      Task<int> CountAccountsAsync();
      Task<string> GetRoleFromUserAsync(Account account);
      Task<bool> VerifyPasswordAsync(Account account, string password);
+     Task<bool> DeleteUserAsync(Account account);
 }

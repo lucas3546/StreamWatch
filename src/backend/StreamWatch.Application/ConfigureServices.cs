@@ -36,8 +36,8 @@ public static class ConfigureServices
         services.AddScoped<IEventHandler<DeleteFriendshipEvent>, DeleteFriendshipEventHandler>();
         services.AddScoped<IEventHandler<FriendshipCreatedEvent>, FriendshipCreatedEventHandler>();
         services.AddScoped<IEventHandler<AcceptFriendshipInvitationEvent>, AcceptFriendshipInvitationEventHandler>();
-        services.AddScoped<IEventHandler<UserJoinedRoomEvent>, UserJoinedRoomEventHandler>();
-        services.AddScoped<IEventHandler<UserLeftRoomEvent>, UserLeftRoomEventHandler>();
+        //services.AddScoped<IEventHandler<UserJoinedRoomEvent>, UserJoinedRoomEventHandler>();
+        //services.AddScoped<IEventHandler<UserLeftRoomEvent>, UserLeftRoomEventHandler>();
 
         #endregion
         

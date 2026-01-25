@@ -35,10 +35,14 @@ public class RoomRepository : IRoomRepository
         await _rooms.UpdateAsync(room);
     }
 
-    public async Task DeleteAsync(string id, CancellationToken ct = default)
+    public async Task DeleteAsync(RoomCache room, CancellationToken ct = default)
     {
-        var room = await GetByIdAsync(id, ct);
-        if (room != null) await _rooms.DeleteAsync(room);
+        await _rooms.DeleteAsync(room);
+    }
+
+    public async Task DeleteAsync(IEnumerable<RoomCache> rooms, CancellationToken ct = default)
+    {
+        await _rooms.DeleteAsync(rooms);
     }
 
     public async Task<IEnumerable<RoomCache>> GetAllAsync(CancellationToken ct = default) => await _rooms.ToListAsync();
@@ -80,7 +84,10 @@ public class RoomRepository : IRoomRepository
         return await query.ToListAsync(ct);
     }
 
-    
+    public async Task<IEnumerable<RoomCache>> GetEmptyRooms()
+    {
+        return await _rooms.Where(x =>x.UsersCount == 0).ToListAsync();
+    }
     
         
 }

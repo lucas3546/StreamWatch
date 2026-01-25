@@ -1,4 +1,4 @@
-import { useEffect, useRef, type RefObject } from "react";
+import { useEffect, type RefObject } from "react";
 import { useSignalR } from "./useSignalR";
 import type {
   MediaErrorDetail,
@@ -102,11 +102,13 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
   }, [connection, isLeader, playlistItems, room]);
 
   useEffect(() => {
-    if (!connection || !isLeader) return;
+    if (!connection) return;
 
     const handler = async () => {
       try {
+        if (!isLeader) return;
         console.log("Sending refresh video state");
+        
         await sendUpdateVideoState();
       } catch (err) {
         console.error("Error al actualizar estado de video:", err);

@@ -7,5 +7,5 @@ public class S3StorageOptions
     public string ServiceURL { get; set; } = "";
     public string PublicBucket { get; set; } = "";
     public string PublicBaseUrl { get; set; } = "";
-    public int LimitUsagePerUser {get; set;} = 0; //
+    public long LimitUsagePerUser {get; set;} = 0; //
 }

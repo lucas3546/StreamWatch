@@ -37,6 +37,8 @@ public class RoomCache
     [Indexed]
     public DateTime CreatedAt { get; set; }
     [Indexed]
+    public DateTimeOffset? EmptySince { get; set; }
+    [Indexed]
     public int UsersCount { get; set; }
     [Indexed(CascadeDepth = 1)]
     public List<PlaylistVideoItem> PlaylistVideoItems { get; set; } = new List<PlaylistVideoItem>();

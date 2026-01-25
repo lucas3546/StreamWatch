@@ -89,7 +89,6 @@ export default function VideoPlayer({
       onMouseLeave={hideControls}
       onTextTrackChange={() => console.log(player.current?.state.textTrack)}
       className="h-full w-full object-contain"
-      onCanPlay={() => player.current?.play()}
     >
       <MediaProvider className=" w-full h-full object-contain">
         {/*

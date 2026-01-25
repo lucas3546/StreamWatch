@@ -27,7 +27,6 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
 
   return (
     <div className="bg-basecolor px-2 min-h-14 w-full flex justify-between items-center border-b border-defaultbordercolor shadow-md md:px-4">
-      {/* Izquierda: menú y logo */}
       <div className="flex items-center gap-3">
         <button
           onClick={() => setSidebarOpen((prev) => !prev)}
@@ -44,12 +43,11 @@ export default function Navbar({ setSidebarOpen }: NavbarProps) {
         </Link>
       </div>
 
-      {/* Centro: barra de búsqueda */}
+      {/* 
       <div className="hidden md:flex md:w-2/3 md:px-3">
         <SearchBar />
       </div>
-
-      {/* Derecha: notificaciones y crear room */}
+    */}
       <div className="flex items-center gap-3">
         {(user?.role === "Admin" || user?.role === "Mod") && <ReportsMenu />}
         {user && <NotificationMenu />}

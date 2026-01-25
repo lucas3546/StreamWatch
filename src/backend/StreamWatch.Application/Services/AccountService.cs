@@ -22,10 +22,11 @@ public class AccountService : IAccountService
     private readonly IMediaProcessingService _mediaProcessingService;
     private readonly IBackgroundService _backgroundService;
     private readonly IGeoIpService _geo;
+    private readonly IBanCacheService _banCacheService;
 
 
 
-    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService, IGeoIpService geoIpService)
+    public AccountService(IIdentityService identityService, IJwtService jwtService, IStorageService storageService, IApplicationDbContext context, ICurrentUserService currentUserService, IMediaProcessingService mediaProcessingService, IBackgroundService backgroundService, IGeoIpService geoIpService, IBanCacheService banCacheService)
     {
         _identityService = identityService;
         _jwtService = jwtService;
@@ -35,6 +36,7 @@ public class AccountService : IAccountService
         _mediaProcessingService = mediaProcessingService;
         _backgroundService = backgroundService;
         _geo = geoIpService;
+        _banCacheService = banCacheService;
     }
 
     public async Task<Result<AuthenticateAccountResponse>> AuthenticateAsync(LoginAccountRequest request)
@@ -44,7 +46,10 @@ public class AccountService : IAccountService
         var user = await _identityService.FindUserByEmailAsync(request.Email);
         if (user is null) return Result<AuthenticateAccountResponse>.Failure(new NotFoundError(nameof(request.Email), "No registered user has been found with that email address."));
 
+        if(await _banCacheService.IsAccountBannedAsync(user.Id, user.IpAddress)) return Result<AuthenticateAccountResponse>.Failure(new ValidationError("This account is banned!"));
+
         bool verification = await _identityService.VerifyPasswordAsync(user, request.Password);
+        
         if (!verification) return Result<AuthenticateAccountResponse>.Failure(new PasswordMismatchError(nameof(request.Password), "The entered password is incorrect for this account."));
 
         var role = await _identityService.GetRoleFromUserAsync(user);
@@ -86,6 +91,8 @@ public class AccountService : IAccountService
         if (string.IsNullOrEmpty(role)) throw new ArgumentNullException("An error occurred while trying to log in to your account. Please contact support.");
 
         user.RefreshToken = Guid.NewGuid().ToString();
+
+        user.IpAddress = _currentUserService.IpAddress;
 
         await _identityService.UpdateUserAsync(user);
 
@@ -206,5 +213,20 @@ public class AccountService : IAccountService
         var filtered = users.Where(u => u.Id != _currentUserService.Id).ToList();
 
         return new PaginatedList<UserSearchResultModel>(filtered, request.PageNumber, request.PageSize, count);
+    }
+
+    public async Task<Result> DeleteCurrentAccountAsync()
+    {
+        ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.Id);
+
+        var user = await _identityService.FindUserByUserByIdAsync(_currentUserService.Id);
+
+        if(user is null) return Result.Failure(new NotFoundError("Account not found!"));
+
+        var isSuccess = await _identityService.DeleteUserAsync(user);
+
+        if(!isSuccess) return Result.Failure(new ValidationError("Unknown error!"));
+
+        return Result.Success();
     }
 }

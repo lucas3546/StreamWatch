@@ -82,6 +82,10 @@ export async function changePassword(
   return api.put("/account/change-password", data).then((res) => res.data);
 }
 
+export async function deleteAccount() : Promise<void>{
+  return api.delete("/account/delete-current").then((res) => res.data);;
+}
+
 export async function setProfilePicture(file: File): Promise<void> {
   const formData = new FormData();
   formData.append("Picture", file);

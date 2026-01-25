@@ -95,7 +95,7 @@ public class RoomsController : ControllerBase
 
     [HttpPost("send-message")]
     [Authorize]
-    [EnableRateLimiting("OnceEvery10Seconds")]
+    [EnableRateLimiting("OnceEvery5Seconds")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -161,9 +161,7 @@ public class RoomsController : ControllerBase
     public async Task<ActionResult<PlaylistVideoItem>> AddVideoToPlaylist(AddVideoToPlaylistRequest request)
     {
         var result = await _roomService.AddVideoToPlaylist(request);
-
-        await _hubContext.Clients.Group(request.RoomId).SendAsync("NewPlaylistVideo", result.Data);
-
+        
         return result.ToActionResult(HttpContext);
     }
 
@@ -175,6 +173,18 @@ public class RoomsController : ControllerBase
     public async Task<ActionResult> InviteFriendToRoom(InviteToRoomRequest request)
     {
         var result = await _roomInvitationService.InviteToRoomAsync(request);
+
+        return result.ToActionResult(HttpContext);
+    }
+
+    [HttpDelete("remove/{roomId}")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> Remove(string roomId)
+    {
+        var result = await _roomService.RemoveRoom(roomId);
 
         return result.ToActionResult(HttpContext);
     }

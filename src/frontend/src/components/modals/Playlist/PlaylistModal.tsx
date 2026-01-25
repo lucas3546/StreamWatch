@@ -15,11 +15,13 @@ export default function PlaylistModal() {
   const { connection } = useSignalR();
   const room = useRoomStore((state) => state.room);
   const playlistItems = useRoomStore((state) => state.playlistItems);
-
+  const isLeader = useRoomStore((state) => state.isLeader); 
   const [isOpen, setIsOpen] = useState(false);
 
   const onClickVideoItem = (itemId: string) => {
     if (!connection) return;
+
+    if(!isLeader) alert("You're not the leader of this room")
 
     const service = roomRealtimeService(connection);
 

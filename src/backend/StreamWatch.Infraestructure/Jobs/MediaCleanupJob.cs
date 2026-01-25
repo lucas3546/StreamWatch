@@ -7,14 +7,14 @@ using StreamWatch.Infraestructure.Persistence;
 
 namespace StreamWatch.Infraestructure.Services;
 
-public class MediaCleanupService
+public class MediaCleanupJob
 {
     private readonly ApplicationDbContext _context;
     private readonly IStorageService _storage;
     private readonly IBackgroundService _backgroundService;
-    private readonly ILogger<MediaCleanupService> _logger;
+    private readonly ILogger<MediaCleanupJob> _logger;
 
-    public MediaCleanupService(ApplicationDbContext context, IStorageService storage, ILogger<MediaCleanupService> logger, IBackgroundService backgroundService)
+    public MediaCleanupJob(ApplicationDbContext context, IStorageService storage, ILogger<MediaCleanupJob> logger, IBackgroundService backgroundService)
     {
         _context = context;
         _storage = storage;

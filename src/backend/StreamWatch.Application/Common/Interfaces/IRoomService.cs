@@ -17,6 +17,7 @@ public interface IRoomService
     Task<RoomCache> IncrementUserCount(RoomCache room);
     Task<RoomCache> DecreaseUserCount(RoomCache room);
     Task<RoomCache?> GetRoomByIdAsync(string roomId);
+    Task<Result> RemoveRoom(string roomId);
     Task SendMessageToChatAsync(SendMessageRequest request, string? imageUrl);
     Task SendWhisperToChatAsync(SendMessageRequest request, string? imageUrl, string targetConnectionId);
 }

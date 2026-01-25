@@ -40,6 +40,8 @@ export default function NotificationMenu() {
       setHasMore(false);
     }
 
+    setUnreadCounter(response.totalItems);
+
     setNotifications((prev) => {
       const existingIds = new Set(prev.map((n) => n.id));
       const newItems = response.items.filter((n) => !existingIds.has(n.id));

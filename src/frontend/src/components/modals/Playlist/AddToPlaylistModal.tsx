@@ -81,7 +81,10 @@ export default function AddToPlaylist() {
       setIsOpen={setIsOpen}
       isOpen={isOpen}
     >
-      <>
+      <div
+        className="bg-neutral-800/60 backdrop-blur-sm
+                          rounded-xl p-4 shadow-lg space-y-4"
+      >
         <label className="w-full">Provider</label>
         <select
           value={provider}
@@ -111,7 +114,7 @@ export default function AddToPlaylist() {
             </div>
           </>
         )}
-      </>
+      </div>
     </BaseModal>
   );
 }

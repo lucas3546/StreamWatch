@@ -7,6 +7,6 @@ public record GetPresignedUrlRequest
 {
     [AllowedExtensions("mp4", "avi", "mov")]
     public required string FileName { get; init; }
-    [Range(1, 2000000000)]
-    public required decimal Size { get; init; }
+    [MaxUsagePerUser]
+    public required long Size { get; init; }
 }

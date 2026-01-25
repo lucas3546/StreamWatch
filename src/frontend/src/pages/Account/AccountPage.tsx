@@ -5,6 +5,7 @@ import ChangeUsernameForm from "../../components/forms/ChangeUsernameForm";
 import ChangeProfilePicture from "../../components/modals/ChangeProfilePictureModal";
 import ChangePasswordForm from "../../components/forms/ChangePasswordForm";
 import LogoutModal from "../../components/modals/LogoutModal";
+import DeleteAccountModal from "../../components/modals/DeleteAccountModal";
 
 export default function AccountPage() {
   const { user } = useUser();
@@ -31,18 +32,8 @@ export default function AccountPage() {
 
         <div className="p-4 bg-neutral-900 border border-neutral-700 rounded-xl w-full flex flex-col gap-3">
           <LogoutModal />
-
-          <button
-            className="
-              w-full py-2 rounded-lg
-              bg-red-900 hover:bg-red-800
-              hover:text-red-400
-              transition font-semibold
-              text-white
-            "
-          >
-            Delete my account
-          </button>
+          <DeleteAccountModal></DeleteAccountModal>
+        
         </div>
       </div>
     </FormContainer>

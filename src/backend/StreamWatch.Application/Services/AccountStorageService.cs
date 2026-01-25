@@ -9,6 +9,7 @@ using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Application.Common.Models;
 using StreamWatch.Application.Requests;
 using StreamWatch.Application.Responses;
+using StreamWatch.Core.Constants;
 using StreamWatch.Core.Entities;
 using StreamWatch.Core.Enums;
 using StreamWatch.Core.Errors;
@@ -75,6 +76,8 @@ public class AccountStorageService : IAccountStorageService
         await _context.SaveChangesAsync(CancellationToken.None);
 
         var response = new GetPresignedUrlResponse(presignedUrl, "PUT", headers, media.Id, expiration);
+
+        _logger.LogInformation("Generated presigned url for User={userId}", _currentUserService.Id);
 
         return Result<GetPresignedUrlResponse>.Success(response);
     }
@@ -238,6 +241,8 @@ public class AccountStorageService : IAccountStorageService
 
             await _context.SaveChangesAsync(CancellationToken.None);
 
+            _logger.LogInformation("The Media={mediaId} has been marked as uploaded, by the User={userId}", media.Id, _currentUserService.Id);
+
             return Result.Success();
         }
         catch (Exception ex)
@@ -269,10 +274,21 @@ public class AccountStorageService : IAccountStorageService
     {
         ArgumentNullException.ThrowIfNullOrEmpty(_currentUserService.Id);
 
-        var media = await _context.Media.FirstOrDefaultAsync(x => x.Id == mediaId && x.CreatedBy == _currentUserService.Id && x.Status == MediaStatus.Uploaded);
+        var media = await _context.Media.FirstOrDefaultAsync(x => x.Id == mediaId);
 
         if(media is null) return Result.Failure(new NotFoundError("NotFound", "Media not found"));
 
+        if (
+            _currentUserService.Id != media.CreatedBy &&
+            _currentUserService.Role != Roles.Admin &&
+            _currentUserService.Role != Roles.Mod
+        )
+        {
+            return Result.Failure(
+                new NotFoundError("NotFound", "Media not found")
+            );
+        }
+        
         _backgroundService.Enqueue(() => _storageService.DeleteAsync(media.FileName));
 
         _backgroundService.Enqueue(() => _storageService.DeleteAsync(media.ThumbnailFileName));

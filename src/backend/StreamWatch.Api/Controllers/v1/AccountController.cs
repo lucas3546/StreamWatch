@@ -67,6 +67,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
     [Authorize]
+    [SwaggerOperation(Summary = "Refresh jwt token")]
     public async Task<ActionResult<RefreshTokenResponse>> Refresh()
     {
         if (!Request.Cookies.TryGetValue("X-Refresh-Token", out var refreshToken)) return BadRequest("You don't have a refresh token in the cookie!");
@@ -88,6 +89,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [SwaggerOperation(Summary = "Set profile pic of current user")]
     public async Task<ActionResult> SetProfilePicture(UpdateProfilePicRequest request)
     {
         string fileName = "profile_pic" + Guid.NewGuid();
@@ -107,6 +109,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [SwaggerOperation(Summary = "Change password of current user")]
     public async Task<ActionResult> ChangePassword(ChangePasswordRequest request)
     {
         var response = await _accountService.ChangePasswordAsync(request);
@@ -119,6 +122,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [SwaggerOperation(Summary = "Change username of current user")]
     public async Task<ActionResult> ChangeUsername(ChangeUsernameRequest request)
     {
         var result = await _accountService.ChangeUsernameAsync(request.newUsername);
@@ -131,6 +135,7 @@ public class AccountController : ControllerBase
     [ProducesResponseType(typeof(GetBasicUserProfileDataResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [SwaggerOperation(Summary = "Get a user's basic profile")]
     public async Task<ActionResult<GetBasicUserProfileDataResponse>> GetBasicUserDataProfile(string userId)
     {
         var response = await _accountService.GetBasicUserProfileDataAsync(userId);
@@ -149,4 +154,17 @@ public class AccountController : ControllerBase
 
         return Ok(response);
     }
+
+    [HttpDelete("delete-current")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> DeleteCurrentAccount()
+    {
+        var response = await _accountService.DeleteCurrentAccountAsync();
+
+        return response.ToActionResult(HttpContext);
+    }
+
 }

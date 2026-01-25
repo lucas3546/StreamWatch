@@ -99,6 +99,13 @@ public class IdentityService : IIdentityService
     {
         return await _userManager.CheckPasswordAsync(account, password);
     }
+
+    public async Task<bool> DeleteUserAsync(Account account)
+    {
+        var result = await _userManager.DeleteAsync(account);
+
+        return result.Succeeded;
+    }
     
     public async Task<IEnumerable<UserSearchResultModel>> SearchUsersPagedAsync(string username, int pageNumber, int pageSize)
     {

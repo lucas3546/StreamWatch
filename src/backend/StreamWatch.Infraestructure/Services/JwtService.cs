@@ -36,6 +36,16 @@ public class JwtService : IJwtService
     {
         var claims = new List<Claim>
         {
+            new Claim(JwtRegisteredClaimNames.Sub, account.Id.ToString()),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(
+                JwtRegisteredClaimNames.Iat,
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                ClaimValueTypes.Integer64
+            ),
+            new Claim(JwtRegisteredClaimNames.Iss, _config["JWT:Issuer"]),
+            new Claim(JwtRegisteredClaimNames.Aud, _config["JWT:Audience"]),
+
             new Claim(ClaimTypes.NameIdentifier, account.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Name, account.UserName),
             new Claim(JwtRegisteredClaimNames.Email, account.Email),

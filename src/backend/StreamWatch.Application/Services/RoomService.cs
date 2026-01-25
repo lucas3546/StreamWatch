@@ -56,6 +56,7 @@ public class RoomService : IRoomService
             LastLeaderUpdateTime = 0,
             CurrentVideoTime = 0,
             CreatedAt = DateTime.UtcNow,
+            EmptySince = DateTimeOffset.UtcNow,
             UsersCount = 0,
         };
 
@@ -125,7 +126,6 @@ public class RoomService : IRoomService
     {
         ArgumentException.ThrowIfNullOrEmpty(_user.Id);
 
-
         var room = await _roomRepository.GetByIdAsync(request.Id);
 
         if (room is null) return Result.Failure(new NotFoundError("Room not found!"));
@@ -137,6 +137,8 @@ public class RoomService : IRoomService
         room.IsPublic = request.IsPublic;
 
         await _roomRepository.UpdateAsync(room);
+
+        _logger.LogInformation("Room updated successfully: RoomId={RoomId}, UserId={UserId}, Title={Title}", room.Id, _user.Id, request.Title);
 
         return Result.Success();
     }
@@ -180,6 +182,8 @@ public class RoomService : IRoomService
         room.PlaylistVideoItems.Add(playlistVideoItem);
 
         await _roomRepository.UpdateAsync(room);
+
+        await _realtimeMessengerService.SendToGroupAsync(request.RoomId, "NewPlaylistVideo", playlistVideoItem);
 
         return Result<PlaylistVideoItem>.Success(playlistVideoItem);
 
@@ -237,15 +241,23 @@ public class RoomService : IRoomService
     public async Task<RoomCache> IncrementUserCount(RoomCache room)
     {
         room.UsersCount++;
+        room.EmptySince = null;
 
         await _roomRepository.UpdateAsync(room);
         
         return room;
     }
 
-        public async Task<RoomCache> DecreaseUserCount(RoomCache room)
+    public async Task<RoomCache> DecreaseUserCount(RoomCache room)
     {
         room.UsersCount--;
+
+        if (room.UsersCount <= 0)
+        {
+            room.UsersCount = 0;
+            room.EmptySince = DateTimeOffset.UtcNow;
+        }
+
 
         await _roomRepository.UpdateAsync(room);
         
@@ -264,6 +276,23 @@ public class RoomService : IRoomService
         room.IsPaused = request.IsPaused;
 
         await _roomRepository.UpdateAsync(room);
+
+        return Result.Success();
+    }
+
+    public async Task<Result> RemoveRoom(string roomId)
+    {
+        var room = await _roomRepository.GetByIdAsync(roomId);
+
+        if(room is null) return Result.Failure(new NotFoundError("Not found"));
+
+        await _roomRepository.DeleteAsync(room);
+
+        _logger.LogInformation(
+            "Room={RoomId} removed by User={UserId}",
+            roomId,
+            _user.Id
+        );
 
         return Result.Success();
     }

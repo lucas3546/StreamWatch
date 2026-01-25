@@ -59,7 +59,7 @@ public class BanService : IBanService
 
         await _banCacheService.BanIpAsync(user.IpAddress);
 
-        _logger.LogInformation("New ban created for UserId={UserId} and the ip", user.Id);
+        _logger.LogInformation("New ban created for UserId={UserId} and the ip, by the Moderator={moderatorId}", user.Id, _user.Id);
 
         return Result<string>.Success(_sqids.Encode(ban.Id));
     }
@@ -76,9 +76,10 @@ public class BanService : IBanService
 
         await _context.SaveChangesAsync(CancellationToken.None);
 
-        _logger.LogInformation("Active ban deleted from database, Id={BanId}", ban.Id);
+        _logger.LogInformation("Active ban deleted from database, Id={BanId} by the Moderator={moderatorId}", ban.Id, _user.Id);
 
         await _banCacheService.UnbanAccountIdAsync(accountId);
+
         await _banCacheService.UnbanIpAsync(ban.IpAddress);
 
         _logger.LogInformation("AccountId={AccountId} and Ip Address={IP} removed from cache", accountId, ban.IpAddress);

@@ -64,7 +64,8 @@ public static class ConfigureServices
                  options.SaveToken = true;
                  options.RequireHttpsMetadata = false;
                  options.TokenValidationParameters = new TokenValidationParameters()
-                 { //Change this  in production to true
+                 { 
+                    
                      ValidateIssuer = true,
                      ValidateAudience = true,
                      ValidAudience = configuration["JWT:Audience"],
@@ -185,30 +186,52 @@ public static class ConfigureServices
                     factory: _ => new FixedWindowRateLimiterOptions
                     {
                         PermitLimit = 1,             
-                        Window = TimeSpan.FromSeconds(30), 
+                        Window = TimeSpan.FromSeconds(10), 
                         QueueLimit = 0,
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst
                     }));
+
+            options.AddPolicy("OnceEvery5Seconds", context =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "default",
+                    factory: _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 1,             
+                        Window = TimeSpan.FromSeconds(5), 
+                        QueueLimit = 0,
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst
+                    }));        
                     
              options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
             options.OnRejected = async (context, cancellationToken) =>
             {
+                context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+
+                if (context.Lease.TryGetMetadata(
+                    MetadataName.RetryAfter,
+                    out var retryAfter))
+                {
+                    // retryAfter es TimeSpan
+                    context.HttpContext.Response.Headers.RetryAfter =
+                        ((int)retryAfter.TotalSeconds).ToString();
+                }
+
                 var problem = new ProblemDetails
                 {
-                    Type = "https://tools.ietf.org/html/rfc6585#section-4", 
+                    Type = "https://tools.ietf.org/html/rfc6585#section-4",
                     Title = "Too Many Requests",
                     Status = StatusCodes.Status429TooManyRequests,
-                    Detail = "You have exceeded the allowed request limit."
+                    Detail = retryAfter != null
+                        ? $"Retry after {Math.Ceiling(retryAfter.TotalSeconds)} seconds."
+                        : "You have exceeded the allowed request limit."
                 };
 
-                context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
                 context.HttpContext.Response.ContentType = "application/problem+json";
 
-                var json = JsonSerializer.Serialize(problem);
-
-                await context.HttpContext.Response.WriteAsync(json, cancellationToken);
+                await context.HttpContext.Response.WriteAsJsonAsync(problem, cancellationToken);
             };
+
         });
  
         return services;

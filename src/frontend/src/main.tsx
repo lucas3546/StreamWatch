@@ -20,6 +20,9 @@ import BanPage from "./pages/BanPage.tsx";
 import ProtectedRoutes from "./components/routes/ProtectedRoutes.tsx";
 import ReportPage from "./pages/ReportPage.tsx";
 import ReportsPage from "./pages/ReportsPage.tsx";
+import RoleProtectedRoutes from "./components/routes/RoleProtectedRoutes.tsx";
+import TermsConditionsPage from "./pages/TermsConditionsPage.tsx";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage.tsx";
 const router = createBrowserRouter([
   {
     element: (
@@ -51,6 +54,8 @@ const router = createBrowserRouter([
 
       { path: "/register", element: <RegisterPage /> },
       { path: "/login", element: <LoginPage /> },
+      {path: "/terms-and-conditions", element: <TermsConditionsPage />},
+      {path: "/privacy-policy", element: <PrivacyPolicyPage />},
       {
         //PROTECTED ROUTES
         element: <ProtectedRoutes></ProtectedRoutes>,
@@ -58,14 +63,19 @@ const router = createBrowserRouter([
           { path: "/rooms/create", element: <CreateRoomPage /> },
           { path: "/friends", element: <FriendsPage /> },
           { path: "/room/:roomId", element: <RoomPage /> },
-          { path: "/report/:reportId", element: <ReportPage /> },
-          { path: "/reports/", element: <ReportsPage /> },
           { path: "/account", element: <AccountPage /> },
           { path: "/settings", element: <SettingsPage /> },
           { path: "/profile/:accountId", element: <ProfilePage /> },
           { path: "/storage", element: <StoragePage /> },
         ],
       },
+      {
+        element: <RoleProtectedRoutes allowedRoles={["Mod", "Admin"]}></RoleProtectedRoutes>,
+        children: [
+          { path: "/reports/", element: <ReportsPage /> },
+          { path: "/report/:reportId", element: <ReportPage /> },
+        ]
+      }
     ],
   },
   {

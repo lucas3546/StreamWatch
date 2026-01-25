@@ -18,6 +18,7 @@ using StreamWatch.Application.Services;
 using StreamWatch.Core.Identity;
 using StreamWatch.Core.Options;
 using StreamWatch.Infraestructure.Identity;
+using StreamWatch.Infraestructure.Jobs;
 using StreamWatch.Infraestructure.Persistence;
 using StreamWatch.Infraestructure.Persistence.Interceptors;
 using StreamWatch.Infraestructure.Repositories;
@@ -122,8 +123,9 @@ public static class ConfigureServices
         //Other DI
         services.AddTransient<IIdentityService, IdentityService>();
         services.AddScoped<IBanCacheService, BanCacheService>();
-        services.AddScoped<MediaCleanupService>();
+        services.AddScoped<MediaCleanupJob>();
         services.AddScoped<BanUpdateJob>();
+        services.AddScoped<RoomsCleanupJob>();
         services.AddScoped<IRoomRepository, RoomRepository>();
         services.AddScoped<IUserSessionRepository, UserSessionRepository>();
         services.AddScoped<IMediaProcessingService, MediaProcessingService>();

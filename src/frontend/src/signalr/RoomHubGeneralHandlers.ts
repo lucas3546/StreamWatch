@@ -27,6 +27,7 @@ export class RoomHubGeneralHandlers {
       },
     });
   };
+  
 
   private onNewLeader = (userId: string) => {
     const { room } = useRoomStore.getState();

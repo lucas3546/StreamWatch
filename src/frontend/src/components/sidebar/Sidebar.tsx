@@ -11,7 +11,8 @@ import { VscBlank } from "react-icons/vsc";
 import { IoIosFlag } from "react-icons/io";
 import { useUser } from "../../contexts/UserContext";
 import { useNavigate } from "react-router";
-
+import { GoLaw } from "react-icons/go";
+import { MdOutlinePrivacyTip } from "react-icons/md";
 interface SidebarProps {
   sidebarIsOpen: boolean;
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
@@ -87,11 +88,13 @@ export default function Sidebar({
         <div className="mt-auto w-full border-t-1 border-t-defaultbordercolor">
           {user ? (
             <>
+            {/* 
               <SidebarItemLink
                 icon={AiFillSetting}
                 label="Settings"
                 href="/settings"
               ></SidebarItemLink>
+              */}
               <SidebarItemLink
                 icon={RxAvatar}
                 thumbnailUrl={user.picture}
@@ -99,6 +102,7 @@ export default function Sidebar({
                 label="Account"
                 href="/account"
               ></SidebarItemLink>
+              
             </>
           ) : (
             <>
@@ -114,6 +118,16 @@ export default function Sidebar({
               ></SidebarItemLink>
             </>
           )}
+          <SidebarItemLink
+                icon={MdOutlinePrivacyTip}
+                label="Privacy"
+                href="/privacy-policy"
+              ></SidebarItemLink>
+              <SidebarItemLink
+                icon={GoLaw}
+                label="Terms (T&C)"
+                href="/terms-and-conditions"
+              ></SidebarItemLink>
         </div>
       </aside>
     </>

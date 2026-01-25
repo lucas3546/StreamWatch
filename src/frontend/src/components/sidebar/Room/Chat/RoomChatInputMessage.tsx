@@ -17,6 +17,7 @@ import ProfilePic from "../../../avatar/ProfilePic";
 import type { BasicUserRoomModel } from "../../../types/BasicUserRoomModel";
 import { useUser } from "../../../../contexts/UserContext";
 import type { RoomChatMessageType } from "../../../types/RoomMessageType";
+import type { ProblemDetails } from "../../../types/ProblemDetails";
 
 interface RoomChatInputMessageProps {
   selectedMessage: SelectedMessageType | undefined;
@@ -85,10 +86,16 @@ export default function RoomChatInputMessage({
         addChatMessage(message);
       }
     } catch (e) {
-      console.log(e);
-      setErrors(
+      const problemDetails = e as ProblemDetails;
+      if(problemDetails){
+        setErrors(problemDetails.detail);
+      }
+      else{
+        setErrors(
         "An error occurred while sending the message, please try again!",
       );
+      }
+      
     } finally {
       setIsLoading(false);
       setInputMessage("");
