@@ -6,6 +6,6 @@ using StreamWatch.Core.Enums;
 
 namespace StreamWatch.Application.Common.Models
 {
-    public record RoomCreatedNotificationModel(string roomId, string thumbnailUrl, string title, string category, string provider, int userCount, DateTime createdAt);
+    public record RoomCreatedNotificationModel(string roomId, string thumbnailUrl, string title, string category, string provider, int userCount, DateTime createdAt, bool isPublic);
 
 }

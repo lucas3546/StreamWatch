@@ -4,6 +4,7 @@ using Redis.OM.Contracts;
 using Redis.OM.Searching;
 using StreamWatch.Application.Common.Interfaces;
 using StreamWatch.Core.Cache;
+using StreamWatch.Core.Constants;
 using StreamWatch.Core.Enums;
 
 namespace StreamWatch.Infraestructure.Repositories;
@@ -13,11 +14,13 @@ public class RoomRepository : IRoomRepository
 {
     private readonly RedisConnectionProvider _provider;
     private readonly IRedisCollection<RoomCache> _rooms;
+    private readonly ICurrentUserService _user;
 
-    public RoomRepository(RedisConnectionProvider provider)
+    public RoomRepository(RedisConnectionProvider provider, ICurrentUserService currentUser)
     {
         _provider = provider;
         _rooms = (RedisCollection<RoomCache>)provider.RedisCollection<RoomCache>();
+        _user = currentUser;
     }
 
     public async Task<RoomCache?> GetByIdAsync(string id, CancellationToken ct = default)
@@ -58,6 +61,11 @@ public class RoomRepository : IRoomRepository
         CancellationToken ct = default)
     {
         var query = _rooms.AsQueryable();
+
+        if(_user.Role == Roles.User) //Normal users only can view public rooms
+        {
+            query = query.Where(r => r.IsPublic);
+        }
 
         if (category != RoomCategory.All)
         {

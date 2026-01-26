@@ -20,11 +20,14 @@ namespace StreamWatch.Application.Events.Handlers
         public async Task HandleAsync(RoomCreatedEvent @event, CancellationToken cancellationToken = default)
         {
 
-            var model = new RoomCreatedNotificationModel(@event.Room.Id.ToString(), @event.Room.ThumbnailUrl, @event.Room.Title, @event.Room.Category.ToString(), @event.Room.VideoProvider, @event.Room.UsersCount, @event.Room.CreatedAt);
+            var model = new RoomCreatedNotificationModel(@event.Room.Id.ToString(), @event.Room.ThumbnailUrl, @event.Room.Title, @event.Room.Category.ToString(), @event.Room.VideoProvider, @event.Room.UsersCount, @event.Room.CreatedAt, @event.Room.IsPublic);
 
-            await _realtimeMessengerService.SendToGroupAsync($"RoomCreated:{RoomCategory.All}", "ReceiveCreatedRoom", model);
+            if (model.isPublic)
+            {
+                await _realtimeMessengerService.SendToGroupAsync($"RoomCreated:{RoomCategory.All}", "ReceiveCreatedRoom", model);
 
-            await _realtimeMessengerService.SendToGroupAsync($"RoomCreated:{@event.Room.Category}", "ReceiveCreatedRoom", model);
+                await _realtimeMessengerService.SendToGroupAsync($"RoomCreated:{@event.Room.Category}", "ReceiveCreatedRoom", model);
+            }
         }
     }
 }

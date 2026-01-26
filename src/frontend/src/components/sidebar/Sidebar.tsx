@@ -13,6 +13,7 @@ import { useUser } from "../../contexts/UserContext";
 import { useNavigate } from "react-router";
 import { GoLaw } from "react-icons/go";
 import { MdOutlinePrivacyTip } from "react-icons/md";
+import { MdLock } from "react-icons/md";
 interface SidebarProps {
   sidebarIsOpen: boolean;
   setSidebarOpen: Dispatch<SetStateAction<boolean>>;
@@ -86,6 +87,7 @@ export default function Sidebar({
           ></SidebarItemLink>
         )}
         <div className="mt-auto w-full border-t-1 border-t-defaultbordercolor">
+          
           {user ? (
             <>
             {/* 
@@ -107,13 +109,8 @@ export default function Sidebar({
           ) : (
             <>
               <SidebarItemLink
-                icon={VscBlank}
-                label="Register"
-                href="/register"
-              ></SidebarItemLink>
-              <SidebarItemLink
-                icon={VscBlank}
-                label="Login"
+                icon={MdLock}
+                label="Auth"
                 href="/login"
               ></SidebarItemLink>
             </>

@@ -9,7 +9,6 @@ import { useParams } from "react-router";
 import { useSignalR } from "../../hooks/useSignalR";
 import { TbReload } from "react-icons/tb";
 import Icon from "../../components/icon/Icon";
-import { MdSignalWifiStatusbarConnectedNoInternet } from "react-icons/md";
 
 interface RoomPageProps {
   category?: string;
@@ -74,6 +73,7 @@ export default function RoomsPage({ category, order }: RoomPageProps) {
         provider: data.provider,
         userCount: data.userCount,
         createdAt: data.createdAt,
+        isPublic: data.isPublic,
       };
 
       setPendingRooms((prev) => [newRoom, ...prev]);
@@ -136,6 +136,7 @@ export default function RoomsPage({ category, order }: RoomPageProps) {
               category={room.category}
               provider={room.provider}
               connectedUsers={room.userCount}
+              isPublic={room.isPublic}
             />
           )) || null
         ) : !loading ? (

@@ -37,6 +37,7 @@ export interface GetPagedRoomsItem {
   userCount: number;
   provider: string;
   createdAt: string;
+  isPublic: boolean;
 }
 
 export interface GetPagedRoomsResponse {

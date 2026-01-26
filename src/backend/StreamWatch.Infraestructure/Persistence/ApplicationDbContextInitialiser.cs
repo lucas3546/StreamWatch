@@ -64,13 +64,22 @@ public class ApplicationDbContextInitialiser
 
 
         // Default users
-        var administrator = new Account { UserName = "Admin", Email = "admin@streamwatch.com", IpAddress = "127.0.0.1" };
+        var administrator = new Account { UserName = "Admin", Email = "admin@streamwatch.cc", IpAddress = "127.0.0.1" };
 
         if (_userManager.Users.All(u => u.UserName != administrator.UserName))
         {
             await _userManager.CreateAsync(administrator, "Administrator1!");
 
             await _userManager.AddToRolesAsync(administrator, new[] { Roles.Admin });
+        }
+
+        var moderator = new Account { UserName = "Mod", Email = "mod@streamwatch.cc", IpAddress = "127.0.0.1" };
+
+        if (_userManager.Users.All(u => u.UserName != moderator.UserName))
+        {
+            await _userManager.CreateAsync(moderator, "Moderator1!");
+
+            await _userManager.AddToRolesAsync(moderator, new[] { Roles.Mod });
         }
     }
 }

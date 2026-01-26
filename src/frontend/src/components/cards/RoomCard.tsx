@@ -3,7 +3,6 @@ import Icon from "../icon/Icon";
 import { BsPlayFill } from "react-icons/bs";
 import { BiSolidUser } from "react-icons/bi";
 import { Link } from "react-router";
-import { useUser } from "../../contexts/UserContext";
 import ReportModal from "../modals/ReportModal";
 import { IoFlagOutline } from "react-icons/io5";
 
@@ -14,6 +13,7 @@ interface RoomCardProps {
   category: string;
   connectedUsers: number;
   provider: string;
+  isPublic: boolean;
 }
 export default function RoomCard({
   roomId,
@@ -22,6 +22,7 @@ export default function RoomCard({
   category,
   connectedUsers,
   provider,
+  isPublic
 }: RoomCardProps) {
   let categoryColor;
   switch (category.toLowerCase()) {
@@ -124,8 +125,17 @@ export default function RoomCard({
         </div>
 
         <div className="p-3">
-          <p className="font-semibold text-gray-100 text-sm group-hover:text-white transition-colors truncate">
-            {title}
+          <p className="font-semibold text-sm transition-colors truncate">
+            {!isPublic && (
+              <span className="text-red-500 text-xs px-1 mr-1 rounded-full
+                              border-1 border-red-500
+                              animate-pulse">
+                PRIVATE
+              </span>
+            )}
+            <span className="text-gray-100 group-hover:text-white">
+              {title}
+            </span>
           </p>
         </div>
       </Link>
