@@ -21,6 +21,8 @@ export default function RoomPage() {
   const resetRoomValues = useRoomStore((state) => state.reset);
   const setRoomUsers = useRoomStore((state) => state.setRoomUsers);
   const setIsLeader = useRoomStore((state) => state.setIsLeader);
+  const liveStatus = useRoomStore((state) => state.liveButtonAlive);
+  const isLeader = useRoomStore((state) => state.isLeader);
   const { roomId } = useParams<{ roomId: string }>();
   const { user } = useUser();
   const { connection, reloadConnection } = useSignalR();
@@ -110,9 +112,21 @@ export default function RoomPage() {
                   onEnded={onEnded}
                 />
               )}
-            </div>
-          </div>
+              
 
+            </div>
+            
+          </div>
+          {isLeader && (
+            <p className="hidden md:block text-xs text-yellow-500 text-center select-none">
+              ★ You are the leader of this room ★
+            </p>
+          )}
+          {(!isLeader && liveStatus === "offline") && <p className="hidden md:inline text-xs text-white text-center select-none">
+            TIP: You can click the
+            <span className="font-mono text-red-500 animate-pulse">{" <offline> "}</span>{" "}
+            button to sync with the room leader
+          </p>}
           <div className="w-full h-auto md:h-16 shrink-0">
             <RoomBottomBar />
           </div>

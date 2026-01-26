@@ -3,7 +3,8 @@ import ProfilePic from "../../../avatar/ProfilePic";
 import { getUsernameColor } from "../../../../utils/userColors";
 import { useNavigate } from "react-router";
 import { LiaReplySolid } from "react-icons/lia";
-
+import ReportModal from "../../../modals/ReportModal";
+import { IoMdFlag } from "react-icons/io";
 interface RoomChatMessageProps {
   msg: RoomChatMessageType;
   onSelectedMessage: (id: string, userName: string, text: string) => void;
@@ -148,11 +149,15 @@ export default function RoomChatMessage({
           )}
           {!msg.fromMe && (
             <div
+              title="Reply"
               className="self-center hover:bg-neutral-600 rounded-full p-1 cursor-pointer"
               onClick={() => onSelectedMessage(msg.id, msg.userName, msg.text)}
             >
               <LiaReplySolid size={18}></LiaReplySolid>
             </div>
+          )}
+          {!msg.fromMe && (
+            <ReportModal openButtonClassname="self-center hover:bg-neutral-600 rounded-full p-1 cursor-pointer ml-1" openButtonContent={<span title="Report"><IoMdFlag color="red" size={18}></IoMdFlag></span>} reportType="User" reportTargetId={msg.userId}></ReportModal>
           )}
         </div>
       )}

@@ -50,10 +50,16 @@ app.MapHub<StreamWatchHub>("/hubs/streamwatch");
 app.UseHttpLogging();
 app.UseHangfireDashboard();
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
+var forwardedHeadersOptions = new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
+};
+
+forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
 
 
 RecurringJob.AddOrUpdate<MediaCleanupJob>(

@@ -8,6 +8,7 @@ import { useState } from "react";
 import { sendFriendshipRequest } from "../../../services/friendshipService";
 import type { ProblemDetails } from "../../types/ProblemDetails";
 import { useRoomStore } from "../../../stores/roomStore";
+import { useNavigate } from "react-router";
 
 interface RoomUsertabItemProps {
   userRoom: BasicUserRoomModel;
@@ -16,6 +17,7 @@ interface RoomUsertabItemProps {
 export default function RoomUsertabItem({ userRoom }: RoomUsertabItemProps) {
   const { user } = useUser();
   const room = useRoomStore((state) => state.room);
+  const navigate = useNavigate();
   const [result, setResult] = useState<string | undefined>();
 
   const sendFriendRequest = async () => {
@@ -54,7 +56,7 @@ export default function RoomUsertabItem({ userRoom }: RoomUsertabItemProps) {
           />
         </div>
       </div>
-      <p title={userRoom.userName} className="truncate">
+      <p title={userRoom.userName} className="truncate cursor-pointer" onClick={() => navigate(`/profile/${userRoom.userId}`)}>
         {userRoom.userName}
       </p>
 

@@ -117,6 +117,7 @@ export default function VideoPlayer({
       */}
       <DefaultAudioLayout icons={defaultLayoutIcons} />
       <VideoLayout></VideoLayout>
+      
     </MediaPlayer>
   );
 }

@@ -1,4 +1,5 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using StreamWatch.Application.Common.Interfaces;
 
@@ -26,12 +27,16 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var ip = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+            var ip = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress;
 
-            if (string.IsNullOrWhiteSpace(ip) || ip == "127.0.0.1" || ip == "::1")
+            if (ip == null)
                 return ("Unknown", "Unknown");
 
-            return _geo.GetCountry(ip);
+            if (ip.IsIPv4MappedToIPv6)
+                ip = ip.MapToIPv4();
+
+            return _geo.GetCountry(ip.ToString());
         }
     }
+
 }
