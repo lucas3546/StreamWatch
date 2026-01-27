@@ -5,10 +5,10 @@ namespace StreamWatch.Application.Requests;
 
 public record GetPagedRoomsRequest
 {
-    [Range(0, 500)]
+    [Range(1, 500)]
     public required int PageNumber {get;init;}
     
-    [Range(0, 20)]
+    [Range(1, 30)]
     public required int PageSize {get;init;}
     
     public required RoomCategory Category { get; init; }

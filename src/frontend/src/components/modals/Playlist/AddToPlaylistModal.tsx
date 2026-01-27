@@ -63,7 +63,7 @@ export default function AddToPlaylist() {
         </button>
       ) : (
         <button
-          className="ml-auto bg-neutral-600 py-2 px-3 rounded-2xl hover:bg-neutral-500 cursor-pointer"
+          className="ml-auto bg-neutral-800 py-2 px-3 rounded-2xl hover:bg-neutral-500 cursor-pointer"
           onClick={AddToPlaylist}
         >
           Add to playlist

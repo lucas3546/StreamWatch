@@ -2,4 +2,3 @@
 export const BASE_ORIGIN_URL = "/api"; // put /api in production //production localhost: https://localhost/api  //development: http://localhost:5100
 export const BASE_URL = BASE_ORIGIN_URL + "/v1";
 
-

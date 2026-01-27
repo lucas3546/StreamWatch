@@ -35,6 +35,7 @@ public class CurrentUserService : ICurrentUserService
             if (ip.IsIPv4MappedToIPv6)
                 ip = ip.MapToIPv4();
 
+            
             return _geo.GetCountry(ip.ToString());
         }
     }

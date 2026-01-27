@@ -7,10 +7,13 @@ import RoomInfoModal from "../modals/RoomInfoModal";
 import ReportModal from "../modals/ReportModal";
 import Icon from "../icon/Icon";
 import { IoFlagOutline } from "react-icons/io5";
+import CloseRoomModal from "../modals/CloseRoomModal";
+import { useUser } from "../../contexts/UserContext";
 
 export default function RoomBottomBar() {
   const room = useRoomStore((state) => state.room);
   const isLeader = useRoomStore((state) => state.isLeader);
+  const { user } = useUser();
 
   return (
     <div className="flex w-full flex-row items-center gap-2 bg-black border-t border-defaultbordercolor h-full p-1 overflow-hidden overflow-x-auto">
@@ -30,6 +33,8 @@ export default function RoomBottomBar() {
             </>
           }
         />
+        {user && (user.role == "Admin" || user.role == "Mod") && <CloseRoomModal></CloseRoomModal>}
+        
       </div>
 
       <div className="flex-1" />

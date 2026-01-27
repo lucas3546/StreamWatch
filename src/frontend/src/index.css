@@ -26,8 +26,14 @@
     color-scheme: light dark;
     color: rgba(255, 255, 255, 0.87);
     background-color: rgb(12, 12, 18);
+    background-image: url("../public/spacebackground.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
+
+

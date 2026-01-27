@@ -4,7 +4,8 @@ namespace StreamWatch.Application.Requests;
 
 public class GetPagedNotificationsRequest
 {
-    [Range(0, 500)]
+    [Range(1, 50)]
     public required int PageNumber {get;set;}
+    [Range(1, 20)]
     public required int PageSize {get;set;}
 }

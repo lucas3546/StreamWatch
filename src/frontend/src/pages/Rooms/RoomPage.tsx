@@ -31,6 +31,7 @@ export default function RoomPage() {
 
   useConfirmNavigation(true, "Are you sure you want to leave the room?", () => {
     if (connection) reloadConnection();
+    document.title = "StreamWatch · Watch Together"
     resetRoomValues();
   });
 
@@ -55,6 +56,8 @@ export default function RoomPage() {
         const roomData = await service.connectToRoom(roomId);
 
         console.log(roomData);
+
+        document.title = "Room: " + roomData.title;
 
         const users = await service.getUsersFromRoom(roomId);
         setRoomUsers(users);

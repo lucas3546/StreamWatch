@@ -41,11 +41,21 @@ export default function Sidebar({
             `}
       >
         <h1
-          className="text-3xl md:hidden m-4 cursor-pointer"
+          className="md:hidden m-2 p-1 cursor-pointer"
           onClick={() => navigate("/")}
         >
-          StreamWatch
+          <div className="flex items-center text-2xl font-semibold text-white truncate">
+            <img
+              src="/favicon.ico"
+              alt="StreamWatch"
+              className="w-7 h-7 flex-shrink-0"
+            />
+            <span className="truncate">StreamWatch</span>
+          </div>
         </h1>
+
+
+        <div className="md:hidden border-t-1 border-defaultbordercolor w-full"></div>
         <div className="w-full">
           <SidebarItemLink
             icon={BiSolidHome}

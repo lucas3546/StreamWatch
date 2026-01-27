@@ -7,6 +7,7 @@ import {
   useEffect,
   type ReactNode,
 } from "react";
+import { refreshToken } from "../services/accountService";
 
 export interface User {
   nameid: string;
@@ -34,32 +35,73 @@ const UserContext = createContext<UserContextType | undefined>(undefined);
 export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     const storedToken = localStorage.getItem("jwt");
     setLoading(true);
-    if (storedToken) {
-      try {
-        const decoded = jwtDecode<DecodedToken>(storedToken);
 
-        const now = Date.now() / 1000;
-        if (decoded.exp && decoded.exp < now) {
-          localStorage.removeItem("jwt");
-          return;
-        }
-
-        setUser({
-          nameid: decoded.nameid,
-          name: decoded.name,
-          email: decoded.email,
-          role: decoded.role,
-          picture: decoded.picture,
-        });
-      } catch {
-        localStorage.removeItem("jwt");
-      }
+    if (!storedToken) {
+      setLoading(false);
+      return;
     }
+
+    let decoded: DecodedToken;
+
+    const applyUserFromToken = (token: string) => {
+      decoded = jwtDecode<DecodedToken>(token);
+      setUser({
+        nameid: decoded.nameid,
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+        picture: decoded.picture,
+      });
+    };
+
+    const tryRefresh = async () => {
+      const resp = await refreshToken();
+      localStorage.setItem("jwt", resp.token);
+      applyUserFromToken(resp.token);
+    };
+
+    try {
+      decoded = jwtDecode<DecodedToken>(storedToken);
+      const now = Date.now() / 1000;
+      const timeLeft = decoded.exp - now;
+
+      if (timeLeft <= 60) {
+        tryRefresh();
+      } else {
+        applyUserFromToken(storedToken);
+      }
+    } catch {
+      localStorage.removeItem("jwt");
+      setLoading(false);
+      return;
+    }
+
+    const intervalId = window.setInterval(async () => {
+      const now = Date.now() / 1000;
+      const timeLeft = decoded.exp - now;
+
+      if (timeLeft <= 60) {
+        try {
+          console.log("Refreshing jwt");
+          await tryRefresh();
+        } catch {
+          localStorage.removeItem("jwt");
+        }
+      }
+    }, 10_000);
+
     setLoading(false);
+    return () => clearInterval(intervalId);
   }, []);
+
+
+
+
+
 
   const setAccountUser = (token: string) => {
     try {

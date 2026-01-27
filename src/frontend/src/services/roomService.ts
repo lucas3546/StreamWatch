@@ -111,3 +111,7 @@ export async function addVideoToPlaylist(
 export async function updateRoom(data: UpdateRoomRequest): Promise<void> {
   return api.put("/rooms/update", data).then((res) => res.data);
 }
+
+export async function removeRoom(targetRoomId: string): Promise<void> {
+  return api.delete(`/rooms/remove/${targetRoomId}`).then((res) => res.data);
+}

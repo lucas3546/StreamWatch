@@ -39,9 +39,13 @@ app.UseAuthorization();
 app.UseMiddleware<BanCheckFactoryMiddleware>();
 app.UseStatusCodePages();
 
-app.MapOpenApi();
-app.UseSwagger();
-app.UseSwaggerUI();
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
 app.MapControllers();
 
 app.MapHealthChecks("/health");

@@ -132,7 +132,7 @@ export default function UploadVideoModal({
     >
       <>
         <h2 className="text-xl">
-          Upload video to our servers for display in your rooms
+          Upload video to show in your rooms
         </h2>
         <VideoUpload onFileSelect={handleFileSelect} />
         {isLoading && (

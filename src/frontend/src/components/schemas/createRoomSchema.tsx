@@ -4,7 +4,7 @@ const YOUTUBE_REGEX =
 
 export const createRoomSchema = z
   .object({
-    title: z.string().min(1, "Title is required"),
+    title: z.string().min(4, "Min 4 characters for title").max(40, "Max 40 characters for title"),
     category: z.enum([
       "Movies",
       "Series",

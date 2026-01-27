@@ -178,7 +178,7 @@ public class RoomsController : ControllerBase
     }
 
     [HttpDelete("remove/{roomId}")]
-    [Authorize]
+    [Authorize(Policy = "Moderation")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]

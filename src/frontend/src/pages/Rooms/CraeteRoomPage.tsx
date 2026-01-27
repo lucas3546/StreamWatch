@@ -57,6 +57,7 @@ export default function CreateRoomPage() {
       setIsLoading(false);
       window.location.href = "/room/" + response.roomId;
     } catch (err) {
+      setIsLoading(false)
       const problem = err as ProblemDetails;
       if (problem.errors) {
         setFieldErrors(null);

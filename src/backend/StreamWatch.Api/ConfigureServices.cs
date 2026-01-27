@@ -163,7 +163,7 @@ public static class ConfigureServices
                     partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "default",
                     factory: _ => new FixedWindowRateLimiterOptions
                     {
-                        PermitLimit = 1,             
+                        PermitLimit = 3,             
                         Window = TimeSpan.FromMinutes(5), 
                         QueueLimit = 0,
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst

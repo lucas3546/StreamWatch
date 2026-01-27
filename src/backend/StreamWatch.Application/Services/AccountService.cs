@@ -69,7 +69,7 @@ public class AccountService : IAccountService
 
         var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role, countryName, countryCode);
 
-        var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
+        var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.UtcNow.AddMinutes(20));
 
         return Result<AuthenticateAccountResponse>.Success(new AuthenticateAccountResponse(token, user.RefreshToken));
     }
@@ -106,7 +106,7 @@ public class AccountService : IAccountService
 
         var claims = _jwtService.GetClaimsForUser(user, profilePicThumbnailUrl, role, countryName, countryCode);
 
-        var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
+        var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.UtcNow.AddMinutes(20));
 
         return Result<RefreshTokenResponse>.Success(new RefreshTokenResponse(token, refreshToken));
     }
@@ -127,7 +127,7 @@ public class AccountService : IAccountService
 
         var claims = _jwtService.GetClaimsForUser(account, null, Roles.User, countryName, countryCode);
 
-        var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.Now.AddHours(24));
+        var token = _jwtService.GenerateToken(claims, ExpirationTime: DateTime.UtcNow.AddMinutes(20));
 
         return Result<RegisterAccountResponse>.Success(new RegisterAccountResponse(token, refreshToken));
     }
