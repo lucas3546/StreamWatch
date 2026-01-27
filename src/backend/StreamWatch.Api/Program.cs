@@ -27,8 +27,20 @@ builder.Services.AddApiServices(builder.Configuration);
 
 var app = builder.Build();
 
+var forwardedHeadersOptions = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+
+forwardedHeadersOptions.KnownNetworks.Clear();
+forwardedHeadersOptions.KnownProxies.Clear();
+
+app.UseForwardedHeaders(forwardedHeadersOptions);
+
 await app.InitialiseDatabaseAsync();
+
 Directory.CreateDirectory("wwwroot/temp");
+
 app.UseSerilogRequestLogging();
 app.UseRouting();
 
@@ -53,17 +65,6 @@ app.MapHealthChecks("/health");
 app.MapHub<StreamWatchHub>("/hubs/streamwatch");
 app.UseHttpLogging();
 app.UseHangfireDashboard();
-
-var forwardedHeadersOptions = new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-};
-
-forwardedHeadersOptions.KnownNetworks.Clear();
-forwardedHeadersOptions.KnownProxies.Clear();
-
-app.UseForwardedHeaders(forwardedHeadersOptions);
-
 
 
 RecurringJob.AddOrUpdate<MediaCleanupJob>(
