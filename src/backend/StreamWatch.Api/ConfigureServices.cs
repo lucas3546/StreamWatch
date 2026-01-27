@@ -43,7 +43,7 @@ public static class ConfigureServices
          {
              options.AddDefaultPolicy(policy =>
              {
-                 policy.WithOrigins("http://localhost:5173", "http://localhost:4173") // frontend
+                 policy.WithOrigins("http://localhost:5173", "http://localhost:4173", "https://www.streamwatch.cc") // frontend
                      .AllowAnyHeader()
                      .AllowAnyMethod()
                      .AllowCredentials();

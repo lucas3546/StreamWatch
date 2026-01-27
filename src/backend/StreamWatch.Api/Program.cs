@@ -44,19 +44,21 @@ Directory.CreateDirectory("wwwroot/temp");
 app.UseSerilogRequestLogging();
 app.UseRouting();
 
-app.UseCors();
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.UseCors();
+}
+
 app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseMiddleware<BanCheckFactoryMiddleware>();
 app.UseStatusCodePages();
 
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+
 
 app.MapControllers();
 
