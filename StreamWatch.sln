@@ -9,8 +9,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8F744C24-5E70-46C3-8538-002DA7F8E5B1}"
 	ProjectSection(SolutionItems) = preProject
 		compose.yaml = compose.yaml
-		nginx.conf = nginx.conf
 		.env = .env
+		default.conf = default.conf
+		nginx.conf = nginx.conf
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StreamWatch.Api", "src\backend\StreamWatch.Api\StreamWatch.Api.csproj", "{B49AA310-DBDC-4C03-BFBA-A852BFE73033}"
