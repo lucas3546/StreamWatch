@@ -21,7 +21,34 @@ public class CurrentUserService : ICurrentUserService
     public string? Name =>
         _httpContextAccessor.HttpContext?.User?.FindFirstValue(JwtRegisteredClaimNames.Name);
     public string? Role => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Role);
-    public string? IpAddress => _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+    public string? IpAddress 
+    {
+        get
+        {
+            var context = _httpContextAccessor?.HttpContext;
+            if (context == null) return null;
+
+            var cfIp = context.Request.Headers["CF-Connecting-IP"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(cfIp))
+                return cfIp;
+            
+            var realIp = context.Request.Headers["X-Real-IP"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(realIp))
+                return realIp;
+            
+            var forwardedFor = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
+            if (!string.IsNullOrEmpty(forwardedFor))
+            {
+                var ips = forwardedFor.Split(',', StringSplitOptions.RemoveEmptyEntries);
+                return ips.FirstOrDefault()?.Trim();
+            }
+            
+            var remoteIp = context.Connection.RemoteIpAddress?.MapToIPv4().ToString();
+            
+            
+            return remoteIp;
+        }
+    }
     public string? ProfilePicUrl => _httpContextAccessor.HttpContext?.User?.FindFirstValue(JwtRegisteredClaimNames.Picture);
     public (string isoCode, string name) Country 
     {
