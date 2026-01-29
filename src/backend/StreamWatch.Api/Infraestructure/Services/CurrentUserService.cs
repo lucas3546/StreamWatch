@@ -54,13 +54,10 @@ public class CurrentUserService : ICurrentUserService
     {
         get
         {
-            var ip = _httpContextAccessor?.HttpContext?.Connection?.RemoteIpAddress;
+            var ip = this.IpAddress;
 
             if (ip == null)
                 return ("Unknown", "Unknown");
-
-            if (ip.IsIPv4MappedToIPv6)
-                ip = ip.MapToIPv4();
 
             
             return _geo.GetCountry(ip.ToString());
