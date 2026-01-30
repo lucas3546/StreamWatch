@@ -167,5 +167,27 @@ public class AccountController : ControllerBase
         return response.ToActionResult(HttpContext);
     }
 
+    [HttpGet("test-connection")]
+    public IActionResult TestConnection()
+    {
+        var remoteIp = HttpContext.Connection.RemoteIpAddress;
+        if (remoteIp?.IsIPv4MappedToIPv6 == true)
+            remoteIp = remoteIp.MapToIPv4();
+
+        var result = new
+        {
+            RemoteIp = remoteIp?.ToString(),
+            RemoteIpRaw = HttpContext.Connection.RemoteIpAddress?.ToString(),
+            LocalIp = HttpContext.Connection.LocalIpAddress?.ToString(),
+            Scheme = HttpContext.Request.Scheme,
+            Method = HttpContext.Request.Method,
+            Path = HttpContext.Request.Path.ToString(),
+            Headers = HttpContext.Request.Headers
+                .ToDictionary(h => h.Key, h => h.Value.ToString())
+        };
+
+        return Ok(result);
+    }
+
 
 }

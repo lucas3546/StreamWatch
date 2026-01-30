@@ -30,20 +30,14 @@ builder.Services.AddApiServices(builder.Configuration);
 
 var app = builder.Build();
 
-var forwardedHeadersOptions = new ForwardedHeadersOptions
+app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders =
         ForwardedHeaders.XForwardedFor |
-        ForwardedHeaders.XForwardedProto
-};
+        ForwardedHeaders.XForwardedProto,
+    RequireHeaderSymmetry = false
+});
 
-
-forwardedHeadersOptions.KnownNetworks.Add(
-    new IPNetwork(IPAddress.Parse("172.18.0.8"), 16)
-);
-
-
-app.UseForwardedHeaders(forwardedHeadersOptions);
 
 await app.InitialiseDatabaseAsync();
 
@@ -75,30 +69,6 @@ app.MapHealthChecks("/health");
 app.MapHub<StreamWatchHub>("/hubs/streamwatch");
 app.UseHttpLogging();
 app.UseHangfireDashboard();
-
-app.MapGet("/debug/request", (HttpContext context) =>
-{
-    var remoteIp = context.Connection.RemoteIpAddress;
-    if (remoteIp?.IsIPv4MappedToIPv6 == true)
-        remoteIp = remoteIp.MapToIPv4();
-
-    var result = new
-    {
-        RemoteIp = remoteIp?.ToString(),
-        RemoteIpRaw = context.Connection.RemoteIpAddress?.ToString(),
-        LocalIp = context.Connection.LocalIpAddress?.ToString(),
-        Scheme = context.Request.Scheme,
-        Method = context.Request.Method,
-        Path = context.Request.Path.ToString(),
-        Headers = context.Request.Headers
-            .ToDictionary(h => h.Key, h => h.Value.ToString())
-    };
-
-    return Results.Json(result, new JsonSerializerOptions
-    {
-        WriteIndented = true
-    });
-});
 
 
 
