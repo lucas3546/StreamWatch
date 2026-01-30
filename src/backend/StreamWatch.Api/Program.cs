@@ -38,7 +38,7 @@ var forwardedHeadersOptions = new ForwardedHeadersOptions
 
 
 forwardedHeadersOptions.KnownNetworks.Add(
-    new IPNetwork(IPAddress.Parse("172.18.0.0"), 16)
+    new IPNetwork(IPAddress.Parse("172.18.0.8"), 16)
 );
 
 
