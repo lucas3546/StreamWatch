@@ -1,3 +1,4 @@
+using System.Net;
 using Hangfire;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.FileProviders;
@@ -11,6 +12,7 @@ using StreamWatch.Infraestructure;
 using StreamWatch.Infraestructure.Jobs;
 using StreamWatch.Infraestructure.Persistence;
 using StreamWatch.Infraestructure.Services;
+using IPNetwork = Microsoft.AspNetCore.HttpOverrides.IPNetwork;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,11 +31,16 @@ var app = builder.Build();
 
 var forwardedHeadersOptions = new ForwardedHeadersOptions
 {
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor |
+        ForwardedHeaders.XForwardedProto
 };
 
-forwardedHeadersOptions.KnownNetworks.Clear();
-forwardedHeadersOptions.KnownProxies.Clear();
+
+forwardedHeadersOptions.KnownNetworks.Add(
+    new IPNetwork(IPAddress.Parse("172.18.0.0"), 16)
+);
+
 
 app.UseForwardedHeaders(forwardedHeadersOptions);
 

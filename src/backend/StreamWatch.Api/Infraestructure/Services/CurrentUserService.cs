@@ -9,11 +9,13 @@ public class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IGeoIpService _geo;
+    private readonly ILogger<CurrentUserService> _logger;
 
-    public CurrentUserService(IHttpContextAccessor httpContextAccessor, IGeoIpService geoIpService)
+    public CurrentUserService(IHttpContextAccessor httpContextAccessor, IGeoIpService geoIpService, ILogger<CurrentUserService> logger)
     {
         _httpContextAccessor = httpContextAccessor;
         _geo = geoIpService;
+        _logger = logger;
     }
 
     public string? Id =>
@@ -56,9 +58,12 @@ public class CurrentUserService : ICurrentUserService
         {
             var ip = this.IpAddress;
 
+            _logger.LogInformation("IpAddress:{ip}", ip);
+
             if (ip == null)
                 return ("Unknown", "Unknown");
 
+            _logger.LogInformation("test");
             
             return _geo.GetCountry(ip.ToString());
         }
