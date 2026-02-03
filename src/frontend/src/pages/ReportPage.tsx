@@ -137,16 +137,25 @@ export default function ReportPage() {
   }
 
   function InfoItem({ label, value }: { label: string; value: any }) {
-    return (
-      <div
-        className="flex flex-col p-2 rounded-md bg-neutral-900 border border-neutral-800"
-        onClick={onClickTargetId}
-      >
-        <span className="text-[11px] opacity-60">{label}</span>
-        <span className="text-sm font-medium truncate">{value ?? "-"}</span>
-      </div>
-    );
-  }
+  const isTarget =
+    label === "Target ID" || label === "Target Type";
+
+  return (
+    <div
+      className="flex flex-col p-2 rounded-md bg-neutral-900 border border-neutral-800"
+      onClick={() => {
+        if (isTarget) {
+          onClickTargetId();
+        }
+      }}
+      style={{ cursor: isTarget ? "pointer" : "default" }}
+    >
+      <span className="text-[11px] opacity-60">{label}</span>
+      <span className="text-sm font-medium truncate">{value ?? "-"}</span>
+    </div>
+  );
+}
+
 
   return (
     <div className="max-w-3xl mx-auto p-4 sm:p-6 bg-neutral-900 border border-neutral-800 rounded-lg shadow-md text-neutral-200 space-y-6">

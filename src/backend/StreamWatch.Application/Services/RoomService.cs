@@ -104,7 +104,7 @@ public class RoomService : IRoomService
         }
         else
         {
-            throw new Exception();
+            return Result<CreateRoomResponse>.Failure(new ValidationError("Invalid Provider"));
         }
 
         var playlistItem = new PlaylistVideoItem(room.VideoUrl, videoTitle, room.ThumbnailUrl, room.VideoProvider.ToString(), _user.Id, _user.Name);

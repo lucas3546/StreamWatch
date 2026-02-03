@@ -60,11 +60,7 @@ export default function RegisterPage() {
       window.location.href = "/";
     } catch (err) {
       const problem = err as ProblemDetails;
-
-      if (problem.errors) {
-        setFieldErrors(problem.errors);
-        return;
-      }
+      console.log(problem.detail)
 
       if (problem.detail) {
         setGeneralError(problem.detail);

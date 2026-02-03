@@ -23,11 +23,7 @@ namespace StreamWatch.Infraestructure.Services
         {
             try
             {
-                _logger.LogInformation("Getting country data for IpAddress={ip}", ipAddress);
-
                 var country = _reader.Country(ipAddress);
-
-                _logger.LogInformation("CountryName={countryName} and CountryIso={countryIso} obtained for IpAddress={ip}", country.Country.Name ?? "Unknown", country.Country.IsoCode ?? "Unknown", ipAddress);
 
                 return (country.Country?.IsoCode ?? "Unknown", country.Country?.Name ?? "Unknown");
             }

@@ -1,7 +1,7 @@
 import captionStyles from "./captions.module.css";
 import styles from "./video-layout.module.css";
 
-import { Captions, Controls, Gesture } from "@vidstack/react";
+import { Captions, Controls, Gesture, MediaPlayerInstance } from "@vidstack/react";
 
 import * as Buttons from "./buttons";
 import * as Menus from "./menus";
@@ -9,12 +9,14 @@ import * as Sliders from "./sliders";
 import { TimeGroup } from "./time-group";
 import { useRoomStore } from "../../stores/roomStore";
 import LiveBadge from "../badge/LiveBadge";
+import type { RefObject } from "react";
 
 export interface VideoLayoutProps {
   thumbnails?: string;
+  playerRef: RefObject<MediaPlayerInstance | null>;
 }
 
-export function VideoLayout({ thumbnails }: VideoLayoutProps) {
+export function VideoLayout({ thumbnails, playerRef }: VideoLayoutProps) {
   const isLeader = useRoomStore((state) => state.isLeader);
   return (
     <>

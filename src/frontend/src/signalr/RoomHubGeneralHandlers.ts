@@ -31,16 +31,12 @@ export class RoomHubGeneralHandlers {
 
   private onNewLeader = (userId: string) => {
     const { room } = useRoomStore.getState();
+    const { setLiveButton } = useRoomStore.getState();
     console.log("New leader received", userId);
     console.log(room);
     if (!room) return;
 
-    useRoomStore.setState({
-      room: {
-        ...room,
-        leaderAccountId: userId,
-      },
-    });
+
     if (this.currentUser?.nameid === userId) {
       useRoomStore.setState({
         isLeader: true,
@@ -49,6 +45,8 @@ export class RoomHubGeneralHandlers {
       useRoomStore.setState({
         isLeader: false,
       });
+
+      setLiveButton("live");
     }
   };
 

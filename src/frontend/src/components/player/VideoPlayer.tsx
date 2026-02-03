@@ -13,7 +13,9 @@ import {
 import "./player.css";
 import { VideoLayout } from "./video-layout";
 import type { RoomState } from "../types/RoomState";
-import { useEffect, type RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
+import { useRoomStore } from "../../stores/roomStore";
+import randomInteger from "../../utils/mathExtensions";
 
 interface VideoPlayerProps {
   roomState: RoomState;
@@ -34,8 +36,13 @@ export default function VideoPlayer({
   onError,
   onEnded,
 }: VideoPlayerProps) {
+  const playerKey = useRoomStore((state) => state.playerKey);
+  const setPlayerKey = useRoomStore((state) => state.setPlayerKey);
+  const setLiveButtonStatus = useRoomStore((state) => state.setLiveButton);
+  const isLeader = useRoomStore((state) => state.isLeader);
+
   useEffect(() => {
-    const mediaElement = player.current?.el; // acceso al MediaPlayer real
+    const mediaElement = player.current?.el; 
 
     if (!mediaElement) return;
 
@@ -58,6 +65,44 @@ export default function VideoPlayer({
     }
   }, [player, roomState.videoUrl]);
 
+useEffect(() => {
+  if (!player.current) return;
+
+  let stallTimeout: NodeJS.Timeout | null = null;
+
+  const dispose = player.current.subscribe(() => {
+    const { waiting, currentTime } = player.current!.state;
+    
+    if (waiting && currentTime > 0 && !stallTimeout) {
+      stallTimeout = setTimeout(() => {
+        console.log("AAAA")
+        const random = randomInteger(1, 200);
+        setPlayerKey(playerKey + random.toString());
+        
+        if(!isLeader){
+          setLiveButtonStatus("sync");
+        }
+        
+      }, 4000); 
+    }
+
+    if (!waiting && stallTimeout) {
+      clearTimeout(stallTimeout);
+      stallTimeout = null;
+
+    }
+  });
+
+  return () => {
+    dispose?.();
+    if (stallTimeout) clearTimeout(stallTimeout);
+  };
+}, []);
+
+
+
+
+
   {
     /*
   const putTrack = () => {
@@ -78,7 +123,9 @@ export default function VideoPlayer({
 
   return (
     <MediaPlayer
-      key={`${roomState?.videoProvider}-${roomState?.videoUrl}`}
+      autoPlay
+      muted
+      key={playerKey}
       src={roomState.videoUrl}
       ref={player}
       onSeeked={onSeeked}
@@ -116,7 +163,7 @@ export default function VideoPlayer({
       />
       */}
       <DefaultAudioLayout icons={defaultLayoutIcons} />
-      <VideoLayout></VideoLayout>
+      <VideoLayout playerRef={player}></VideoLayout>
       
     </MediaPlayer>
   );

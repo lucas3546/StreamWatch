@@ -76,7 +76,7 @@ export default function CreateRoomPage() {
     <FormContainer>
       <form
         onSubmit={handleSubmit}
-        className="w-full flex flex-col items-center gap-4 text-white p-4"
+        className="w-full h-screen md:h-auto flex flex-col items-center gap-4 text-white p-4"
       >
         <h2 className="text-3xl font-bold text-center">Create Room</h2>
 

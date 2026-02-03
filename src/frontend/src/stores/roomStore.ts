@@ -1,14 +1,15 @@
 import { create } from "zustand";
-import type { RoomChatMessage } from "../components/sidebar/Room/RoomChat";
 import type { BasicUserRoomModel } from "../components/types/BasicUserRoomModel";
 import type { PlaylistVideoItemModel } from "../components/types/PlaylistVideoItemModel";
 import type { RoomState } from "../components/types/RoomState";
 import type { LiveStatusType } from "../components/types/LiveStatusType";
+import type { RoomChatMessageType } from "../components/types/RoomMessageType";
 
 interface RoomStore {
+  playerKey : string;
   room: RoomState | null;
   playlistItems: PlaylistVideoItemModel[];
-  chatMessages: RoomChatMessage[];
+  chatMessages: RoomChatMessageType[];
   roomUsers: BasicUserRoomModel[];
   isLeader: boolean;
   liveButtonAlive: LiveStatusType;
@@ -16,16 +17,18 @@ interface RoomStore {
   //setters
   setRoom: (room: RoomState) => void;
   addPlaylistItem: (item: PlaylistVideoItemModel) => void;
-  addChatMessage: (msg: RoomChatMessage) => void;
+  addChatMessage: (msg: RoomChatMessageType) => void;
   addUserRoom: (user: BasicUserRoomModel) => void;
   setRoomUsers: (users: BasicUserRoomModel[]) => void;
   removeUserRoom: (userId: string) => void;
   setIsLeader: (isleader: boolean) => void;
   setLiveButton: (type: LiveStatusType) => void;
+  setPlayerKey: (key : string) => void;
   reset: () => void;
 }
 
 const initialState = {
+  playerKey: "",
   room: null,
   playlistItems: [],
   chatMessages: [],
@@ -68,6 +71,8 @@ export const useRoomStore = create<RoomStore>((set) => ({
   setIsLeader: (isleader) => set({ isLeader: isleader }),
 
   setLiveButton: (livebutton) => set({ liveButtonAlive: livebutton }),
+
+  setPlayerKey: (key) => set({ playerKey: key }),
 
   reset: () => set(initialState),
 }));

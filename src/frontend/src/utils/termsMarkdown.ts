@@ -1,7 +1,9 @@
+import { contactEmail, lastUpdatedTerms, legalServiceName } from "./config";
 
-export const termsMarkdown = `**Last updated: 24/1/2026**
 
-Welcome to **StreamWatch.cc** (“Service”, “we”, “us”, “our”).
+export const termsMarkdown = `**Last updated: ${lastUpdatedTerms}**
+
+Welcome to **${legalServiceName}** (“Service”, “we”, “us”, “our”).
 By accessing or using our website and services, you agree to be bound by these Terms and Conditions (“Terms”). If you do not agree, you must not use the Service.
 
 ---
@@ -21,7 +23,7 @@ We do not knowingly allow minors to use the Service. Accounts found to belong to
 
 ### 2. Description of the Service
 
-StreamWatch.cc is a free online platform that allows users to create virtual rooms and synchronize media playback with other users in real time.
+${legalServiceName} is a free online platform that allows users to create virtual rooms and synchronize media playback with other users in real time.
 
 The Service supports:
 
@@ -161,7 +163,7 @@ To the maximum extent permitted by law, we disclaim all warranties, express or i
 
 ### 12. Limitation of Liability
 
-To the maximum extent permitted by law, [Your App Name] shall not be liable for:
+To the maximum extent permitted by law, ${legalServiceName} shall not be liable for:
 
 * User-generated content
 * Loss of data or access
@@ -194,6 +196,6 @@ We may update these Terms from time to time. Continued use of the Service after 
 
 For questions or reports related to these Terms, contact:
 
-**Email:** [[streamwatchcc@proton.me](mailto:streamwatchcc@proton.me)]
+**Email:** [[${contactEmail}](mailto:${contactEmail})]
 
 `;

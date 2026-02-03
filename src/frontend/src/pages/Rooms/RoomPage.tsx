@@ -21,6 +21,7 @@ export default function RoomPage() {
   const resetRoomValues = useRoomStore((state) => state.reset);
   const setRoomUsers = useRoomStore((state) => state.setRoomUsers);
   const setIsLeader = useRoomStore((state) => state.setIsLeader);
+  const setPlayerKey = useRoomStore((state) => state.setPlayerKey);
   const liveStatus = useRoomStore((state) => state.liveButtonAlive);
   const isLeader = useRoomStore((state) => state.isLeader);
   const { roomId } = useParams<{ roomId: string }>();
@@ -67,6 +68,8 @@ export default function RoomPage() {
         }
 
         setRoom(roomData);
+        
+        setPlayerKey(roomData.id);
 
         service.onReconnected((id) => {
           console.log("Reconectado con id:", id);

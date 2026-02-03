@@ -18,6 +18,8 @@
     --animate-marquee: marquee 10s linear infinite;
 }
 
+
+
 :root {
     font-family: monospace, system-ui, Avenir, Helvetica, Arial, sans-serif;
     line-height: 1.5;

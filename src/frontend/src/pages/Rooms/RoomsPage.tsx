@@ -124,7 +124,7 @@ export default function RoomsPage({ category, order }: RoomPageProps) {
   };
 
   return (
-    <div className="w-full h-full flex flex-col overflow-y-auto">
+    <div className="w-full min-h-screen flex flex-col overflow-y-auto">
       <RoomGrid>
         {rooms?.length > 0 ? (
           rooms?.map((room) => (

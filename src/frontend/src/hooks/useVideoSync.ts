@@ -1,4 +1,4 @@
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { useSignalR } from "./useSignalR";
 import type {
   MediaErrorDetail,
@@ -11,6 +11,7 @@ import {
   roomRealtimeService,
   type ChangeVideoFromPlaylistItemType,
 } from "../services/roomRealtimeService";
+import randomInteger from "../utils/mathExtensions";
 
 interface UpdateVideoStateRequest {
   roomId: string;
@@ -24,9 +25,29 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
   const playlistItems = useRoomStore((state) => state.playlistItems);
   const room = useRoomStore((state) => state.room);
   const setRoom = useRoomStore((state) => state.setRoom);
+  const setPlayerKey = useRoomStore((state) => state.setPlayerKey);
   const isLeader = useRoomStore((state) => state.isLeader);
   const setLiveButtonAlive = useRoomStore((state) => state.setLiveButton);
   const liveButtonAlive = useRoomStore((state) => state.liveButtonAlive);
+  const firstTime = useRef<boolean>(true);
+
+    useEffect(() => {
+      if (!firstTime) return;
+
+
+      if (!connection || !room || isLeader) return;
+
+      setLiveButtonAlive("sync");
+
+      const service = roomRealtimeService(connection);
+
+      service.requestTimestampToOwner(room.id);
+
+      firstTime.current = false;
+    }, [room, playerRef, connection, isLeader]);
+
+    
+
 
   useEffect(() => {
     if (!connection) return;
@@ -49,18 +70,9 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
 
       if (playerRef.current === null) return;
 
-      const now = Date.now();
-      const latency = (now - sentAt) / 1000;
       setLiveButtonAlive("live");
 
-      const estimatedTime = isPaused
-        ? videoTimestamp
-        : videoTimestamp + latency;
-
-      const drift = estimatedTime - playerRef.current.currentTime;
-      if (Math.abs(drift) > 0.5) {
-        playerRef.current.currentTime = estimatedTime;
-      }
+      playerRef.current.currentTime = videoTimestamp;
 
       if (playerRef.current.paused !== isPaused) {
         if (isPaused) {
@@ -161,7 +173,7 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
 
   async function onEnded() {
     console.log("Video ended");
-    if (!connection || !room?.id) return;
+    if (!connection || !room?.id || !isLeader || !playerRef.current) return;
     const { changeVideoFromPlaylist } = roomRealtimeService(connection);
 
     const mostRecentPlaylistItem = playlistItems.reduce((latest, current) => {
@@ -169,6 +181,13 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
         ? current
         : latest;
     });
+
+
+    if(room.videoUrl === mostRecentPlaylistItem.videoUrl){
+      const random = randomInteger(1, 200)
+      setPlayerKey(room.id + random.toString());
+    }
+
 
     const request: ChangeVideoFromPlaylistItemType = {
       roomId: room?.id,

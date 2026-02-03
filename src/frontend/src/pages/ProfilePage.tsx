@@ -236,7 +236,7 @@ export default function ProfilePage() {
                 </>
               }
             ></ReportModal>
-            {user?.role === "Admin" && profileData && (
+            {(user?.role === "Admin" || user?.role == "Mod") && profileData && (
               <>
                 <BanUserModal
                   accountId={profileData?.userId}

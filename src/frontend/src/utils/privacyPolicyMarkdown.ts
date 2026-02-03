@@ -1,8 +1,10 @@
+import { contactEmail, legalServiceName } from "./config";
+
 export const privacyPolicyMarkdown = `# Privacy Policy
 
 **Last updated: 24/1/2026**
 
-This Privacy Policy explains how **StreamWatch.cc** (“Service”, “we”, “us”, “our”) collects, uses, and protects your information when you use our website and services.
+This Privacy Policy explains how **${legalServiceName}** (“Service”, “we”, “us”, “our”) collects, uses, and protects your information when you use our website and services.
 
 By using the Service, you agree to the collection and use of information in accordance with this Privacy Policy.
 
@@ -152,4 +154,4 @@ Continued use of the Service after changes constitutes acceptance of the updated
 
 If you have questions or requests regarding this Privacy Policy, contact us at:
 
-**Email:** [[streamwatchcc@proton.me](mailto:streamwatchcc@proton.me)]`;
+**Email:** [[${contactEmail}](mailto:${contactEmail})]`;
