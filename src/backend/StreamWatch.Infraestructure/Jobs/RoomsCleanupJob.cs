@@ -27,20 +27,11 @@ public async Task RemoveEmptyRooms()
 
 
     var roomsToRemove = rooms
-        .Where(x =>
-            x.EmptySince.HasValue &&
-            DateTimeOffset.UtcNow - x.EmptySince.Value >= TimeSpan.FromMinutes(5))
-        .ToList();
-
-    foreach (var room in rooms)
-    {
-        if (room.EmptySince != null)
-        {
-            Console.WriteLine(
-                $"Room {room.Id} | EmptySince={room.EmptySince:o} | " +
-                $"Now={DateTime.UtcNow:o} | Diff={(DateTime.UtcNow - room.EmptySince.Value).TotalSeconds}s");
-        }
-    }
+    .Where(x =>
+        !x.IsPermanent &&
+        x.EmptySince.HasValue &&
+        DateTimeOffset.UtcNow - x.EmptySince.Value >= TimeSpan.FromMinutes(5))
+    .ToList();
 
 
     if (!roomsToRemove.Any())

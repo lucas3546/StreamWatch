@@ -57,6 +57,7 @@ public class RoomService : IRoomService
             CurrentVideoTime = 0,
             CreatedAt = DateTime.UtcNow,
             EmptySince = DateTimeOffset.UtcNow,
+            IsPermanent = false,
             UsersCount = 0,
         };
 

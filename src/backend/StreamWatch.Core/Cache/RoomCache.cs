@@ -31,6 +31,8 @@ public class RoomCache
     [Indexed]
     public bool IsPaused { get; set; }
     [Indexed]
+    public bool IsPermanent { get; set; }
+    [Indexed]
     public decimal LastLeaderUpdateTime { get; set; }
     [Indexed]
     public decimal CurrentVideoTime { get; set; }
