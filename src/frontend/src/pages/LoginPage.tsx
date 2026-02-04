@@ -57,7 +57,7 @@ export default function LoginPage() {
     <FormContainer>
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col w-full text-left gap-2"
+        className="w-full h-screen md:h-auto flex flex-col w-full text-left gap-2"
       >
         <h2 className="text-3xl text-center">Login</h2>
 

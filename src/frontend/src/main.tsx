@@ -7,7 +7,7 @@ import RegisterPage from "./pages/RegisterPage.tsx";
 import { UserProvider } from "./contexts/UserContext.tsx";
 import StoragePage from "./pages/StoragePage.tsx";
 import AccountPage from "./pages/Account/AccountPage.tsx";
-import CreateRoomPage from "./pages/Rooms/CraeteRoomPage.tsx";
+import CreateRoomPage from "./pages/Rooms/CreateRoomPage.tsx";
 import RoomsPage from "./pages/Rooms/RoomsPage.tsx";
 import RoomPage from "./pages/Rooms/RoomPage.tsx";
 import LoginPage from "./pages/LoginPage.tsx";
