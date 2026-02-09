@@ -2,7 +2,7 @@
 
 ![.NET](https://img.shields.io/badge/.NET-10.0-512BD4)  ![Docker](https://img.shields.io/badge/Docker-Containerized-2496ED?logo=docker&logoColor=white) ![React](https://img.shields.io/badge/React-Frontend-61DAFB?logo=react&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-4169E1?logo=postgresql&logoColor=white) ![Redis](https://img.shields.io/badge/Redis-Cache-DC382D?logo=redis&logoColor=white) ![AWS S3](https://img.shields.io/badge/S3-Storage-569A31?logo=amazon&logoColor=white) ![SignalR](https://img.shields.io/badge/SignalR-Realtime-512BD4?logo=dotnet) ![Nginx](https://img.shields.io/badge/Nginx-Reverse%20Proxy-009639?logo=nginx&logoColor=white) ![Hangfire](https://img.shields.io/badge/Hangfire-Background%20Jobs-FF6A00) ![Cloudflare](https://img.shields.io/badge/Cloudflare-Storage%20%26%20Security-F38020?logo=cloudflare&logoColor=white) ![Serilog](https://img.shields.io/badge/Serilog-Logging-2F2F2F) ![Seq](https://img.shields.io/badge/Seq-Logging-2F2F2F)
 
-**StreamWatch** is a real-time synchronized media watching platform. It allows users to create rooms, synchronize video playback, and watch content together in real time.
+**StreamWatch** is a real-time synchronized media watching platform. It allows users to create rooms, synchronize video playback, and watch content together in real time using **SignalR**.
 
 The platform supports third-party media synchronization (such as **YouTube**) as well as
 temporary user-uploaded media via **S3 providers**.
