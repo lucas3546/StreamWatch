@@ -32,7 +32,12 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
   const firstTime = useRef<boolean>(true);
 
     useEffect(() => {
-      if (!firstTime) return;
+      if (!firstTime || !playerRef.current) return;
+
+      if(isLeader){
+        playerRef.current.currentTime = room?.currentVideoTime ?? 0;
+        return;
+      }
 
 
       if (!connection || !room || isLeader) return;
@@ -136,6 +141,13 @@ export function useVideoSync(playerRef: RefObject<MediaPlayerInstance | null>) {
 
   useEffect(() => {
     if (!connection || !room?.id) return;
+
+    if(room.isPaused){
+      playerRef.current?.pause();
+    }
+    else{
+      playerRef.current?.play();
+    }
 
     const service = roomRealtimeService(connection);
     if (liveButtonAlive === "sync") {
