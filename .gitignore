@@ -9,3 +9,7 @@ seq-data/
 .vscode/
 /src/frontend/build
 .env
+cert.pem
+key.pem
+certs/cert.pem
+certs/key.pem
