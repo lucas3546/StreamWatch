@@ -63,7 +63,7 @@ export default function VideoPlayer({
         backgroundColor: "black",
       });
     }
-  }, [player, roomState.videoUrl]);
+  }, [playerKey, roomState.videoUrl]);
 
 useEffect(() => {
   if (!player.current) return;
@@ -75,13 +75,11 @@ useEffect(() => {
     
     if (waiting && currentTime > 0 && !stallTimeout) {
       stallTimeout = setTimeout(() => {
-        console.log("AAAA")
+        setLiveButtonStatus("sync");
         const random = randomInteger(1, 200);
         setPlayerKey(playerKey + random.toString());
         
-        if(!isLeader){
-          setLiveButtonStatus("sync");
-        }
+        
         
       }, 4000); 
     }
@@ -121,9 +119,17 @@ useEffect(() => {
     player.current?.controls.hide();
   };
 
+  const onCanPlay = () => {
+    if(roomState.isPaused){
+      player.current?.pause();
+      return;
+    }
+    player.current?.play();
+
+  }
+
   return (
     <MediaPlayer
-      autoPlay
       muted
       key={playerKey}
       src={roomState.videoUrl}
@@ -136,6 +142,7 @@ useEffect(() => {
       onMouseLeave={hideControls}
       onTextTrackChange={() => console.log(player.current?.state.textTrack)}
       className="h-full w-full object-contain"
+      onCanPlay={onCanPlay}
     >
       <MediaProvider className=" w-full h-full object-contain">
         {/*

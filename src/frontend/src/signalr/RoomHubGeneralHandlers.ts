@@ -46,7 +46,7 @@ export class RoomHubGeneralHandlers {
         isLeader: false,
       });
 
-      setLiveButton("live");
+      setLiveButton("live")
     }
   };
 

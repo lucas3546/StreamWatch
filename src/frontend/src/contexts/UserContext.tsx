@@ -61,7 +61,6 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
     const tryRefresh = async () => {
       const resp = await refreshToken();
       localStorage.setItem("jwt", resp.token);
-      applyUserFromToken(resp.token);
     };
 
     try {
